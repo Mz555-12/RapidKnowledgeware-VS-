@@ -1,5 +1,6 @@
 ﻿// KnowledgeBaseModel.cs
 using GalaSoft.MvvmLight;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -50,8 +51,8 @@ namespace RapidKnowledgeware.Models
             }
         }
 
-        private ObservableCollection<string> _fileBlocks = new ObservableCollection<string>();
-        public ObservableCollection<string> FileBlocks
+        private ObservableCollection<FileChunkItem> _fileBlocks = new ObservableCollection<FileChunkItem>();
+        public ObservableCollection<FileChunkItem> FileBlocks
         {
             get => _fileBlocks;
             set { _fileBlocks = value; RaisePropertyChanged(); }
@@ -69,6 +70,30 @@ namespace RapidKnowledgeware.Models
         {
             get => _isIndexed;
             set { _isIndexed = value; RaisePropertyChanged(); }
+        }
+
+        private HashSet<int> _deletedChunkIndices = new HashSet<int>();
+        public HashSet<int> DeletedChunkIndices
+        {
+            get => _deletedChunkIndices;
+            set { _deletedChunkIndices = value; RaisePropertyChanged(); }
+        }
+    }
+
+    public class FileChunkItem : ObservableObject
+    {
+        private string _content;
+        public string Content
+        {
+            get => _content;
+            set { _content = value; RaisePropertyChanged(); }
+        }
+
+        private int _originalIndex;
+        public int OriginalIndex
+        {
+            get => _originalIndex;
+            set { _originalIndex = value; RaisePropertyChanged(); }
         }
     }
 }

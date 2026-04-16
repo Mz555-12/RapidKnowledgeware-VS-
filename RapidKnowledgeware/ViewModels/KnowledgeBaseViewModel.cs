@@ -1,13 +1,11 @@
-﻿// KnowledgeBaseViewModel.cs
-using GalaSoft.MvvmLight;
+﻿using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using RapidKnowledgeware.Base;
+using RapidKnowledgeware.Functions.KnowledgeBaseFunc;
 using RapidKnowledgeware.Functions.MainWindowFunc;
 using RapidKnowledgeware.Models;
 using RapidKnowledgeware.Views;
 using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,81 +17,64 @@ namespace RapidKnowledgeware.ViewModels
     public class KnowledgeBaseViewModel : ViewModelBase
     {
         public KnowledgeBaseModel KnowledgeBaseModel { get; set; } = KnowledgeBaseModel.Instance;
+        private readonly KnowledgeBaseService _service;
 
         private static KnowledgeBaseViewModel _instance;
         public static KnowledgeBaseViewModel Instance => _instance ?? (_instance = new KnowledgeBaseViewModel());
 
+        private KnowledgeFileItem _currentDisplayedFile;
+
+
+        private bool _hasMultipleChunks;
+        public bool HasMultipleChunks
+        {
+            get => _hasMultipleChunks;
+            set { _hasMultipleChunks = value; RaisePropertyChanged(); }
+        }
+
         private KnowledgeBaseViewModel()
         {
-            // 初始化命令
+            _service = new KnowledgeBaseService(KnowledgeBaseModel);
+
+            // 命令初始化
             AddKnowledgeCommand = new RelayCommand(AddKnowledgeExecute, () => !string.IsNullOrWhiteSpace(KnowledgeBaseModel.BlockRule));
             ViewFileBlocksCommand = new RelayCommand<KnowledgeFileItem>(ViewFileBlocksExecute);
             DeleteFileCommand = new RelayCommand<KnowledgeFileItem>(DeleteFileExecute);
             CloseFileBlockViewCommand = new RelayCommand(CloseFileBlockViewExecute);
+            DeleteChunkCommand = new RelayCommand<FileChunkItem>(DeleteChunkExecute);
         }
 
         public ICommand AddKnowledgeCommand { get; }
         public ICommand ViewFileBlocksCommand { get; }
         public ICommand DeleteFileCommand { get; }
         public ICommand CloseFileBlockViewCommand { get; }
-
-        private string[] ParseSeparators()
-        {
-            var separators = KnowledgeBaseModel.BlockRule
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim())
-                .Where(s => !string.IsNullOrEmpty(s))
-                .ToArray();
-
-            return separators.Length > 0 ? separators : new[] { "###" };
-        }
-
+        public ICommand DeleteChunkCommand { get; }
 
         private async void AddKnowledgeExecute()
         {
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = "文本文件|*.txt|所有文件|*.*"
+                Filter = "文本文件|*.txt|所有文件|*.*",
+                Multiselect = true
             };
-            if (dialog.ShowDialog() == true)
+
+            if (dialog.ShowDialog() == true && dialog.FileNames.Length > 0)
             {
-                string filePath = dialog.FileName;
-                MainWindow.SetStatusMessage($"正在索引文件: {System.IO.Path.GetFileName(filePath)}...");
-                try
+                var files = dialog.FileNames;
+                MainWindow.SetStatusMessage($"开始索引 {files.Length} 个文件...");
+
+                var progress = new Progress<(string FileName, bool Success, int ChunkCount, string ErrorMessage)>(report =>
                 {
-                    var ragService = new RagService(
-                        ollamaEndpoint: "http://localhost:11434",
-                        embeddingModel: KnowledgeBaseModel.CurrentEmbeddingName
-                    );
+                    if (report.Success)
+                        MainWindow.SetStatusMessage($"✓ {report.FileName} 索引完成，{report.ChunkCount} 个块");
+                    else
+                        MainWindow.SetStatusMessage($"✗ {report.FileName} 索引失败: {report.ErrorMessage}");
+                });
 
-                    // 解析分隔符：支持逗号分隔，自动去除空白
-                    var separators = KnowledgeBaseModel.BlockRule
-                        .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.Trim())
-                        .Where(s => !string.IsNullOrEmpty(s))
-                        .ToArray();
+                int successCount = await _service.IndexFilesAsync(files, progress);
 
-                    // 如果解析后为空，使用默认分隔符
-                    if (separators.Length == 0)
-                        separators = new[] { "###" };
-
-                    int chunkCount = await ragService.IndexDocumentAsync(filePath, separators, clearExisting: false);
-
-                    var item = new KnowledgeFileItem
-                    {
-                        FilePath = filePath,
-                        ChunkCount = chunkCount,
-                        IsIndexed = true
-                    };
-                    KnowledgeBaseModel.FileItems.Add(item);
-                    MainWindow.SetStatusMessage($"索引完成，共 {chunkCount} 个块。");
-
-                    AppSettingsManager.SaveSettings(KnowledgeBaseModel);
-                }
-                catch (Exception ex)
-                {
-                    MainWindow.SetStatusMessage($"索引失败: {ex.Message}");
-                }
+                MainWindow.SetStatusMessage($"批量索引完成：成功 {successCount}/{files.Length} 个文件。");
+                AppSettingsManager.SaveSettings(KnowledgeBaseModel);
             }
         }
 
@@ -103,28 +84,15 @@ namespace RapidKnowledgeware.ViewModels
             try
             {
                 MainWindow.SetStatusMessage($"正在加载分块内容: {item.FileName}...");
+                _currentDisplayedFile = item;
 
-                var analysis = new OllamaFramework.Embedding.AnalysesFile();
-                string content = await analysis.LoadFileAsync(item.FilePath);
-                var chunks = await Task.Run(() =>
-                    analysis.SplitIntoChunks(content, ParseSeparators())
-                );
-
-                // 清空原有并填充新分块
-
+                var chunks = await _service.LoadFileChunksAsync(item);
                 KnowledgeBaseModel.FileBlocks.Clear();
-                foreach (var chunk in chunks)
-                    KnowledgeBaseModel.FileBlocks.Add(chunk);
+                foreach (var c in chunks)
+                    KnowledgeBaseModel.FileBlocks.Add(c);
 
-                // 显示浮层
-                var knowledgeView = GetKnowledgeBaseView();
-                if (knowledgeView != null)
-                {
-                    var overlay = knowledgeView.FindName("FileBlockOverlay") as Grid;
-                    var fileBlockView = knowledgeView.FindName("FileBlockViewControl") as FileBlockView;
-                    SlidingView.SlideDownToBottom(fileBlockView, overlay);
-                }
-
+                ShowFileBlockOverlay();
+                HasMultipleChunks = KnowledgeBaseModel.FileBlocks.Count > 1;
                 MainWindow.SetStatusMessage($"已加载 {item.FileName} 的分块，共 {chunks.Count} 个块");
             }
             catch (Exception ex)
@@ -139,43 +107,28 @@ namespace RapidKnowledgeware.ViewModels
             var result = MessageBox.Show($"确定删除文件 {item.FileName} 及其索引吗？", "确认删除", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.Yes)
             {
-                // 从RAG索引中移除（简单起见重新构建索引，或从内部列表移除）
-                // 这里假设你维护一个全局 RagService，简化起见我们直接删除并清空重索引剩余文件
                 KnowledgeBaseModel.FileItems.Remove(item);
-
-                // 重新索引剩余文件（耗时操作可后台执行）
-                await ReindexAllFiles();
-
-                MainWindow.SetStatusMessage($"已删除文件 {item.FileName}");
                 AppSettingsManager.SaveSettings(KnowledgeBaseModel);
+                MainWindow.SetStatusMessage($"已删除文件 {item.FileName}");
+
+                await _service.ReindexAllFilesAsync();
             }
         }
 
-        private async Task ReindexAllFiles()
+        private async void DeleteChunkExecute(FileChunkItem chunkItem)
         {
-            var ragService = new RagService(embeddingModel: KnowledgeBaseModel.CurrentEmbeddingName);
-            ragService.ClearIndex();
-            foreach (var file in KnowledgeBaseModel.FileItems)
-            {
-                var separators = ParseSeparators();
-                int count = await ragService.IndexDocumentAsync(file.FilePath, separators, clearExisting: false);
-                file.ChunkCount = count;
-                file.IsIndexed = true;
-            }
-        }
+            if (_currentDisplayedFile == null || chunkItem == null) return;
 
-        private KnowledgeBaseView GetKnowledgeBaseView()
-        {
-            // 遍历可视化树获取当前显示的 KnowledgeBaseView 实例
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            var spaceView = mainWindow?.FindName("SpaceView") as SpaceParametersView;
-            if (spaceView != null)
-            {
-                var container = spaceView.FindName("ViewContainer") as ContentControl;
-                if (container?.Content is KnowledgeBaseView kbView)
-                    return kbView;
-            }
-            return null;
+            var result = MessageBox.Show($"确定删除该块吗？", "确认删除", MessageBoxButton.YesNo);
+            if (result != MessageBoxResult.Yes) return;
+
+            _currentDisplayedFile.DeletedChunkIndices.Add(chunkItem.OriginalIndex);
+            await _service.ReindexSingleFileAsync(_currentDisplayedFile);
+            HasMultipleChunks = KnowledgeBaseModel.FileBlocks.Count > 1;
+            _service.RefreshDisplayedChunks(_currentDisplayedFile);
+
+            MainWindow.SetStatusMessage($"已删除块（原索引 {chunkItem.OriginalIndex}）");
+            AppSettingsManager.SaveSettings(KnowledgeBaseModel);
         }
 
         private void CloseFileBlockViewExecute()
@@ -187,6 +140,30 @@ namespace RapidKnowledgeware.ViewModels
                 var fileBlockView = knowledgeView.FindName("FileBlockViewControl") as FileBlockView;
                 SlidingView.SlideUpToTop(fileBlockView, overlay);
             }
+        }
+
+        private void ShowFileBlockOverlay()
+        {
+            var knowledgeView = GetKnowledgeBaseView();
+            if (knowledgeView != null)
+            {
+                var overlay = knowledgeView.FindName("FileBlockOverlay") as Grid;
+                var fileBlockView = knowledgeView.FindName("FileBlockViewControl") as FileBlockView;
+                SlidingView.SlideDownToBottom(fileBlockView, overlay);
+            }
+        }
+
+        private KnowledgeBaseView GetKnowledgeBaseView()
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            var spaceView = mainWindow?.FindName("SpaceView") as SpaceParametersView;
+            if (spaceView != null)
+            {
+                var container = spaceView.FindName("ViewContainer") as ContentControl;
+                if (container?.Content is KnowledgeBaseView kbView)
+                    return kbView;
+            }
+            return null;
         }
     }
 }

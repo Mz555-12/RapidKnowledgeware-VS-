@@ -12,6 +12,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Styles/MainWindowStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -40,14 +42,29 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" 
-                    Margin="0 0 0 10" Padding="8" Background="#FAFAFA">
-                            <StackPanel>
-                                <TextBlock Text="{Binding RelativeSource={RelativeSource TemplatedParent}, 
-                                              Path=(ItemsControl.AlternationIndex), 
-                                              StringFormat='块 {0}'}"
-                               FontWeight="Bold" Foreground="#2C3E50" Margin="0 0 0 5"/>
-                                <TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="13"/>
-                            </StackPanel>
+            Margin="0 0 0 10" Padding="8" Background="#FAFAFA">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <!-- 标题行：左侧序号，右侧删除按钮 -->
+                                <Grid Grid.Row="0">
+                                    <TextBlock Text="{Binding RelativeSource={RelativeSource TemplatedParent}, 
+                                          Path=(ItemsControl.AlternationIndex), 
+                                          StringFormat='块 {0}'}"
+                           FontWeight="Bold" Foreground="#2C3E50" VerticalAlignment="Center"/>
+                                    <!-- 删除按钮修改为 -->
+                                    <Button Content="🗑️" Width="24" Height="24" HorizontalAlignment="Right"
+                                        ToolTip="删除此块"
+                                        Command="{Binding DataContext.DeleteChunkCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
+                                        Background="Transparent" BorderThickness="0" Foreground="Red"
+                                        Visibility="{Binding DataContext.HasMultipleChunks, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BoolToVis}}"/>
+                                </Grid>
+                                <!-- 块内容 -->
+                                <TextBlock Grid.Row="1" Text="{Binding Content}" TextWrapping="Wrap" FontSize="13" Margin="0 5 0 0"/>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

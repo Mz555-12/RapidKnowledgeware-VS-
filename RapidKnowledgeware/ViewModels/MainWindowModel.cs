@@ -30,6 +30,7 @@ namespace RapidKnowledgeware.ViewModels
                     _closeMainWindowCommand = new CommandBase();
                     _closeMainWindowCommand.DoExecute = new Action<object>((o) =>
                     {
+                        AppSettingsManager.SaveSettings(KnowledgeBaseModel.Instance);
                         (o as Window).Close();
                     });
                 }

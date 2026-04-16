@@ -291,4 +291,23 @@ public class RagService
     {
         return _indexedChunks.ToList();
     }
+
+
+    /// <summary>
+    /// 移除所有来源于指定文件的文档块
+    /// </summary>
+    public void RemoveChunksBySource(string filePath)
+    {
+        _indexedChunks.RemoveAll(c => c.Metadata["source"]?.ToString() == filePath);
+    }
+
+    /// <summary>
+    /// 批量添加文档块（用于重建索引）
+    /// </summary>
+    public void AddChunks(IEnumerable<DocumentChunk> chunks)
+    {
+        _indexedChunks.AddRange(chunks);
+    }
+
+
 }
