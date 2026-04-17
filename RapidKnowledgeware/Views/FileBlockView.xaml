@@ -10,7 +10,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Styles/MainWindowStyle.xaml"/>
+                <ResourceDictionary Source="../Assets/Styles/MainWindowStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>

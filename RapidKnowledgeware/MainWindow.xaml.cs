@@ -32,6 +32,9 @@ namespace RapidKnowledgeware
         public MainWindow()
         {
             InitializeComponent();
+            MainModel.Loading_Grid = this.Loading_Grid;
+
+
             // 加载设置到 KnowledgeBaseModel
             AppSettingsManager.LoadSettings(KnowledgeBaseModel.Instance);
             this.DataContext = new MainWindowModel();

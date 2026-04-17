@@ -37,7 +37,7 @@ namespace RapidKnowledgeware.ViewModels
             _service = new KnowledgeBaseService(KnowledgeBaseModel);
 
             // 命令初始化
-            AddKnowledgeCommand = new RelayCommand(AddKnowledgeExecute, () => !string.IsNullOrWhiteSpace(KnowledgeBaseModel.BlockRule));
+            AddKnowledgeCommand = new RelayCommand(AddKnowledgeExecute);
             ViewFileBlocksCommand = new RelayCommand<KnowledgeFileItem>(ViewFileBlocksExecute);
             DeleteFileCommand = new RelayCommand<KnowledgeFileItem>(DeleteFileExecute);
             CloseFileBlockViewCommand = new RelayCommand(CloseFileBlockViewExecute);
@@ -52,6 +52,14 @@ namespace RapidKnowledgeware.ViewModels
 
         private async void AddKnowledgeExecute()
         {
+
+            // 添加这段检查
+            if (string.IsNullOrWhiteSpace(KnowledgeBaseModel.BlockRule))
+            {
+                MessageBox.Show("分块规则不能为空，请先填写规则。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
                 Filter = "文本文件|*.txt|所有文件|*.*",
@@ -60,6 +68,7 @@ namespace RapidKnowledgeware.ViewModels
 
             if (dialog.ShowDialog() == true && dialog.FileNames.Length > 0)
             {
+                LoadingAnimation.Show_Loading();
                 var files = dialog.FileNames;
                 MainWindow.SetStatusMessage($"开始索引 {files.Length} 个文件...");
 
@@ -75,6 +84,7 @@ namespace RapidKnowledgeware.ViewModels
 
                 MainWindow.SetStatusMessage($"批量索引完成：成功 {successCount}/{files.Length} 个文件。");
                 AppSettingsManager.SaveSettings(KnowledgeBaseModel);
+                LoadingAnimation.Hide_Loading();
             }
         }
 
@@ -107,11 +117,38 @@ namespace RapidKnowledgeware.ViewModels
             var result = MessageBox.Show($"确定删除文件 {item.FileName} 及其索引吗？", "确认删除", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.Yes)
             {
+                LoadingAnimation.Show_Loading();
                 KnowledgeBaseModel.FileItems.Remove(item);
                 AppSettingsManager.SaveSettings(KnowledgeBaseModel);
-                MainWindow.SetStatusMessage($"已删除文件 {item.FileName}");
 
-                await _service.ReindexAllFilesAsync();
+                // 启动重索引任务（不等待，让它后台运行）
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _service.ReindexAllFilesAsync();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            MainWindow.SetStatusMessage($"重建索引失败: {ex.Message}");
+                        });
+                    }
+                });
+
+                // 等待至少1秒后隐藏动画
+                try
+                {
+                    await Task.Delay(1700);
+                }
+                finally
+                {
+                    MainWindow.SetStatusMessage($"已删除文件 {item.FileName}");
+                    LoadingAnimation.Hide_Loading();
+                }
+
             }
         }
 
@@ -121,14 +158,15 @@ namespace RapidKnowledgeware.ViewModels
 
             var result = MessageBox.Show($"确定删除该块吗？", "确认删除", MessageBoxButton.YesNo);
             if (result != MessageBoxResult.Yes) return;
-
+            LoadingAnimation.Show_Loading();
             _currentDisplayedFile.DeletedChunkIndices.Add(chunkItem.OriginalIndex);
             await _service.ReindexSingleFileAsync(_currentDisplayedFile);
             HasMultipleChunks = KnowledgeBaseModel.FileBlocks.Count > 1;
             _service.RefreshDisplayedChunks(_currentDisplayedFile);
-
-            MainWindow.SetStatusMessage($"已删除块（原索引 {chunkItem.OriginalIndex}）");
             AppSettingsManager.SaveSettings(KnowledgeBaseModel);
+            MainWindow.SetStatusMessage($"已删除块（原索引 {chunkItem.OriginalIndex}）");
+            LoadingAnimation.Hide_Loading();
+
         }
 
         private void CloseFileBlockViewExecute()

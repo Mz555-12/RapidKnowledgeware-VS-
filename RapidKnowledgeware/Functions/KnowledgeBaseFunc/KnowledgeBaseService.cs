@@ -22,8 +22,12 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         /// </summary>
         public string[] ParseSeparators()
         {
+            if (string.IsNullOrWhiteSpace(_model.BlockRule))
+                return new[] { "###" };
+
+            // 使用中英文逗号分割
             var separators = _model.BlockRule
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Split(new[] { ',', '，' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => s.Trim())
                 .Where(s => !string.IsNullOrEmpty(s))
                 .ToArray();

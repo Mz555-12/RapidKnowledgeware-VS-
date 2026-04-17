@@ -10,7 +10,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="./Styles/MainWindowStyle.xaml"/>
+                <ResourceDictionary Source="./Assets/Styles/MainWindowStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
         </ResourceDictionary>
@@ -76,6 +76,74 @@
                         <!-- 初始偏移量与高度一致 -->
                     </views:SpaceParametersView.RenderTransform>
                 </views:SpaceParametersView>
+            </Grid>
+
+            <!-- 覆盖层，用于放置加载动画 -->
+            <Grid Background="Transparent" Grid.Row="1" Name="Loading_Grid" Visibility="Collapsed">
+                <Grid.Resources>
+                    <Style x:Key="ellipse" TargetType="Ellipse">
+                        <Setter Property="Width" Value="10"/>
+                        <Setter Property="Height" Value="10"/>
+                        <Setter Property="Canvas.Left" Value="42.5"/>
+                        <Setter Property="Fill" Value="Gray"/>
+                        <Setter Property="RenderTransformOrigin" Value="0.5,3.33"/>
+                    </Style>
+
+                    <PowerEase x:Key="powerease" Power="3" EasingMode="EaseInOut"/>
+
+                </Grid.Resources>
+                <Border Background="#80FFFFFF"/>
+                <Canvas Width="100" Height="100">
+                    <Canvas.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetName="e1" To="360" Duration="0:0:2" EasingFunction="{StaticResource powerease}" AccelerationRatio="0.1" DecelerationRatio="0.9"/>
+                                    <DoubleAnimation Storyboard.TargetName="e2" To="360" Duration="0:0:2" EasingFunction="{StaticResource powerease}" AccelerationRatio="0.3" DecelerationRatio="0.7"/>
+                                    <DoubleAnimation Storyboard.TargetName="e3" To="360" Duration="0:0:2" EasingFunction="{StaticResource powerease}" AccelerationRatio="0.5" DecelerationRatio="0.5"/>
+                                    <DoubleAnimation Storyboard.TargetName="e4" To="360" Duration="0:0:2" EasingFunction="{StaticResource powerease}" AccelerationRatio="0.7" DecelerationRatio="0.3"/>
+                                    <DoubleAnimation Storyboard.TargetName="e5" To="360" Duration="0:0:2" EasingFunction="{StaticResource powerease}" AccelerationRatio="0.9" DecelerationRatio="0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Canvas.Triggers>
+
+                    <Label Content="Loading" 
+FontSize="11"
+FontFamily="Times New Roman"
+Foreground="#BAB9B9"
+FontWeight="Bold"
+Width="93" 
+Height="70"
+VerticalContentAlignment="Center" 
+HorizontalContentAlignment="Center"/>
+
+                    <Ellipse Name="e1" Style="{StaticResource ellipse}">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform Angle="0"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse Name="e2" Style="{StaticResource ellipse}">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform Angle="0"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse Name="e3" Style="{StaticResource ellipse}">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform Angle="0"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse Name="e4" Style="{StaticResource ellipse}">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform Angle="0"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                    <Ellipse Name="e5" Style="{StaticResource ellipse}">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform Angle="0"/>
+                        </Ellipse.RenderTransform>
+                    </Ellipse>
+                </Canvas>
             </Grid>
         </Grid>
     </Border>

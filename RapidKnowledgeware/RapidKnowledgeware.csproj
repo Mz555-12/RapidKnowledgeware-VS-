@@ -158,6 +158,7 @@
     <Compile Include="Base\CommandBase.cs" />
     <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseService.cs" />
     <Compile Include="Functions\MainWindowFunc\AppSettingsManager.cs" />
+    <Compile Include="Functions\MainWindowFunc\LoadingAnimation.cs" />
     <Compile Include="Functions\MainWindowFunc\SlidingView.cs" />
     <Compile Include="Functions\SpaceParametersFunc\ViewSwitcher.cs" />
     <Compile Include="Models\KnowledgeBaseModel.cs" />
@@ -189,11 +190,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Styles\MainWindowStyle.xaml">
+    <Page Include="Assets\Styles\MainWindowStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Styles\SpaceParametersStyle.xaml">
+    <Page Include="Assets\Styles\SpaceParametersStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
