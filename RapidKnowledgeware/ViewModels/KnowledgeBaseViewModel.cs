@@ -52,8 +52,6 @@ namespace RapidKnowledgeware.ViewModels
 
         private async void AddKnowledgeExecute()
         {
-
-            // 添加这段检查
             if (string.IsNullOrWhiteSpace(KnowledgeBaseModel.BlockRule))
             {
                 MessageBox.Show("分块规则不能为空，请先填写规则。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -68,9 +66,35 @@ namespace RapidKnowledgeware.ViewModels
 
             if (dialog.ShowDialog() == true && dialog.FileNames.Length > 0)
             {
-                LoadingAnimation.Show_Loading();
-                var files = dialog.FileNames;
-                MainWindow.SetStatusMessage($"开始索引 {files.Length} 个文件...");
+                var selectedFiles = dialog.FileNames;
+                var existingFiles = selectedFiles.Where(f => KnowledgeBaseModel.FileItems.Any(item => item.FilePath == f)).ToList();
+
+                if (existingFiles.Any())
+                {
+                    string msg = $"以下文件已存在于知识库中：\n{string.Join("\n", existingFiles.Select(System.IO.Path.GetFileName))}\n\n是否覆盖这些文件？";
+                    var result = MessageBox.Show(msg, "文件已存在", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // 移除所有重复项
+                        foreach (var file in existingFiles)
+                        {
+                            var item = KnowledgeBaseModel.FileItems.First(f => f.FilePath == file);
+                            KnowledgeBaseModel.FileItems.Remove(item);
+                            _service.RemoveFileFromIndex(item.FilePath);
+                        }
+                        // 全部重新索引
+                    }
+                    else
+                    {
+                        // 用户选择不覆盖，则从待处理列表中排除重复文件
+                        selectedFiles = selectedFiles.Except(existingFiles).ToArray();
+                        if (selectedFiles.Length == 0)
+                            return;
+                    }
+                }
+
+                WindowControls.Show_Loading();
+                MainWindow.SetStatusMessage($"开始索引 {selectedFiles.Length} 个文件...");
 
                 var progress = new Progress<(string FileName, bool Success, int ChunkCount, string ErrorMessage)>(report =>
                 {
@@ -80,11 +104,11 @@ namespace RapidKnowledgeware.ViewModels
                         MainWindow.SetStatusMessage($"✗ {report.FileName} 索引失败: {report.ErrorMessage}");
                 });
 
-                int successCount = await _service.IndexFilesAsync(files, progress);
+                int successCount = await _service.IndexFilesAsync(selectedFiles, progress);
 
-                MainWindow.SetStatusMessage($"批量索引完成：成功 {successCount}/{files.Length} 个文件。");
+                MainWindow.SetStatusMessage($"批量索引完成：成功 {successCount}/{selectedFiles.Length} 个文件。");
                 AppSettingsManager.SaveSettings(KnowledgeBaseModel);
-                LoadingAnimation.Hide_Loading();
+                WindowControls.Hide_Loading();
             }
         }
 
@@ -124,7 +148,7 @@ namespace RapidKnowledgeware.ViewModels
             var result = MessageBox.Show($"确定删除文件 {item.FileName} 及其索引吗？", "确认删除", MessageBoxButton.YesNo);
             if (result == MessageBoxResult.Yes)
             {
-                LoadingAnimation.Show_Loading();
+                WindowControls.Show_Loading();
 
                 // 立即从 UI 列表移除
                 KnowledgeBaseModel.FileItems.Remove(item);
@@ -137,7 +161,7 @@ namespace RapidKnowledgeware.ViewModels
                 await Task.Delay(500);
 
                 MainWindow.SetStatusMessage($"已删除文件 {item.FileName}");
-                LoadingAnimation.Hide_Loading();
+                WindowControls.Hide_Loading();
             }
         }
 
@@ -147,7 +171,7 @@ namespace RapidKnowledgeware.ViewModels
             var result = MessageBox.Show($"确定删除该块吗？", "确认删除", MessageBoxButton.YesNo);
             if (result != MessageBoxResult.Yes) return;
 
-            LoadingAnimation.Show_Loading();
+            WindowControls.Show_Loading();
 
             _currentDisplayedFile.DeletedChunkIndices.Add(chunkItem.OriginalIndex);
             _service.RemoveChunkAndSave(_currentDisplayedFile.FilePath, chunkItem.OriginalIndex);
@@ -158,7 +182,7 @@ namespace RapidKnowledgeware.ViewModels
 
             await Task.Delay(500);  // 同样保证动画最短显示时间
             MainWindow.SetStatusMessage($"已删除块（原索引 {chunkItem.OriginalIndex}）");
-            LoadingAnimation.Hide_Loading();
+            WindowControls.Hide_Loading();
         }
 
         private void CloseFileBlockViewExecute()

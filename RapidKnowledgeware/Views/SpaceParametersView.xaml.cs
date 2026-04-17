@@ -23,7 +23,7 @@ namespace RapidKnowledgeware.Views
         {
             // 创建并缓存两个视图实例
             ViewSwitcher.PreloadView("KnowledgeBaseView", new KnowledgeBaseView());
-            ViewSwitcher.PreloadView("SpaceAdjustView", new SpaceAdjustView());
+            ViewSwitcher.PreloadView("SpaceAdjustView", new ModelAdjustView());
         }
     }
 }

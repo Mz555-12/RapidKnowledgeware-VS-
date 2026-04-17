@@ -5,25 +5,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RapidKnowledgeware.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="608" FontSize="14">
-    <Grid Background="white">
+             d:DesignHeight="700" d:DesignWidth="748" FontSize="15">
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 20 0">
-                <Label Content="当前嵌入模型："  />
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 0 0">
+                <Label Content="当前嵌入模型："   FontWeight="Bold"/>
                 <TextBox Text="{Binding KnowledgeBaseModel.CurrentEmbeddingName, UpdateSourceTrigger=PropertyChanged}" 
-                         Margin="5 0 0 0" MinWidth="50" BorderThickness="0 0 0 1" Padding="10 0" 
+                         Margin="0 0 5 0" MinWidth="50" MaxWidth="185" BorderThickness="0 0 0 1" Padding="10 0" 
                          VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
             </StackPanel>
             <!--多个分隔符请用英文逗号分隔，例如：###,##-->
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Label Content="分块规则：" />
+                <Label Content="分块规则："   FontWeight="Bold"/>
                 <TextBox Text="{Binding KnowledgeBaseModel.BlockRule, UpdateSourceTrigger=PropertyChanged}" 
-                         Margin="5 0 0 0" MinWidth="50" BorderThickness="0 0 0 1" Padding="10 0"
+                         Margin="0 0 0 0" MinWidth="50"  MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0"  
                          VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
             </StackPanel>
         </StackPanel>
@@ -61,8 +61,8 @@
         </Grid>
 
         <!-- 浮层显示 FileBlockView，从上滑下 -->
-        <Grid x:Name="FileBlockOverlay" Grid.RowSpan="2" Visibility="Collapsed" Background="Transparent" Margin="0 0 0 0">
-            <local:FileBlockView x:Name="FileBlockViewControl" Width="599" Height="499"
+        <Grid x:Name="FileBlockOverlay" Grid.RowSpan="2" Visibility="Collapsed" Background="Transparent" Margin="0 0 0 5">
+            <local:FileBlockView x:Name="FileBlockViewControl" Width="802" Height="602"
                                  HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                  RenderTransformOrigin="0.5,0.5">
                 <local:FileBlockView.RenderTransform>

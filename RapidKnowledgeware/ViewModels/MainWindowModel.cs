@@ -66,17 +66,24 @@ namespace RapidKnowledgeware.ViewModels
                         }
 
                         if (!_isSpaceViewVisible)
-                        {
+                        {   
+                            
+                            WindowControls.Show_Title();
+
                             // 当前隐藏 → 显示（滑落）
                             Debug.WriteLine("[命令] 执行滑落动画");
-                            SlidingView.SlideDownToBottom(spaceView, overlay);
+                            SlidingView.SlideInFromLeft(spaceView, overlay);
+
+
                             _isSpaceViewVisible = true;
                         }
                         else
                         {
+                            WindowControls.Hide_Title();
+
                             // 当前显示 → 隐藏（滑回）
                             Debug.WriteLine("[命令] 执行滑回动画");
-                            SlidingView.SlideUpToTop(spaceView, overlay);
+                            SlidingView.SlideOutToRight(spaceView, overlay);
                             AppSettingsManager.SaveSettings(KnowledgeBaseModel.Instance);
                             _isSpaceViewVisible = false;
                         }

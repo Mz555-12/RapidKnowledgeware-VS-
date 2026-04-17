@@ -33,7 +33,7 @@
                     <RadioButton  Content="知识库"  IsChecked="True" Template="{StaticResource RadioButtonTemple}" Name="btn_startPanel" Margin="0 40"
                          Command="{Binding ViewChangedCommand}"
                          CommandParameter="KnowledgeBaseView"/>
-                    <RadioButton  Content="空间设置"   Template="{StaticResource RadioButtonTemple}"  Name="btn_controlPanel" Margin="0 40"
+                    <RadioButton  Content="模型设置"   Template="{StaticResource RadioButtonTemple}"  Name="btn_controlPanel" Margin="0 40"
                          Command="{Binding ViewChangedCommand}"
                          CommandParameter="SpaceAdjustView"/>
                 </StackPanel>

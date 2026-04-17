@@ -33,8 +33,14 @@ namespace RapidKnowledgeware
         {
             InitializeComponent();
             MainModel.Loading_Grid = this.Loading_Grid;
-            this.DataContext = new MainWindowModel();
+            MainModel.CloseWindow_Btn = this.CloseWindow_Btn;
+            MainModel.TopWindow_Border = this.TopWindow_Border;
+            MainModel.Minimum_Btn = this.Minimum_Btn;
 
+
+
+
+            this.DataContext = new MainWindowModel();
             // 加载设置到 KnowledgeBaseModel
             AppSettingsManager.LoadSettings(KnowledgeBaseModel.Instance);
             foreach (var item in KnowledgeBaseModel.Instance.FileItems)
