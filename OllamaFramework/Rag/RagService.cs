@@ -1,14 +1,19 @@
-﻿using OllamaFramework.Embedding;
+﻿using Newtonsoft.Json;
+using OllamaFramework.Embedding;
 using OllamaFramework.LLM;
 using OllamaFramework.Models;
 using OllamaFramework.Rag;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
+using static OllamaFramework.Models.Serializable;
+
 
 /// <summary>
 /// 检索增强生成（RAG）服务
@@ -28,6 +33,11 @@ public class RagService
     /// 默认的 LLM 生成参数，用于所有查询（除非单独覆盖）
     /// </summary>
     public LLMParameters DefaultLLMParameters { get; set; } = new LLMParameters();
+
+
+
+
+    private static readonly string IndexFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Json", "rag_index.json");
 
 
     /// <summary>
@@ -307,6 +317,58 @@ public class RagService
     public void AddChunks(IEnumerable<DocumentChunk> chunks)
     {
         _indexedChunks.AddRange(chunks);
+    }
+
+
+
+    public void SaveIndex()
+    {
+        try
+        {
+            var data = new IndexData
+            {
+                Chunks = _indexedChunks.Select(c => new ChunkData
+                {
+                    Content = c.Content,
+                    Embedding = c.Embedding,
+                    Metadata = c.Metadata
+                }).ToList()
+            };
+            string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+            File.WriteAllText(IndexFilePath, json);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"保存索引失败: {ex.Message}");
+        }
+    }
+
+    public void LoadIndex()
+    {
+        if (!File.Exists(IndexFilePath)) return;
+        try
+        {
+            string json = File.ReadAllText(IndexFilePath);
+            var data = JsonConvert.DeserializeObject<IndexData>(json);
+            _indexedChunks.Clear();
+            _indexedChunks.AddRange(data.Chunks.Select(d => new DocumentChunk
+            {
+                Content = d.Content,
+                Embedding = d.Embedding,
+                Metadata = d.Metadata
+            }));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"加载索引失败: {ex.Message}");
+        }
+    }
+
+    public void RemoveChunkBySourceAndIndex(string filePath, int chunkIndex)
+    {
+        _indexedChunks.RemoveAll(c =>
+            c.Metadata["source"]?.ToString() == filePath &&
+            Convert.ToInt32(c.Metadata["chunk_index"]) == chunkIndex);
     }
 
 

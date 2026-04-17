@@ -12,27 +12,35 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
     {
         private readonly KnowledgeBaseModel _model;
 
+        private readonly RagService _ragService;
+
         public KnowledgeBaseService(KnowledgeBaseModel model)
         {
             _model = model;
+            _ragService = new RagService(ollamaEndpoint: "http://localhost:11434",embeddingModel: _model.CurrentEmbeddingName
+);
+            _ragService.LoadIndex();
         }
 
         /// <summary>
         /// 解析用户输入的分隔符字符串为数组
         /// </summary>
-        public string[] ParseSeparators()
+        private static string[] ParseSeparatorsFromRule(string rule)
         {
-            if (string.IsNullOrWhiteSpace(_model.BlockRule))
+            if (string.IsNullOrWhiteSpace(rule))
                 return new[] { "###" };
 
-            // 使用中英文逗号分割
-            var separators = _model.BlockRule
-                .Split(new[] { ',', '，' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Trim())
-                .Where(s => !string.IsNullOrEmpty(s))
-                .ToArray();
-
+            var separators = rule.Split(new[] { ',', '，' }, StringSplitOptions.RemoveEmptyEntries)
+                                 .Select(s => s.Trim())
+                                 .Where(s => !string.IsNullOrEmpty(s))
+                                 .ToArray();
             return separators.Length > 0 ? separators : new[] { "###" };
+        }
+
+        // 
+        public string[] ParseSeparators()
+        {
+            return ParseSeparatorsFromRule(_model.BlockRule);
         }
 
         /// <summary>
@@ -41,10 +49,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         public async Task<int> IndexFilesAsync(IEnumerable<string> filePaths, IProgress<(string FileName, bool Success, int ChunkCount, string ErrorMessage)> progress = null)
         {
             int successCount = 0;
-            var ragService = new RagService(
-                ollamaEndpoint: "http://localhost:11434",
-                embeddingModel: _model.CurrentEmbeddingName
-            );
+            var ragService = _ragService;
             var separators = ParseSeparators();
 
             foreach (var filePath in filePaths)
@@ -57,7 +62,8 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
                     {
                         FilePath = filePath,
                         ChunkCount = chunkCount,
-                        IsIndexed = true
+                        IsIndexed = true,
+                        ImportBlockRule = _model.BlockRule   // 记录当前全局规则
                     };
                     _model.FileItems.Add(item);
                     successCount++;
@@ -68,6 +74,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
                     progress?.Report((fileName, false, 0, ex.Message));
                 }
             }
+            _ragService.SaveIndex();  // 索引变更后保存
             return successCount;
         }
 
@@ -76,32 +83,33 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         /// </summary>
         public async Task ReindexAllFilesAsync()
         {
-            var ragService = new RagService(embeddingModel: _model.CurrentEmbeddingName);
-            ragService.ClearIndex();
+            _ragService.ClearIndex();
             var filesSnapshot = _model.FileItems.ToList();
             foreach (var file in filesSnapshot)
             {
                 if (!_model.FileItems.Contains(file))
                     continue;
-                await ReindexSingleFileAsync(file, ragService);
+                await ReindexSingleFileAsync(file);
             }
+            _ragService.SaveIndex();
         }
 
         /// <summary>
         /// 重新索引单个文件（更新 RAG 索引）
         /// </summary>
-        public async Task ReindexSingleFileAsync(KnowledgeFileItem fileItem, RagService existingRagService = null)
+        public async Task ReindexSingleFileAsync(KnowledgeFileItem fileItem)
         {
-            var ragService = existingRagService ?? new RagService(embeddingModel: _model.CurrentEmbeddingName);
-            if (existingRagService == null)
-            {
-                // 如果不是复用的实例，则移除该文件的旧索引
-                ragService.RemoveChunksBySource(fileItem.FilePath);
-            }
+            // 移除旧索引
+            _ragService.RemoveChunksBySource(fileItem.FilePath);
 
             var analysis = new AnalysesFile(embeddingModel: _model.CurrentEmbeddingName);
             string content = await analysis.LoadFileAsync(fileItem.FilePath);
-            var allChunks = analysis.SplitIntoChunks(content, ParseSeparators());
+
+            string ruleToUse = !string.IsNullOrWhiteSpace(fileItem.ImportBlockRule)
+                               ? fileItem.ImportBlockRule
+                               : _model.BlockRule;
+            var separators = ParseSeparatorsFromRule(ruleToUse);
+            var allChunks = analysis.SplitIntoChunks(content, separators);
 
             var newChunks = new List<DocumentChunk>();
             for (int i = 0; i < allChunks.Count; i++)
@@ -121,7 +129,9 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
                     }
                 });
             }
-            ragService.AddChunks(newChunks);
+            _ragService.AddChunks(newChunks);
+            _ragService.SaveIndex();
+
             fileItem.ChunkCount = newChunks.Count;
             fileItem.IsIndexed = true;
         }
@@ -132,9 +142,13 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         public void RefreshDisplayedChunks(KnowledgeFileItem fileItem)
         {
             var analysis = new AnalysesFile();
-            // 注意：这里同步调用 LoadFileAsync，适合删除后立即刷新场景（文件已加载过）
             string content = Task.Run(() => analysis.LoadFileAsync(fileItem.FilePath)).Result;
-            var allChunks = analysis.SplitIntoChunks(content, ParseSeparators());
+
+            string ruleToUse = !string.IsNullOrWhiteSpace(fileItem.ImportBlockRule)
+                               ? fileItem.ImportBlockRule
+                               : _model.BlockRule;
+            var separators = ParseSeparatorsFromRule(ruleToUse);
+            var allChunks = analysis.SplitIntoChunks(content, separators);
 
             _model.FileBlocks.Clear();
             for (int i = 0; i < allChunks.Count; i++)
@@ -156,7 +170,12 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         {
             var analysis = new AnalysesFile();
             string content = await analysis.LoadFileAsync(fileItem.FilePath);
-            var allChunks = await Task.Run(() => analysis.SplitIntoChunks(content, ParseSeparators()));
+
+            string ruleToUse = !string.IsNullOrWhiteSpace(fileItem.ImportBlockRule)
+                               ? fileItem.ImportBlockRule
+                               : _model.BlockRule;
+            var separators = ParseSeparatorsFromRule(ruleToUse);
+            var allChunks = await Task.Run(() => analysis.SplitIntoChunks(content, separators));
 
             var result = new List<FileChunkItem>();
             for (int i = 0; i < allChunks.Count; i++)
@@ -170,6 +189,19 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
                 });
             }
             return result;
+        }
+
+        public void RemoveFileFromIndex(string filePath)
+        {
+            _ragService.RemoveChunksBySource(filePath);
+            _ragService.SaveIndex();
+        }
+
+        public void RemoveChunkAndSave(string filePath, int chunkIndex)
+        {
+            // 需要在 RagService 中添加 RemoveChunkBySourceAndIndex 方法
+            _ragService.RemoveChunkBySourceAndIndex(filePath, chunkIndex);
+            _ragService.SaveIndex();
         }
     }
 }

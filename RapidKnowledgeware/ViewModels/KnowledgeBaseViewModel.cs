@@ -103,6 +103,13 @@ namespace RapidKnowledgeware.ViewModels
 
                 ShowFileBlockOverlay();
                 HasMultipleChunks = KnowledgeBaseModel.FileBlocks.Count > 1;
+
+                KnowledgeBaseModel.CurrentFileName = item.FileName;
+                KnowledgeBaseModel.CurrentFileBlockRule = string.IsNullOrEmpty(item.ImportBlockRule)
+                    ? KnowledgeBaseModel.BlockRule
+                    : item.ImportBlockRule;
+
+
                 MainWindow.SetStatusMessage($"已加载 {item.FileName} 的分块，共 {chunks.Count} 个块");
             }
             catch (Exception ex)
@@ -118,55 +125,40 @@ namespace RapidKnowledgeware.ViewModels
             if (result == MessageBoxResult.Yes)
             {
                 LoadingAnimation.Show_Loading();
+
+                // 立即从 UI 列表移除
                 KnowledgeBaseModel.FileItems.Remove(item);
                 AppSettingsManager.SaveSettings(KnowledgeBaseModel);
 
-                // 启动重索引任务（不等待，让它后台运行）
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await _service.ReindexAllFilesAsync();
+                // 从内存索引中移除并保存（瞬间完成）
+                _service.RemoveFileFromIndex(item.FilePath);
 
-                    }
-                    catch (Exception ex)
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            MainWindow.SetStatusMessage($"重建索引失败: {ex.Message}");
-                        });
-                    }
-                });
+                // 保证动画至少显示 0.5 秒
+                await Task.Delay(500);
 
-                // 等待至少1秒后隐藏动画
-                try
-                {
-                    await Task.Delay(1700);
-                }
-                finally
-                {
-                    MainWindow.SetStatusMessage($"已删除文件 {item.FileName}");
-                    LoadingAnimation.Hide_Loading();
-                }
-
+                MainWindow.SetStatusMessage($"已删除文件 {item.FileName}");
+                LoadingAnimation.Hide_Loading();
             }
         }
 
         private async void DeleteChunkExecute(FileChunkItem chunkItem)
         {
             if (_currentDisplayedFile == null || chunkItem == null) return;
-
             var result = MessageBox.Show($"确定删除该块吗？", "确认删除", MessageBoxButton.YesNo);
             if (result != MessageBoxResult.Yes) return;
+
             LoadingAnimation.Show_Loading();
+
             _currentDisplayedFile.DeletedChunkIndices.Add(chunkItem.OriginalIndex);
-            await _service.ReindexSingleFileAsync(_currentDisplayedFile);
-            HasMultipleChunks = KnowledgeBaseModel.FileBlocks.Count > 1;
+            _service.RemoveChunkAndSave(_currentDisplayedFile.FilePath, chunkItem.OriginalIndex);
             _service.RefreshDisplayedChunks(_currentDisplayedFile);
+
+            HasMultipleChunks = KnowledgeBaseModel.FileBlocks.Count > 1;
             AppSettingsManager.SaveSettings(KnowledgeBaseModel);
+
+            await Task.Delay(500);  // 同样保证动画最短显示时间
             MainWindow.SetStatusMessage($"已删除块（原索引 {chunkItem.OriginalIndex}）");
             LoadingAnimation.Hide_Loading();
-
         }
 
         private void CloseFileBlockViewExecute()
@@ -178,6 +170,10 @@ namespace RapidKnowledgeware.ViewModels
                 var fileBlockView = knowledgeView.FindName("FileBlockViewControl") as FileBlockView;
                 SlidingView.SlideUpToTop(fileBlockView, overlay);
             }
+            KnowledgeBaseModel.CurrentFileName = string.Empty;
+            KnowledgeBaseModel.CurrentFileBlockRule = string.Empty;
+            AppSettingsManager.SaveSettings(KnowledgeBaseModel);
+
         }
 
         private void ShowFileBlockOverlay()

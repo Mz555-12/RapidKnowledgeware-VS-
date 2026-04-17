@@ -40,6 +40,9 @@
     <Reference Include="Microsoft.Extensions.AI.Abstractions, Version=10.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\RapidKnowledgeware\packages\Microsoft.Extensions.AI.Abstractions.10.4.1\lib\net462\Microsoft.Extensions.AI.Abstractions.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\RapidKnowledgeware\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OllamaSharp, Version=5.4.25.0, Culture=neutral, PublicKeyToken=a180b353776c8e9e, processorArchitecture=MSIL">
       <HintPath>..\RapidKnowledgeware\packages\OllamaSharp.5.4.25\lib\netstandard2.0\OllamaSharp.dll</HintPath>
     </Reference>
@@ -87,6 +90,7 @@
     <Compile Include="Rag\DocumentChunk.cs" />
     <Compile Include="Rag\RagResponse.cs" />
     <Compile Include="Rag\RagService.cs" />
+    <Compile Include="Models\Serializable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

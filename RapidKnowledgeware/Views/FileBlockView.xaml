@@ -26,7 +26,19 @@
         <!-- 标题栏，右侧关闭按钮 -->
         <Border Grid.Row="0" Background="#F0F0F0" BorderBrush="#DDD" BorderThickness="0 0 0 1">
             <Grid>
-                <TextBlock Text="文档分块预览" VerticalAlignment="Center" Margin="10 0 0 0" FontWeight="Bold"/>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="当前文件为:" VerticalAlignment="Center" Margin="10 0 0 0" FontWeight="Bold"/>
+                        <TextBlock  Text="{Binding KnowledgeBaseModel.CurrentFileName}" VerticalAlignment="Center" Margin="10 0 10 0" FontSize="14" MinWidth="50" MaxWidth="185"/>
+
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="当前分块规则为:" VerticalAlignment="Center" Margin="10 0 0 0" FontWeight="Bold"/>
+                        <TextBlock  Text="{Binding KnowledgeBaseModel.CurrentFileBlockRule}" VerticalAlignment="Center" Margin="10 0 20 0" FontSize="14" MinWidth="50" MaxWidth="150"/>
+                    </StackPanel>
+                </StackPanel>
+
+
                 <Button Height="30" Width="40" 
                         Template="{StaticResource ButtonTemplate}" 
                         Content="&#xe601;" FontWeight="Bold" BorderThickness="0"  

@@ -33,11 +33,17 @@ namespace RapidKnowledgeware
         {
             InitializeComponent();
             MainModel.Loading_Grid = this.Loading_Grid;
-
+            this.DataContext = new MainWindowModel();
 
             // 加载设置到 KnowledgeBaseModel
             AppSettingsManager.LoadSettings(KnowledgeBaseModel.Instance);
-            this.DataContext = new MainWindowModel();
+            foreach (var item in KnowledgeBaseModel.Instance.FileItems)
+            {
+                if (string.IsNullOrEmpty(item.ImportBlockRule))
+                    item.ImportBlockRule = KnowledgeBaseModel.Instance.BlockRule;
+            }
+
+
             this.Closing += MainWindow_Closing;
         }
         private void RowDefinition_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

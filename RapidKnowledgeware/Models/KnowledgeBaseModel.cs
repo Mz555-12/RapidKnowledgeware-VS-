@@ -57,6 +57,21 @@ namespace RapidKnowledgeware.Models
             get => _fileBlocks;
             set { _fileBlocks = value; RaisePropertyChanged(); }
         }
+
+
+        private string _currentFileName;
+        public string CurrentFileName
+        {
+            get => _currentFileName;
+            set { _currentFileName = value; RaisePropertyChanged(); }
+        }
+
+        private string _currentFileBlockRule;
+        public string CurrentFileBlockRule
+        {
+            get => _currentFileBlockRule;
+            set { _currentFileBlockRule = value; RaisePropertyChanged(); }
+        }
     }
 
     public class KnowledgeFileItem : ObservableObject
@@ -77,6 +92,14 @@ namespace RapidKnowledgeware.Models
         {
             get => _deletedChunkIndices;
             set { _deletedChunkIndices = value; RaisePropertyChanged(); }
+        }
+
+
+        private string _importBlockRule;
+        public string ImportBlockRule
+        {
+            get => _importBlockRule;
+            set { _importBlockRule = value; RaisePropertyChanged(); }
         }
     }
 
