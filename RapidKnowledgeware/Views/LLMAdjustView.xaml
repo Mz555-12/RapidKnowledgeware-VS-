@@ -20,7 +20,7 @@
                 </StackPanel>
             </Border>
 
-            <ScrollViewer  Grid.Row="1" Margin="0 0 5 0">
+            <ScrollViewer  Grid.Row="1" Margin="0 0 5 0" VerticalScrollBarVisibility="Auto">
                  <Grid Margin="0 0 30 0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>

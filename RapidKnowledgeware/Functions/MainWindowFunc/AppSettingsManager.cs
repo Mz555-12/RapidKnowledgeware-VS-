@@ -39,6 +39,7 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             {
                 Debug.WriteLine($"[AppSettingsManager] 保存 {typeof(T).Name} 失败: {ex.Message}");
             }
+            
         }
 
         /// <summary>

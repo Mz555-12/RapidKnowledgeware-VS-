@@ -22,14 +22,18 @@
 
         <Border Grid.Row="0" Background="#F0F0F0" BorderBrush="#DDD" BorderThickness="0 0 0 1">
             <Grid>
-                <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}"  Content="&#xe601;" FontWeight="Bold" BorderThickness="0"   Background="#55DAE3EA" HorizontalAlignment="Right" Margin="0 0 5 0"
-                 Command="{Binding CloseFileBlockViewCommand}"/>
+                <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" 
+                        Content="&#xe601;" FontWeight="Bold" BorderThickness="0" 
+                        Background="#55DAE3EA" 
+                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
+                        Command="{Binding CloseCommand}"/>
 
                 <TextBlock Text="空间参数设置" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 0 0" FontWeight="Bold" FontSize="16"/>
+                <TextBlock Text="{Binding Session.DisplayName}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10 0 0 0" FontWeight="Bold" FontSize="16"/>
             </Grid>
         </Border>
 
-        <ScrollViewer  Grid.Row="1" Margin="0 0 5 0">
+        <ScrollViewer  Grid.Row="1" Margin="0 0 5 0" VerticalScrollBarVisibility="Auto">
 
 
             <Grid Margin="0 0 30 0">
@@ -56,7 +60,7 @@
 
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <Label Content="ChatLLM："/>
-                                    <TextBox Text="{Binding SpaceAdjustModel.RepeatPenalty}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    <TextBox Text="{Binding SpaceAdjustModel.ChatLLM}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
@@ -71,26 +75,26 @@
                 </Grid>
 
                 <Grid Grid.Row="1">
-            <StackPanel>
-                <Label Content="查询模式拒绝响应:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
-                <Border  MinHeight="70"  Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray" MaxHeight="100">
-                    <TextBox Text="{Binding SpaceAdjustModel.QueryRefusalResponse}" BorderThickness="0" Padding="5" Background="Transparent"  Margin="0 5"
+                    <StackPanel>
+                        <Label Content="查询模式拒绝响应:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
+                        <Border  MinHeight="70"  Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray" MaxHeight="100">
+                            <TextBox Text="{Binding SpaceAdjustModel.QueryRefusalResponse}" BorderThickness="0" Padding="5" Background="Transparent"  Margin="0 5"
                          VerticalContentAlignment="Top" HorizontalContentAlignment="Left" TextWrapping="Wrap" />
-                </Border>
-            </StackPanel>
-        </Grid>
-        <Grid Grid.Row="2">
-            <StackPanel>
-                <Label Content="系统提示词:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
-                <Border   Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray">
-                    <TextBox Text="" BorderThickness="0" Padding="5" Background="Transparent" Margin="0 5"
+                        </Border>
+                    </StackPanel>
+                </Grid>
+                <Grid Grid.Row="2">
+                    <StackPanel>
+                        <Label Content="系统提示词:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
+                        <Border   Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray">
+                            <TextBox Text="{Binding SpaceAdjustModel.SystemPrompt}" BorderThickness="0" Padding="5" Background="Transparent" Margin="0 5"
                          TextWrapping="Wrap" MinHeight="150"/>
-                </Border>
-            </StackPanel>
-        </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </ScrollViewer>
-   
+
 
 
     </Grid>

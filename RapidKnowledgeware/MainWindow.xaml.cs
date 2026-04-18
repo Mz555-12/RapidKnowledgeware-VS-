@@ -37,10 +37,14 @@ namespace RapidKnowledgeware
             MainModel.TopWindow_Border = this.TopWindow_Border;
             MainModel.Minimum_Btn = this.Minimum_Btn;
 
+            var vm = new MainWindowModel();
+            this.DataContext = vm;
 
+            this.Tag = vm;   // 将 ViewModel 存入 Tag，供菜单绑定使用
 
+            // 传递 SpaceAdjustView 弹出层引用（注意这里的名称与 XAML 中 x:Name 一致）
+            vm.SetSpaceAdjustViewReferences(this.SpaceAdjustOverlay, this.SpaceAdjustViewControl);
 
-            this.DataContext = new MainWindowModel();
             // 加载设置到 KnowledgeBaseModel
             AppSettingsManager.LoadSettings(KnowledgeBaseModel.Instance);
             foreach (var item in KnowledgeBaseModel.Instance.FileItems)
@@ -49,9 +53,9 @@ namespace RapidKnowledgeware
                     item.ImportBlockRule = KnowledgeBaseModel.Instance.BlockRule;
             }
 
-
             this.Closing += MainWindow_Closing;
         }
+
         private void RowDefinition_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)

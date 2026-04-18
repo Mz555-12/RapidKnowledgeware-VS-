@@ -6,16 +6,13 @@
              xmlns:local="clr-namespace:RapidKnowledgeware.Views"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="748" FontSize="15">
-    <UserControl.Resources>
-        
-    </UserControl.Resources>
     <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Horizontal" Margin="0 0 10 0">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 0 0">
                 <Label Content="当前嵌入模型："   FontWeight="Bold"/>
                 <TextBox Text="{Binding KnowledgeBaseModel.CurrentEmbeddingName, UpdateSourceTrigger=PropertyChanged}" 
@@ -31,11 +28,11 @@
             </StackPanel>
         </StackPanel>
 
-        <Button Content="添加文件" Margin="0 0 10 0" Height="30" Width="100" HorizontalAlignment="Right"
+        <Button Content="添加文件" Margin="0 0 20 0" Height="30" Width="100" HorizontalAlignment="Right"
                 Command="{Binding AddKnowledgeCommand}"/>
 
-        <Grid Grid.Row="1" Margin="0 10 0 0">
-            <ScrollViewer>
+        <Grid Grid.Row="1" Margin="0 10 10 0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding KnowledgeBaseModel.FileItems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>

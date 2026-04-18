@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RapidKnowledgeware"
         xmlns:views="clr-namespace:RapidKnowledgeware.Views"
+        xmlns:converters="clr-namespace:RapidKnowledgeware.Converters"
         mc:Ignorable="d"
         Title="RapidKnowledgeware" Height="700" Width="1000" ResizeMode="NoResize"  FontSize="13.5" FontWeight="Normal" FontFamily="Microsoft YaHei" Background="{x:Null}" WindowStyle="None" WindowStartupLocation="CenterScreen" AllowsTransparency="True">
     <Window.Resources>
@@ -12,22 +13,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="./Assets/Styles/MainWindowStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <ControlTemplate TargetType="Button" x:Key="SendMessageBtn">
-
-                <TextBlock Text="&#xe637;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="28"  Foreground="#3964fe"
-                           FontFamily="{StaticResource iconfont}" Margin="0 1.3 0 0" Name="text"/>
-
-                <ControlTemplate.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Foreground" Value="#b0c1ff" TargetName="text"/>
-                    </Trigger>
-                    <Trigger Property="IsPressed" Value="True">
-                        <Setter Property="Foreground" Value="#3964fe" TargetName="text"/>
-                    </Trigger>
-                </ControlTemplate.Triggers>
-            </ControlTemplate>
-
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+            <FrameworkElement x:Key="WindowProxy" DataContext="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
         </ResourceDictionary>
 
     </Window.Resources>
@@ -50,10 +38,10 @@
                                 <Button Template="{StaticResource ButtonTemplate}" Content="&#xe67b;" FontWeight="Bold" FontSize="19" Click="TopWindow_Click" BorderThickness="0" Background="#55DAE3EA"/>
                             </Border>
                         </Border>
-                        <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe60c;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
-                                Command="{Binding OpenSpaceParametersViewCommand}" />
+                        <!--<Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe60c;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
+                                Command="{Binding LogCommand}" />-->
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe62e;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
-                                Command="{Binding Log}"/>
+                                Command="{Binding OpenSpaceParametersViewCommand}"/>
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="Minimum_Btn" Content="&#xe650;" Click="Minimum_Click" BorderThickness="0"  FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"/>
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="CloseWindow_Btn" Content="&#xe601;" FontWeight="Bold" BorderThickness="0"  Background="#55DAE3EA"
             Command="{Binding CloseMainWindowCommand}"
@@ -80,13 +68,39 @@
                         <RowDefinition Height="60"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Button Content="开启新对话" Template="{StaticResource NewDialogueBtnStyle}"/>
+                    <Button Content="开启新对话" Command="{Binding NewSessionCommand}" Template="{StaticResource NewDialogueBtnStyle}"/>
 
-                    <!--item-->
-                    <Grid Grid.Row="1">
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Sessions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <RadioButton GroupName="ChatSessions"
+             IsChecked="{Binding IsSelected, Mode=TwoWay}"
+             Content="{Binding DisplayName}"
+             Style="{StaticResource SessionRadioButtonStyle}"
+             Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
+                                        <RadioButton.ContextMenu>
+                                            <ContextMenu>
 
-                    </Grid>
 
+
+                                                <MenuItem Header="删除" 
+                  Command="{Binding PlacementTarget.Tag.DeleteSessionCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                  CommandParameter="{Binding}"/>
+                                                <MenuItem Header="编辑" 
+Command="{Binding PlacementTarget.Tag.EditSessionCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+CommandParameter="{Binding}"/>
+                                                <Separator/>
+                                                <MenuItem Header="重命名" 
+Command="{Binding PlacementTarget.Tag.RenameSessionCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+CommandParameter="{Binding}"/>
+                                            </ContextMenu>
+                                        </RadioButton.ContextMenu>
+                                    </RadioButton>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
 
                 <!--右侧内容容器-->
@@ -96,13 +110,125 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
-                    <!--模型标识-->
-                    <TextBlock Text="{Binding MainModel.CurrentLLMName}" FontSize="14"  Margin="10 0 0 0" VerticalAlignment="Bottom" Foreground="#AAA" />
+                    <TextBlock Text="{Binding SelectedSession.SpaceParameters.ChatLLM, FallbackValue='未选择模型'}" FontSize="14" Margin="10 0 0 0" VerticalAlignment="Bottom" Foreground="#AAA"/>
 
                     <!--聊天窗口-->
-                    <Grid Grid.Row="1">
+                    <ScrollViewer Grid.Row="1" x:Name="ChatScrollViewer" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding CurrentMessages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="20,5,20,5" Background="Transparent">
+                                        <!-- 用户消息（右侧） -->
+                                        <Border Background="#95EC69" 
+                                                HorizontalAlignment="Right" 
+                                                CornerRadius="5" 
+                                                Margin="50,0,0,5"
+                                                Visibility="{Binding IsUserMessage, Converter={StaticResource BoolToVis}}">
+                                            <TextBox Text="{Binding Content}" 
+                                                     Margin="10" 
+                                                     TextWrapping="Wrap" 
+                                                     IsReadOnly="True" 
+                                                     MaxWidth="370"
+                                                     Background="Transparent" 
+                                                     BorderBrush="Transparent" 
+                                                     BorderThickness="0"/>
+                                        </Border>
 
-                    </Grid>
+                                        <!-- AI消息（左侧） -->
+                                        <Border Background="#FFFFFF" 
+                                                HorizontalAlignment="Left" 
+                                                CornerRadius="5" 
+                                                Margin="0,0,50,5"
+                                                Visibility="{Binding IsUserMessage, Converter={StaticResource InverseBoolToVis}}">
+                                            <Grid>
+                                                <StackPanel>
+                                                    <!-- 可折叠的 think 区域 -->
+                                                    <Expander x:Name="ThinkExpander" 
+                                                              Header="思考过程" 
+                                                              IsExpanded="False" 
+                                                              Margin="10,5,10,5" 
+                                                              Foreground="#7597DB" 
+                                                              Background="Transparent"
+                                                              Visibility="{Binding HasThinkContent, Converter={StaticResource BoolToVis}}">
+                                                        <TextBox Text="{Binding Content}"  
+                                                                 Margin="0,5,0,0"
+                                                                 TextWrapping="Wrap" 
+                                                                 IsReadOnly="True" 
+                                                                 Foreground="#7597DB"
+                                                                 MaxWidth="370"  
+                                                                 BorderBrush="Transparent" 
+                                                                 BorderThickness="0"/>
+                                                    </Expander>
+
+                                                    <!-- 正式回答内容 -->
+                                                    <TextBox Text="{Binding Content2}"  
+                                                             Visibility="{Binding HasMainContent, Converter={StaticResource BoolToVis}}"
+                                                             Margin="10,5,10,10" 
+                                                             TextWrapping="Wrap" 
+                                                             IsReadOnly="True" 
+                                                             MaxWidth="370"  
+                                                             BorderBrush="Transparent" 
+                                                             BorderThickness="0"/>
+                                                </StackPanel>
+
+                                                <!-- 加载动画（正在思考） -->
+                                                <Grid MinHeight="20"  
+                                                      Margin="10,5,4,0" 
+                                                      HorizontalAlignment="Left" 
+                                                      VerticalAlignment="Top"
+                                                      Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                                                    <TextBlock x:Name="scanText" 
+                                                               Text="正在思考 (๑•ㅂ•)و✧" 
+                                                               Foreground="Gray" 
+                                                               FontSize="14" 
+                                                               HorizontalAlignment="Left" 
+                                                               VerticalAlignment="Center"/>
+
+                                                    <!-- 扫光层 -->
+                                                    <TextBlock Text="正在思考 (๑" 
+                                                               FontSize="14"  
+                                                               HorizontalAlignment="Left" 
+                                                               VerticalAlignment="Center">
+                                                        <TextBlock.Foreground>
+                                                            <LinearGradientBrush x:Name="scanGradient" 
+                                                                                 StartPoint="0,0.5" 
+                                                                                 EndPoint="1,0.5">
+                                                                <GradientStop Color="Transparent" Offset="0"/>
+                                                                <GradientStop Color="Transparent" Offset="0.1"/>
+                                                                <GradientStop Color="White" Offset="0.5"/>
+                                                                <GradientStop Color="Transparent" Offset="0.9"/>
+                                                                <GradientStop Color="Transparent" Offset="1"/>
+                                                                <LinearGradientBrush.Transform>
+                                                                    <TransformGroup>
+                                                                        <TranslateTransform x:Name="scanTransform" X="-10"/>
+                                                                    </TransformGroup>
+                                                                </LinearGradientBrush.Transform>
+                                                            </LinearGradientBrush>
+                                                        </TextBlock.Foreground>
+                                                        <TextBlock.Effect>
+                                                            <BlurEffect Radius="1.5"/>
+                                                        </TextBlock.Effect>
+                                                        <TextBlock.Triggers>
+                                                            <EventTrigger RoutedEvent="TextBlock.Loaded">
+                                                                <BeginStoryboard>
+                                                                    <Storyboard RepeatBehavior="Forever">
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="scanGradient"
+                                                                            Storyboard.TargetProperty="(LinearGradientBrush.Transform).(TransformGroup.Children)[0].(TranslateTransform.X)"
+                                                                            From="-100" To="100" Duration="0:0:2"/>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </EventTrigger>
+                                                        </TextBlock.Triggers>
+                                                    </TextBlock>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
 
                     <!--发消息栏-->
                     <Grid Grid.Row="2">
@@ -112,18 +238,23 @@
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="40"/>
                                 </Grid.RowDefinitions>
-                                <TextBox Text="" FontSize="14" Padding="10 10 10 5" Background="Transparent" TextWrapping="Wrap" BorderThickness="0"/>
-
-                                <Button Grid.Row="1"  BorderThickness="0" Template="{StaticResource SendMessageBtn}" HorizontalAlignment="Right" Margin="0 0 10 0"/>
-
+                                <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}" FontSize="14" Padding="10 10 10 5" Background="Transparent" TextWrapping="Wrap" BorderThickness="0"/>
+                                <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" HorizontalAlignment="Right" Margin="0 0 10 0"
+                        Command="{Binding SendMessageCommand}"/>
                             </Grid>
                         </Border>
                     </Grid>
 
 
                     <!--SpaceAdjustView-->
-                    <Grid Grid.RowSpan="3" >
-
+                    <Grid Grid.RowSpan="3" x:Name="SpaceAdjustOverlay" Visibility="{Binding IsSpaceAdjustVisible, Converter={StaticResource BoolToVis}}">
+                        <views:SpaceAdjustView x:Name="SpaceAdjustViewControl" 
+                               DataContext="{Binding SpaceAdjustVM}"
+                               RenderTransformOrigin="0.5,0.5">
+                            <views:SpaceAdjustView.RenderTransform>
+                                <TranslateTransform X="-1000"/>
+                            </views:SpaceAdjustView.RenderTransform>
+                        </views:SpaceAdjustView>
                     </Grid>
 
                 </Grid>

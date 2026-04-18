@@ -23,6 +23,10 @@ namespace RapidKnowledgeware.Views
         public SpaceAdjustView()
         {
             InitializeComponent();
+            this.DataContextChanged += (s, e) =>
+            {
+                System.Diagnostics.Debug.WriteLine($"[SpaceAdjustView] DataContext 变为: {DataContext?.GetType().Name ?? "null"}");
+            };
         }
     }
 }

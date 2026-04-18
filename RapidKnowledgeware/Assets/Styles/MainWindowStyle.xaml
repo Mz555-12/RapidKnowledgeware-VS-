@@ -74,4 +74,43 @@
     </ControlTemplate>
 
 
+    <ControlTemplate TargetType="Button" x:Key="SendMessageBtn">
+
+        <TextBlock Text="&#xe637;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="28"  Foreground="#3964fe"
+                FontFamily="{StaticResource iconfont}" Margin="0 1.3 0 0" Name="text"/>
+
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="#b0c1ff" TargetName="text"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Foreground" Value="#3964fe" TargetName="text"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+
+    <Style x:Key="SessionRadioButtonStyle" TargetType="RadioButton">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="border" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="10,5">
+                        <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#E6F0FF"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="#3964fe"/>
+                            <Setter TargetName="border" Property="BorderThickness" Value="0,0,3,0"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#F0F0F0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
 </ResourceDictionary>
