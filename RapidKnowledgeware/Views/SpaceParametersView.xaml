@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RapidKnowledgeware.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="797">
+             d:DesignHeight="610" d:DesignWidth="1000">
 
 
     <UserControl.Resources>
@@ -33,7 +33,7 @@
                     <RadioButton  Content="知识库"  IsChecked="True" Template="{StaticResource RadioButtonTemple}" Name="btn_startPanel" Margin="0 40"
                          Command="{Binding ViewChangedCommand}"
                          CommandParameter="KnowledgeBaseView"/>
-                    <RadioButton  Content="模型设置"   Template="{StaticResource RadioButtonTemple}"  Name="btn_controlPanel" Margin="0 40"
+                    <RadioButton  Content="模型默认设置"   Template="{StaticResource RadioButtonTemple}"  Name="btn_controlPanel" Margin="0 40"
                          Command="{Binding ViewChangedCommand}"
                          CommandParameter="SpaceAdjustView"/>
                 </StackPanel>

@@ -18,9 +18,9 @@ namespace RapidKnowledgeware.Views
     /// <summary>
     /// SpaceAdjustView.xaml 的交互逻辑
     /// </summary>
-    public partial class ModelAdjustView : UserControl
+    public partial class SpaceAdjustView : UserControl
     {
-        public ModelAdjustView()
+        public SpaceAdjustView()
         {
             InitializeComponent();
         }

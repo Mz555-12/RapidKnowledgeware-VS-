@@ -12,29 +12,22 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="./Assets/Styles/MainWindowStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <ControlTemplate TargetType="Button" x:Key="NewDialogueBtnStyle">
-                <Border Name="back" 
-                 Background="White"  CornerRadius="20" Margin="20 11">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Gray" BlurRadius="10" ShadowDepth="0" Opacity="0.3" Direction="270"/>
-                    </Border.Effect>
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"  Orientation="Horizontal">
 
-                        <Label Content="&#xe8a6;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"  Foreground="Black" FontFamily="{StaticResource iconfont}" Margin="0 1.3 0 0"/>
-                        <TextBlock Text="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"  Foreground="Black" Margin="0 0 10 0"/>
-                     
-                    </StackPanel>
-                </Border>
+            <ControlTemplate TargetType="Button" x:Key="SendMessageBtn">
+
+                <TextBlock Text="&#xe637;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="28"  Foreground="#3964fe"
+                           FontFamily="{StaticResource iconfont}" Margin="0 1.3 0 0" Name="text"/>
+
                 <ControlTemplate.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="{StaticResource LightBlue}" TargetName="back"/>
-                        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlue}" TargetName="back"/>
+                        <Setter Property="Foreground" Value="#b0c1ff" TargetName="text"/>
                     </Trigger>
                     <Trigger Property="IsPressed" Value="True">
-                        <Setter Property="Background" Value="#D0E8FF" TargetName="back"/>
+                        <Setter Property="Foreground" Value="#3964fe" TargetName="text"/>
                     </Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
+
         </ResourceDictionary>
 
     </Window.Resources>
@@ -57,8 +50,10 @@
                                 <Button Template="{StaticResource ButtonTemplate}" Content="&#xe67b;" FontWeight="Bold" FontSize="19" Click="TopWindow_Click" BorderThickness="0" Background="#55DAE3EA"/>
                             </Border>
                         </Border>
+                        <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe60c;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
+                                Command="{Binding OpenSpaceParametersViewCommand}" />
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe62e;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
-                                Command="{Binding OpenSpaceParametersViewCommand}"/>
+                                Command="{Binding Log}"/>
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="Minimum_Btn" Content="&#xe650;" Click="Minimum_Click" BorderThickness="0"  FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"/>
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="CloseWindow_Btn" Content="&#xe601;" FontWeight="Bold" BorderThickness="0"  Background="#55DAE3EA"
             Command="{Binding CloseMainWindowCommand}"
@@ -78,17 +73,72 @@
                 <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Stretch" Background="#B4D6F1" ResizeBehavior="PreviousAndNext" ResizeDirection="Columns"/>
 
 
+
+                <!--左侧导航栏-->
                 <Grid Background="#f9fafb">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="60"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Button Content="开启新对话" Template="{StaticResource NewDialogueBtnStyle}"/>
+
+                    <!--item-->
+                    <Grid Grid.Row="1">
+
+                    </Grid>
+
                 </Grid>
 
+                <!--右侧内容容器-->
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <!--模型标识-->
+                    <TextBlock Text="{Binding MainModel.CurrentLLMName}" FontSize="14"  Margin="10 0 0 0" VerticalAlignment="Bottom" Foreground="#AAA" />
 
+                    <!--聊天窗口-->
+                    <Grid Grid.Row="1">
+
+                    </Grid>
+
+                    <!--发消息栏-->
+                    <Grid Grid.Row="2">
+                        <Border BorderBrush="#CCC" BorderThickness="1" CornerRadius="15" Height="110" Margin="20 10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="40"/>
+                                </Grid.RowDefinitions>
+                                <TextBox Text="" FontSize="14" Padding="10 10 10 5" Background="Transparent" TextWrapping="Wrap" BorderThickness="0"/>
+
+                                <Button Grid.Row="1"  BorderThickness="0" Template="{StaticResource SendMessageBtn}" HorizontalAlignment="Right" Margin="0 0 10 0"/>
+
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+
+                    <!--SpaceAdjustView-->
+                    <Grid Grid.RowSpan="3" >
+
+                    </Grid>
+
+                </Grid>
 
             </Grid>
+
+
+
+
+
+
+
+
+
+
             <Border Grid.Row="2" BorderBrush="#0078D7" BorderThickness="0 1 0 0">
                 <TextBlock Text="{Binding MainModel.ViewInfo}" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="13.5" Foreground="#595959" Margin="0 0 10 0"/>
             </Border>

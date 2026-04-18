@@ -49,5 +49,29 @@
         <Setter Property="BorderThickness" Value="0,0,0,1"/>
     </Style>
 
+    <ControlTemplate TargetType="Button" x:Key="NewDialogueBtnStyle">
+        <Border Name="back" 
+                 Background="White"  CornerRadius="20" Margin="20 11">
+            <Border.Effect>
+                <DropShadowEffect Color="Gray" BlurRadius="10" ShadowDepth="0" Opacity="0.3" Direction="270"/>
+            </Border.Effect>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"  Orientation="Horizontal">
+
+                <Label Content="&#xe8a6;" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"  Foreground="Black" FontFamily="{StaticResource iconfont}" Margin="0 1.3 0 0"/>
+                <TextBlock Text="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"  Foreground="Black" Margin="0 0 10 0"/>
+
+            </StackPanel>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource LightBlue}" TargetName="back"/>
+                <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlue}" TargetName="back"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="#D0E8FF" TargetName="back"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
 
 </ResourceDictionary>

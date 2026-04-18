@@ -31,12 +31,12 @@ namespace OllamaFramework.Models
         /// <summary>
         /// 温度参数，控制随机性（0.0 - 2.0），默认 0.7
         /// </summary>
-        public float Temperature { get; set; } = 0.7f;
+        public float Temperature { get; set; } = 0.3f;
 
         /// <summary>
         /// Top-P 核采样参数（0.0 - 1.0），默认 0.9
         /// </summary>
-        public float TopP { get; set; } = 0.9f;
+        public float TopP { get; set; } = 0.5f;
 
         /// <summary>
         /// 上下文窗口大小（token 数量），默认 2048
@@ -72,6 +72,6 @@ namespace OllamaFramework.Models
         /// <summary>
         /// 重复惩罚系数（可选）
         /// </summary>
-        public float? RepeatPenalty { get; set; }
+        public float? RepeatPenalty { get; set; } = 1.0f;
     }
 }

@@ -59,7 +59,7 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 }
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
-    
+
         /// <summary>
         /// 从左侧滑入（显示）
         /// </summary>
@@ -109,6 +109,37 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                     transform.BeginAnimation(TranslateTransform.XProperty, anim);
                 }
             }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+
+        /// <summary>
+        /// 立即隐藏视图（无动画），并将覆盖层容器设为 Collapsed
+        /// </summary>
+        public static void HideImmediately(FrameworkElement view, FrameworkElement overlayContainer)
+        {
+            var transform = view.RenderTransform as TranslateTransform;
+            if (transform != null)
+            {
+                // 停止任何正在进行的 X 动画
+                transform.BeginAnimation(TranslateTransform.XProperty, null);
+
+                // 获取视图当前实际宽度（如果尚未布局，则使用 Width 或 Fallback 值）
+                double width = view.ActualWidth > 0 ? view.ActualWidth : view.Width;
+                if (width <= 0 && overlayContainer != null)
+                    width = overlayContainer.ActualWidth;  // 使用容器的宽度作为参考
+
+                if (width > 0)
+                {
+                    transform.X = -width;   // 移出左侧屏幕外
+                }
+                else
+                {
+                    transform.X = -1000;    // 保底值（与 XAML 初始值一致）
+                }
+            }
+
+            overlayContainer.Visibility = Visibility.Collapsed;
+            Debug.WriteLine("[SlidingView] 视图已立即隐藏，X 偏移已重置到左侧外部");
         }
     }
 }

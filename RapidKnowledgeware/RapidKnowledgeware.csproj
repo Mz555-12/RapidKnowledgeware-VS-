@@ -163,8 +163,12 @@
     <Compile Include="Functions\SpaceParametersFunc\ViewSwitcher.cs" />
     <Compile Include="Models\KnowledgeBaseModel.cs" />
     <Compile Include="Models\MainModel.cs" />
+    <Compile Include="Models\LLMAdjustModel.cs" />
+    <Compile Include="Models\SpaceAdjustModel.cs" />
     <Compile Include="ViewModels\KnowledgeBaseViewModel.cs" />
     <Compile Include="ViewModels\MainWindowModel.cs" />
+    <Compile Include="ViewModels\LLMAdjustViewModel.cs" />
+    <Compile Include="ViewModels\SpaceAdjustViewModel.cs" />
     <Compile Include="ViewModels\SpaceParametersViewModel.cs" />
     <Compile Include="Views\FileBlockView.xaml.cs">
       <DependentUpon>FileBlockView.xaml</DependentUpon>
@@ -172,8 +176,14 @@
     <Compile Include="Views\KnowledgeBaseView.xaml.cs">
       <DependentUpon>KnowledgeBaseView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ModelAdjustView.xaml.cs">
-      <DependentUpon>ModelAdjustView.xaml</DependentUpon>
+    <Compile Include="Views\LLMAdjustView.xaml.cs">
+      <DependentUpon>LLMAdjustView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\loggingView.xaml.cs">
+      <DependentUpon>loggingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SpaceAdjustView.xaml.cs">
+      <DependentUpon>SpaceAdjustView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SpaceParametersView.xaml.cs">
       <DependentUpon>SpaceParametersView.xaml</DependentUpon>
@@ -206,7 +216,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ModelAdjustView.xaml">
+    <Page Include="Views\LLMAdjustView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\loggingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SpaceAdjustView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -251,6 +269,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Converters\" />
+    <Folder Include="Functions\LLMAdjustFunc\" />
+    <Folder Include="Functions\SpaceAdjusFunc\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets" Condition="Exists('packages\System.ValueTuple.4.6.1\build\net471\System.ValueTuple.targets')" />

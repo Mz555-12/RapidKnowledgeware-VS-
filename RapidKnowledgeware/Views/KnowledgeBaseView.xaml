@@ -6,6 +6,9 @@
              xmlns:local="clr-namespace:RapidKnowledgeware.Views"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="748" FontSize="15">
+    <UserControl.Resources>
+        
+    </UserControl.Resources>
     <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
