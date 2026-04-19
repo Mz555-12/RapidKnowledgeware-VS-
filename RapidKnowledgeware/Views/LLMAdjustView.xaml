@@ -42,7 +42,7 @@
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                             <Label Content="BaseURL："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_BaseURL}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_BaseURL}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="350" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>
                                     </StackPanel>
 

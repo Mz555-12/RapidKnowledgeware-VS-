@@ -16,14 +16,24 @@ namespace RapidKnowledgeware.Models
         public string Content
         {
             get => _content;
-            set { _content = value; RaisePropertyChanged(); }
+            set
+            {
+                _content = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(HasThinkContent));
+            }
         }
 
         private string _content2;
         public string Content2
         {
             get => _content2;
-            set { _content2 = value; RaisePropertyChanged(); }
+            set
+            {
+                _content2 = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(HasMainContent));
+            }
         }
 
         private bool _isLoading;
@@ -33,8 +43,11 @@ namespace RapidKnowledgeware.Models
             set { _isLoading = value; RaisePropertyChanged(); }
         }
 
+
+
         // 辅助属性
         public bool HasThinkContent => !string.IsNullOrEmpty(Content);
         public bool HasMainContent => !string.IsNullOrEmpty(Content2);
+        
     }
 }

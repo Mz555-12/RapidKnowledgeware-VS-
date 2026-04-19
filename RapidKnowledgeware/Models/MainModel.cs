@@ -8,6 +8,7 @@ public class MainModel : ObservableObject
     public static Border TopWindow_Border { get; set; }
     public static Button Minimum_Btn { get; set; }
     public static Button CloseWindow_Btn { get; set; }
+    public static Button OpenSpaceParametersView_Btn { get; set; }
 
 
     private string _viewInfo;

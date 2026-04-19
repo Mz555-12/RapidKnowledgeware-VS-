@@ -20,6 +20,8 @@ namespace RapidKnowledgeware.ViewModels
     {
         // ---------- 原有成员 ----------
         public MainModel MainModel { get; set; } = new MainModel();
+        private bool _isUpdatingSelection = false; // 防止递归
+
 
         private CommandBase _closeMainWindowCommand;
         public CommandBase CloseMainWindowCommand
@@ -57,13 +59,13 @@ namespace RapidKnowledgeware.ViewModels
 
                         if (!_isSpaceViewVisible)
                         {
-                            WindowControls.Show_Title();
+                            WindowControls.Hide_Title();
                             SlidingView.SlideInFromLeft(spaceView, overlay);
                             _isSpaceViewVisible = true;
                         }
                         else
                         {
-                            WindowControls.Hide_Title();
+                            WindowControls.Show_Title();
                             SlidingView.HideImmediately(spaceView, overlay);
                             AppSettingsManager.SaveSettings(KnowledgeBaseModel.Instance);
                             _isSpaceViewVisible = false;
@@ -90,14 +92,16 @@ namespace RapidKnowledgeware.ViewModels
             {
                 if (_selectedSession != value)
                 {
-                    // 取消其他会话的选中状态
+                    _isUpdatingSelection = true;
                     if (_selectedSession != null)
                         _selectedSession.IsSelected = false;
                     _selectedSession = value;
                     if (_selectedSession != null)
                         _selectedSession.IsSelected = true;
+                    _isUpdatingSelection = false;
                     RaisePropertyChanged();
                     RaisePropertyChanged(nameof(CurrentMessages));
+                    (_sendMessageCommand as CommandBase)?.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -108,7 +112,13 @@ namespace RapidKnowledgeware.ViewModels
         public string InputText
         {
             get => _inputText;
-            set { _inputText = value; RaisePropertyChanged(); }
+            set
+            {
+                _inputText = value;
+                RaisePropertyChanged();
+                // 通知发送命令刷新可用状态
+                (_sendMessageCommand as CommandBase)?.RaiseCanExecuteChanged();
+            }
         }
 
         // 右侧 SpaceAdjustView 弹出（用于编辑会话参数）
@@ -155,7 +165,7 @@ namespace RapidKnowledgeware.ViewModels
                     _sendMessageCommand = new CommandBase();
                     _sendMessageCommand.DoExecute = new Action<object>(async _ => await SendMessage());
                     _sendMessageCommand.DoCanExecute = new Func<object, bool>(_ =>
-                        !string.IsNullOrWhiteSpace(InputText) && SelectedSession != null);
+                        !string.IsNullOrWhiteSpace(InputText));
                 }
                 return _sendMessageCommand;
             }
@@ -209,10 +219,21 @@ namespace RapidKnowledgeware.ViewModels
                 SelectedSession = firstSession;
             }
             IsSpaceAdjustVisible = false;   // 确保覆盖层初始隐藏
+
+            // 订阅每个会话的属性变更，以同步 IsSelected -> SelectedSession
+            AttachSessionPropertyChanged();
+            Sessions.CollectionChanged += OnSessionsCollectionChanged;
         }
 
         private void CreateNewSession()
         {
+            // 检查当前选中会话是否有聊天记录，若没有则不允许新建
+            if (SelectedSession != null && SelectedSession.Messages.Count == 0)
+            {
+                MainWindow.SetStatusMessage($"当前“{SelectedSession.DisplayName}”为空，请先发送消息再新建对话");
+                return;
+            }
+
             string baseName = "对话";
 
             // 找出最小的未使用编号
@@ -229,7 +250,7 @@ namespace RapidKnowledgeware.ViewModels
                 DisplayName = newName,
                 SpaceParameters = LLMAdjustService.CreateSpaceParametersFromDefault()
             };
-            Sessions.Add(newSession);
+            Sessions.Insert(0, newSession);
             SelectedSession = newSession;
             SaveSessions();
             MainWindow.SetStatusMessage($"已创建新会话：{newName}");
@@ -237,7 +258,12 @@ namespace RapidKnowledgeware.ViewModels
 
         private async System.Threading.Tasks.Task SendMessage()
         {
-            if (SelectedSession == null) return;
+            // 如果没有选中任何会话，自动新建一个
+            if (SelectedSession == null)
+            {
+                CreateNewSession();
+            }
+
             var userInput = InputText;
             InputText = "";
 
@@ -270,7 +296,7 @@ namespace RapidKnowledgeware.ViewModels
         {
             Debug.WriteLine("[ShowSpaceAdjustView] 开始显示");
             if (_spaceAdjustOverlay == null || _spaceAdjustViewControl == null) return;
-            WindowControls.Show_Title();
+            WindowControls.Hide_Title(0);
             SlidingView.SlideInFromLeft(_spaceAdjustViewControl, _spaceAdjustOverlay);
             IsSpaceAdjustVisible = true;
             Debug.WriteLine($"[ShowSpaceAdjustView] Visibility={_spaceAdjustOverlay.Visibility}");
@@ -281,7 +307,7 @@ namespace RapidKnowledgeware.ViewModels
             Debug.WriteLine($"[HideSpaceAdjustView] 调用堆栈: {Environment.StackTrace}");
             Debug.WriteLine("[HideSpaceAdjustView] 开始隐藏");
             if (_spaceAdjustOverlay == null || _spaceAdjustViewControl == null) return;
-            WindowControls.Hide_Title();
+            WindowControls.Show_Title();
             SlidingView.HideImmediately(_spaceAdjustViewControl, _spaceAdjustOverlay);
             IsSpaceAdjustVisible = false;
             SaveSessions();
@@ -431,6 +457,49 @@ namespace RapidKnowledgeware.ViewModels
             Debug.WriteLine($"[Rename] 会话重命名为: {newName}");
             MainWindow.SetStatusMessage($"已将“{oldName}”重命名为“{newName}”");
         }
+
+        private void OnSessionsCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (ChatSessionModel session in e.NewItems)
+                {
+                    session.PropertyChanged += OnSessionPropertyChanged;
+                }
+            }
+            if (e.OldItems != null)
+            {
+                foreach (ChatSessionModel session in e.OldItems)
+                {
+                    session.PropertyChanged -= OnSessionPropertyChanged;
+                }
+            }
+        }
+
+        private void AttachSessionPropertyChanged()
+        {
+            foreach (var session in Sessions)
+            {
+                session.PropertyChanged += OnSessionPropertyChanged;
+            }
+        }
+
+        private void OnSessionPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (_isUpdatingSelection) return;
+            if (e.PropertyName == nameof(ChatSessionModel.IsSelected))
+            {
+                var session = sender as ChatSessionModel;
+                if (session != null && session.IsSelected && SelectedSession != session)
+                {
+                    _isUpdatingSelection = true;
+                    SelectedSession = session;
+                    _isUpdatingSelection = false;
+                }
+            }
+        }
+
+      
 
 
     }

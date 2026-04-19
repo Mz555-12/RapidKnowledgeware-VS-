@@ -40,7 +40,7 @@
                         </Border>
                         <!--<Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe60c;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
                                 Command="{Binding LogCommand}" />-->
-                        <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe62e;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
+                        <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="OpenSpaceParametersView_Btn" Content="&#xe62e;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
                                 Command="{Binding OpenSpaceParametersViewCommand}"/>
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="Minimum_Btn" Content="&#xe650;" Click="Minimum_Click" BorderThickness="0"  FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"/>
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="CloseWindow_Btn" Content="&#xe601;" FontWeight="Bold" BorderThickness="0"  Background="#55DAE3EA"
@@ -75,14 +75,12 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <RadioButton GroupName="ChatSessions"
-             IsChecked="{Binding IsSelected, Mode=TwoWay}"
+             IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
              Content="{Binding DisplayName}"
              Style="{StaticResource SessionRadioButtonStyle}"
              Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
                                         <RadioButton.ContextMenu>
                                             <ContextMenu>
-
-
 
                                                 <MenuItem Header="删除" 
                   Command="{Binding PlacementTarget.Tag.DeleteSessionCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -104,16 +102,17 @@ CommandParameter="{Binding}"/>
                 </Grid>
 
                 <!--右侧内容容器-->
-                <Grid Grid.Column="2">
+                <Grid Grid.Column="2" Background="#f9fafb">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="25"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     <TextBlock Text="{Binding SelectedSession.SpaceParameters.ChatLLM, FallbackValue='未选择模型'}" FontSize="14" Margin="10 0 0 0" VerticalAlignment="Bottom" Foreground="#AAA"/>
+                    <TextBlock Text="{Binding SelectedSession.DisplayName, FallbackValue='未选择对话'}" FontSize="14" Margin="10 0 0 0" VerticalAlignment="Bottom" Foreground="#AAA" HorizontalAlignment="Center"/>
 
                     <!--聊天窗口-->
-                    <ScrollViewer Grid.Row="1" x:Name="ChatScrollViewer" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="1" x:Name="ChatScrollViewer" VerticalScrollBarVisibility="Auto"  Margin="0 10 0 0">
                         <ItemsControl ItemsSource="{Binding CurrentMessages}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -238,8 +237,14 @@ CommandParameter="{Binding}"/>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="40"/>
                                 </Grid.RowDefinitions>
-                                <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}" FontSize="14" Padding="10 10 10 5" Background="Transparent" TextWrapping="Wrap" BorderThickness="0"/>
-                                <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" HorizontalAlignment="Right" Margin="0 0 10 0"
+                                <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}" 
+         FontSize="14" Padding="10 10 10 5" Background="Transparent" 
+         TextWrapping="Wrap" BorderThickness="0" AcceptsReturn="True">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Modifiers="Ctrl" Command="{Binding SendMessageCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" HorizontalAlignment="Right" Margin="0 0 10 0" 
                         Command="{Binding SendMessageCommand}"/>
                             </Grid>
                         </Border>
@@ -247,7 +252,7 @@ CommandParameter="{Binding}"/>
 
 
                     <!--SpaceAdjustView-->
-                    <Grid Grid.RowSpan="3" x:Name="SpaceAdjustOverlay" Visibility="{Binding IsSpaceAdjustVisible, Converter={StaticResource BoolToVis}}">
+                    <Grid Grid.RowSpan="3" x:Name="SpaceAdjustOverlay" Visibility="{Binding IsSpaceAdjustVisible, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
                         <views:SpaceAdjustView x:Name="SpaceAdjustViewControl" 
                                DataContext="{Binding SpaceAdjustVM}"
                                RenderTransformOrigin="0.5,0.5">

@@ -25,8 +25,7 @@ namespace RapidKnowledgeware
     public partial class MainWindow : Window
     {
         private bool is_top = false;
-
-        // ✅ 正确写法：直接返回自动生成的私有字段（字段名与 x:Name 一致）
+        private static System.Windows.Threading.DispatcherTimer _statusTimer;
 
 
         public MainWindow()
@@ -36,6 +35,8 @@ namespace RapidKnowledgeware
             MainModel.CloseWindow_Btn = this.CloseWindow_Btn;
             MainModel.TopWindow_Border = this.TopWindow_Border;
             MainModel.Minimum_Btn = this.Minimum_Btn;
+            MainModel.OpenSpaceParametersView_Btn = this.OpenSpaceParametersView_Btn;
+
 
             var vm = new MainWindowModel();
             this.DataContext = vm;
@@ -94,7 +95,39 @@ namespace RapidKnowledgeware
                     if (vm != null)
                         vm.MainModel.ViewInfo = message;
                 }
+
+                // 重置定时器：5秒后清空状态信息
+                if (_statusTimer == null)
+                {
+                    _statusTimer = new System.Windows.Threading.DispatcherTimer();
+                    _statusTimer.Interval = TimeSpan.FromSeconds(5);
+                    _statusTimer.Tick += (s, e) =>
+                    {
+                        _statusTimer.Stop();
+                        var win = Application.Current.MainWindow as MainWindow;
+                        if (win != null)
+                        {
+                            var viewModel = win.DataContext as MainWindowModel;
+                            if (viewModel != null)
+                                viewModel.MainModel.ViewInfo = string.Empty;
+                        }
+                    };
+                }
+                else
+                {
+                    _statusTimer.Stop();
+                }
+                _statusTimer.Start();
             });
+        }
+
+        public static void ScrollChatToEnd()
+        {
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var mainWin = Application.Current.MainWindow as MainWindow;
+                mainWin?.ChatScrollViewer?.ScrollToEnd();
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
 
