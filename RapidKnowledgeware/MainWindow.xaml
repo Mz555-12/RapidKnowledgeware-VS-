@@ -230,22 +230,85 @@ CommandParameter="{Binding}"/>
                     </ScrollViewer>
 
                     <!--发消息栏-->
-                    <Grid Grid.Row="2">
+                    <!-- 动态区域：覆盖 Grid.Row="1" 和 Grid.Row="2"，根据是否有消息切换布局 -->
+                    <!-- 无消息时的居中布局（覆盖聊天区域） -->
+                    <Grid Grid.Row="1" Grid.RowSpan="2" Visibility="{Binding HasMessages, Converter={StaticResource InverseBoolToVis}}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="{Binding GreetingText}" 
+                                   FontSize="24" FontWeight="Bold" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                   Foreground="#333" Margin="0 0 0 20"/>
+                        <Border Grid.Row="1" BorderBrush="#CCC" BorderThickness="1" CornerRadius="15" 
+                                Height="110" Width="500" HorizontalAlignment="Center">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="40"/>
+                                </Grid.RowDefinitions>
+                                <Grid>
+                                    <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}" 
+                                             FontSize="14" Padding="10 10 10 5" Background="Transparent" 
+                                             TextWrapping="Wrap" BorderThickness="0" AcceptsReturn="True"
+                                             x:Name="CenterInputBox"
+                                             TextChanged="InputBox_TextChanged"
+                                             VerticalScrollBarVisibility="Auto">
+                                        <TextBox.InputBindings>
+                                            <KeyBinding Key="Enter" Modifiers="Ctrl" Command="{Binding SendMessageCommand}" />
+                                        </TextBox.InputBindings>
+                                    </TextBox>
+                                    <TextBlock Text="Ctrl+Enter 发送" 
+                                               FontSize="14" 
+                                               Foreground="#AAA" 
+                                               FontStyle="Italic"
+                                               HorizontalAlignment="Left" 
+                                               VerticalAlignment="Top"
+                                               Margin="12,10,0,0"
+                                               IsHitTestVisible="False"
+                                               Visibility="{Binding ElementName=CenterInputBox, Path=IsKeyboardFocused, Converter={StaticResource InverseBoolToVis}}"/>
+                                </Grid>
+                                <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                        HorizontalAlignment="Right" Margin="0 0 10 0" 
+                                        Command="{Binding SendMessageCommand}"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- 有消息时的底部布局（原位置） -->
+                    <Grid Grid.Row="2" Visibility="{Binding HasMessages, Converter={StaticResource BoolToVis}}">
                         <Border BorderBrush="#CCC" BorderThickness="1" CornerRadius="15" Height="110" Margin="20 10">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="40"/>
                                 </Grid.RowDefinitions>
-                                <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}" 
-         FontSize="14" Padding="10 10 10 5" Background="Transparent" 
-         TextWrapping="Wrap" BorderThickness="0" AcceptsReturn="True">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding Key="Enter" Modifiers="Ctrl" Command="{Binding SendMessageCommand}" />
-                                    </TextBox.InputBindings>
-                                </TextBox>
-                                <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" HorizontalAlignment="Right" Margin="0 0 10 0" 
-                        Command="{Binding SendMessageCommand}"/>
+                                <Grid>
+                                    <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}" 
+                                                 FontSize="14" Padding="10 10 10 0" Background="Transparent" 
+                                                 TextWrapping="Wrap" BorderThickness="0" AcceptsReturn="True"
+                                                 x:Name="BottomInputBox"
+                                                 TextChanged="InputBox_TextChanged"
+                                                 VerticalScrollBarVisibility="Auto" Margin="0 0 0 10">
+                                        <TextBox.InputBindings>
+                                            <KeyBinding Key="Enter" Modifiers="Ctrl" Command="{Binding SendMessageCommand}" />
+                                        </TextBox.InputBindings>
+                                    </TextBox>
+                                    <TextBlock Text="Ctrl+Enter 发送" 
+                                                   FontSize="14" 
+                                                   Foreground="#AAA" 
+                                                   FontStyle="Italic"
+                                                   HorizontalAlignment="Left" 
+                                                   VerticalAlignment="Top"
+                                                   Margin="12,10,0,0"
+                                                   IsHitTestVisible="False"
+                                                   Visibility="{Binding ElementName=BottomInputBox, Path=IsKeyboardFocused, Converter={StaticResource InverseBoolToVis}}"/>
+                                </Grid>
+                                <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                        HorizontalAlignment="Right" Margin="0 0 10 0" 
+                                        Command="{Binding SendMessageCommand}"/>
                             </Grid>
                         </Border>
                     </Grid>

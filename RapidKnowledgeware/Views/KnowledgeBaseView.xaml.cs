@@ -24,7 +24,9 @@ namespace RapidKnowledgeware.Views
         public KnowledgeBaseView()
         {
             InitializeComponent();
-            this.DataContext = KnowledgeBaseViewModel.Instance;
+            var vm = KnowledgeBaseViewModel.Instance;
+            this.DataContext = vm;
+            vm.SetKnowledgeBaseView(this);   // 传递视图引用，使服务层能够操作覆盖层动画
         }
     }
 }

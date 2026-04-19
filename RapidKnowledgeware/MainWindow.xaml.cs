@@ -4,6 +4,7 @@ using RapidKnowledgeware.ViewModels;
 using RapidKnowledgeware.Views;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -55,6 +56,14 @@ namespace RapidKnowledgeware
             }
 
             this.Closing += MainWindow_Closing;
+
+
+            // 后台预热 RagService，避免首次调用时的冷启动延迟
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                var instance = RapidKnowledgeware.Functions.KnowledgeBaseFunc.KnowledgeBaseService.RagServiceInstance;
+                Debug.WriteLine($"[MainWindow] RagService 预热完成，索引块数: {instance.IndexedChunkCount}");
+            });
         }
 
         private void RowDefinition_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -127,6 +136,47 @@ namespace RapidKnowledgeware
             {
                 var mainWin = Application.Current.MainWindow as MainWindow;
                 mainWin?.ChatScrollViewer?.ScrollToEnd();
+            }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+
+        /// <summary>
+        /// 输入框文本变化时动态调整父 Border 高度（带滞后避免频繁跳动）
+        /// </summary>
+        /// <summary>
+        /// 输入框文本变化时动态调整父 Border 高度（检测滚动条是否出现）
+        /// </summary>
+        private void InputBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var textBox = sender as TextBox;
+            if (textBox == null) return;
+
+            // 向上查找父 Border
+            DependencyObject parent = VisualTreeHelper.GetParent(textBox);
+            while (parent != null && !(parent is Border))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            var border = parent as Border;
+            if (border == null) return;
+
+            // 延迟执行确保布局更新
+            textBox.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                textBox.UpdateLayout();
+
+                // 获取滚动条是否可见：ExtentHeight > ViewportHeight 表示内容超出
+                bool scrollBarVisible = textBox.ExtentHeight > textBox.ViewportHeight;
+                double neededHeight = textBox.ExtentHeight;
+
+                if (border.Height == 110 && scrollBarVisible)
+                {
+                    border.Height = 260;
+                }
+                else if (border.Height == 260 && neededHeight < 50)
+                {
+                    border.Height = 110;
+                }
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
 

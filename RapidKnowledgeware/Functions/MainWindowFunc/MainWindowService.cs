@@ -52,9 +52,19 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
         public void CreateNewSession()
         {
             // 检查当前选中会话是否有聊天记录，若没有则不允许新建
-            if (_viewModel.SelectedSession != null && _viewModel.SelectedSession.Messages.Count == 0)
+            var latestSession = _viewModel.Sessions.FirstOrDefault();
+            if (latestSession != null && latestSession.Messages.Count == 0)
             {
-                MainWindow.SetStatusMessage($"当前“{_viewModel.SelectedSession.DisplayName}”为空，请先发送消息再新建对话");
+                // 如果当前选中的不是该空会话，则跳转过去
+                if (_viewModel.SelectedSession != latestSession)
+                {
+                    _viewModel.SelectedSession = latestSession;
+                    MainWindow.SetStatusMessage($"已切换到空会话“{latestSession.DisplayName}”");
+                }
+                else
+                {
+                    MainWindow.SetStatusMessage($"“{latestSession.DisplayName}”无聊天记录，请先发送消息再新建对话");
+                }
                 return;
             }
 
@@ -96,6 +106,7 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
 
             _currentChatService = new ChatService(_viewModel.SelectedSession);
             await _currentChatService.SendMessageAsync(userInput, token => { /* UI 已自动更新 */ });
+            _viewModel.RefreshUIAssistProperties();   // 消息已添加，刷新界面
             SaveSessions();
         }
 
@@ -159,6 +170,7 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 MainWindow.SetStatusMessage($"已删除会话：{deletedName}");
             }
 
+            _viewModel.RefreshUIAssistProperties();
             SaveSessions();
             Debug.WriteLine($"[Delete] 已删除会话: {deletedName}");
         }
@@ -333,6 +345,40 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 }
             }
         }
+
+        #endregion
+
+        #region UI 辅助状态
+
+        /// <summary>
+        /// 获取当前选中会话是否有消息（用于控制输入框位置）
+        /// </summary>
+        public bool HasMessages => _viewModel.SelectedSession != null && _viewModel.SelectedSession.Messages.Count > 0;
+
+        /// <summary>
+        /// 根据当前时间生成问候语
+        /// </summary>
+        public string GreetingText => GetGreetingByTime();
+
+        /// <summary>
+        /// 根据当前时间获取问候语
+        /// </summary>
+        private string GetGreetingByTime()
+        {
+            int hour = DateTime.Now.Hour;
+            if (hour >= 5 && hour < 12)
+                return "早上好，有什么需要帮助的嘛？";
+            else if (hour >= 12 && hour < 14)
+                return "中午好，有什么需要帮助的嘛？";
+            else if (hour >= 14 && hour < 18)
+                return "下午好，有什么需要帮助的嘛？";
+            else if (hour >= 18 && hour < 24)
+                return "晚上好，有什么需要帮助的嘛？";
+            else
+                return "凌晨好，有什么需要帮助的嘛？";
+        }
+
+        
 
         #endregion
     }

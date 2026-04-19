@@ -22,7 +22,15 @@ namespace RapidKnowledgeware.ViewModels
         public MainModel MainModel { get; set; } = new MainModel();
         private MainWindowService _service;
 
+        /// <summary>
+        /// 当前会话是否有消息（委托给 Service）
+        /// </summary>
+        public bool HasMessages => _service.HasMessages;
 
+        /// <summary>
+        /// 根据时间生成的问候语（委托给 Service）
+        /// </summary>
+        public string GreetingText => _service.GreetingText;
 
         // ---------- 构造函数 ----------
         public MainWindowModel()
@@ -127,6 +135,8 @@ namespace RapidKnowledgeware.ViewModels
                         _selectedSession.IsSelected = true;
                     RaisePropertyChanged();
                     RaisePropertyChanged(nameof(CurrentMessages));
+                    RaisePropertyChanged(nameof(HasMessages));      // 添加：切换会话时刷新输入框位置
+                    RaisePropertyChanged(nameof(GreetingText));    // 添加：切换会话时刷新问候语
                     (_sendMessageCommand as CommandBase)?.RaiseCanExecuteChanged();
                 }
             }
@@ -290,6 +300,12 @@ namespace RapidKnowledgeware.ViewModels
         public void OnWindowClosing()
         {
             _service.SaveAllSettings();
+        }
+
+        public void RefreshUIAssistProperties()
+        {
+            RaisePropertyChanged(nameof(HasMessages));
+            RaisePropertyChanged(nameof(GreetingText));
         }
     }
 }

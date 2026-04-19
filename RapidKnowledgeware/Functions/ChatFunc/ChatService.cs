@@ -75,6 +75,13 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                 });
                 Debug.WriteLine($"[ChatService] 已添加用户消息到会话: {_session.DisplayName}");
                 MainWindow.ScrollChatToEnd();
+
+                // 立即刷新输入框布局（居中→底部）
+                var mainWin = Application.Current.MainWindow as MainWindow;
+                if (mainWin?.DataContext is RapidKnowledgeware.ViewModels.MainWindowModel vm)
+                {
+                    vm.RefreshUIAssistProperties();
+                }
             });
 
             var aiMessage = new ChatMessageModel
@@ -90,20 +97,18 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                 Debug.WriteLine("[ChatService] 已添加AI消息占位符");
             });
 
-            // ---------- RAG 检索 ----------
+            // ---------- RAG 检索（工业级优化版）----------
             string augmentedPrompt = userInput;
             try
             {
-                var ragService = new RagService(
-                    ollamaEndpoint: LLMAdjustFunc.LLMAdjustService.Current.Default_BaseURL,
-                    embeddingModel: KnowledgeBaseModel.Instance.CurrentEmbeddingName
-                );
-                ragService.LoadIndex();
+                // 直接获取全局单例，避免重复加载索引和初始化客户端
+                var ragService = KnowledgeBaseFunc.KnowledgeBaseService.RagServiceInstance;
 
                 if (ragService.IndexedChunkCount > 0)
                 {
                     Debug.WriteLine($"[ChatService] RAG 索引中有 {ragService.IndexedChunkCount} 个块，开始检索...");
-                    var retrieved = await ragService.RetrieveAsync(userInput, topK: 3, minSimilarity: 0.3f);
+                    // 提高相似度阈值到 0.5f，减少检索数量到 2，压缩提示词长度
+                    var retrieved = await ragService.RetrieveAsync(userInput, topK: 10, minSimilarity: 0.6f);
                     Debug.WriteLine($"[ChatService] 检索到 {retrieved.Count} 个相关块，最高相似度: {retrieved.FirstOrDefault().Similarity}");
 
                     if (retrieved.Count > 0)

@@ -17,8 +17,8 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         public KnowledgeBaseService(KnowledgeBaseModel model)
         {
             _model = model;
-            _ragService = new RagService(ollamaEndpoint: "http://localhost:11434",embeddingModel: _model.CurrentEmbeddingName
-);
+            _ragService = RagServiceInstance;  // 使用全局单例
+            
             _ragService.LoadIndex();
         }
 
@@ -202,6 +202,34 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
             // 需要在 RagService 中添加 RemoveChunkBySourceAndIndex 方法
             _ragService.RemoveChunkBySourceAndIndex(filePath, chunkIndex);
             _ragService.SaveIndex();
+        }
+
+        private static RagService _ragServiceInstance;
+        private static readonly object _ragServiceLock = new object();
+
+        /// <summary>
+        /// 获取全局唯一的 RagService 单例实例（线程安全，延迟初始化）
+        /// </summary>
+        public static RagService RagServiceInstance
+        {
+            get
+            {
+                if (_ragServiceInstance == null)
+                {
+                    lock (_ragServiceLock)
+                    {
+                        if (_ragServiceInstance == null)
+                        {
+                            _ragServiceInstance = new RagService(
+                                ollamaEndpoint: LLMAdjustFunc.LLMAdjustService.Current.Default_BaseURL,
+                                embeddingModel: KnowledgeBaseModel.Instance.CurrentEmbeddingName
+                            );
+                            _ragServiceInstance.LoadIndex();
+                        }
+                    }
+                }
+                return _ragServiceInstance;
+            }
         }
     }
 }
