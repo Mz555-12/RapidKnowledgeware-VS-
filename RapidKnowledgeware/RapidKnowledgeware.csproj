@@ -160,8 +160,10 @@
     <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="Functions\ChatFunc\ChatService.cs" />
     <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseService.cs" />
+    <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseUIService.cs" />
     <Compile Include="Functions\LLMAdjustFunc\LLMAdjustService.cs" />
     <Compile Include="Functions\MainWindowFunc\AppSettingsManager.cs" />
+    <Compile Include="Functions\MainWindowFunc\MainWindowService.cs" />
     <Compile Include="Functions\MainWindowFunc\WindowControls.cs" />
     <Compile Include="Functions\MainWindowFunc\SlidingView.cs" />
     <Compile Include="Functions\SpaceAdjusFunc\SpaceAdjustService.cs" />

@@ -8,9 +8,15 @@ using System.Linq;
 
 namespace RapidKnowledgeware.Models
 {
+    /// <summary>
+    /// 知识库数据模型（单例）
+    /// </summary>
     public class KnowledgeBaseModel : ObservableObject
     {
         private string _currentEmbeddingName = "bge-m3:567m";
+        /// <summary>
+        /// 当前使用的嵌入模型名称
+        /// </summary>
         public string CurrentEmbeddingName
         {
             get => _currentEmbeddingName;
@@ -18,6 +24,9 @@ namespace RapidKnowledgeware.Models
         }
 
         private string _blockRule = "###";
+        /// <summary>
+        /// 全局分块规则（多个分隔符用英文逗号分隔）
+        /// </summary>
         public string BlockRule
         {
             get => _blockRule;
@@ -25,22 +34,29 @@ namespace RapidKnowledgeware.Models
         }
 
         private string _fileBlockContent;
+        /// <summary>
+        /// 文件分块内容（用于预览）
+        /// </summary>
         public string FileBlockContent
         {
             get => _fileBlockContent;
             set { _fileBlockContent = value; RaisePropertyChanged(); }
         }
 
-        // 文件列表
         private ObservableCollection<KnowledgeFileItem> _fileItems = new ObservableCollection<KnowledgeFileItem>();
+        /// <summary>
+        /// 知识库文件列表
+        /// </summary>
         public ObservableCollection<KnowledgeFileItem> FileItems
         {
             get => _fileItems;
             set { _fileItems = value; RaisePropertyChanged(); }
         }
 
-        // 单例模式保持（若需要全局共享，已有Instance；但可能ViewModel中直接new Model即可，看你设计）
         private static KnowledgeBaseModel _instance;
+        /// <summary>
+        /// 知识库模型单例实例
+        /// </summary>
         public static KnowledgeBaseModel Instance
         {
             get
@@ -52,14 +68,19 @@ namespace RapidKnowledgeware.Models
         }
 
         private ObservableCollection<FileChunkItem> _fileBlocks = new ObservableCollection<FileChunkItem>();
+        /// <summary>
+        /// 当前查看的文件分块列表
+        /// </summary>
         public ObservableCollection<FileChunkItem> FileBlocks
         {
             get => _fileBlocks;
             set { _fileBlocks = value; RaisePropertyChanged(); }
         }
 
-
         private string _currentFileName;
+        /// <summary>
+        /// 当前查看的文件名称
+        /// </summary>
         public string CurrentFileName
         {
             get => _currentFileName;
@@ -67,6 +88,9 @@ namespace RapidKnowledgeware.Models
         }
 
         private string _currentFileBlockRule;
+        /// <summary>
+        /// 当前查看文件的分块规则
+        /// </summary>
         public string CurrentFileBlockRule
         {
             get => _currentFileBlockRule;
@@ -74,13 +98,30 @@ namespace RapidKnowledgeware.Models
         }
     }
 
+    /// <summary>
+    /// 知识库文件项
+    /// </summary>
     public class KnowledgeFileItem : ObservableObject
     {
+        /// <summary>
+        /// 文件完整路径
+        /// </summary>
         public string FilePath { get; set; }
+
+        /// <summary>
+        /// 文件名（不含路径）
+        /// </summary>
         public string FileName => System.IO.Path.GetFileName(FilePath);
+
+        /// <summary>
+        /// 分块数量
+        /// </summary>
         public int ChunkCount { get; set; } = 0;
 
         private bool _isIndexed;
+        /// <summary>
+        /// 是否已索引
+        /// </summary>
         public bool IsIndexed
         {
             get => _isIndexed;
@@ -88,14 +129,19 @@ namespace RapidKnowledgeware.Models
         }
 
         private HashSet<int> _deletedChunkIndices = new HashSet<int>();
+        /// <summary>
+        /// 已删除的分块索引集合
+        /// </summary>
         public HashSet<int> DeletedChunkIndices
         {
             get => _deletedChunkIndices;
             set { _deletedChunkIndices = value; RaisePropertyChanged(); }
         }
 
-
         private string _importBlockRule;
+        /// <summary>
+        /// 导入时使用的分块规则
+        /// </summary>
         public string ImportBlockRule
         {
             get => _importBlockRule;
@@ -103,9 +149,15 @@ namespace RapidKnowledgeware.Models
         }
     }
 
+    /// <summary>
+    /// 文件分块项（用于显示）
+    /// </summary>
     public class FileChunkItem : ObservableObject
     {
         private string _content;
+        /// <summary>
+        /// 分块文本内容
+        /// </summary>
         public string Content
         {
             get => _content;
@@ -113,6 +165,9 @@ namespace RapidKnowledgeware.Models
         }
 
         private int _originalIndex;
+        /// <summary>
+        /// 原始分块索引（0-based）
+        /// </summary>
         public int OriginalIndex
         {
             get => _originalIndex;

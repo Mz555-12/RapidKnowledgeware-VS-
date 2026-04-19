@@ -94,7 +94,7 @@
                             <Label Content="查询模式默认拒绝响应:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
                         <Border  MinHeight="70"  Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray">
                                 <TextBox Text="{Binding LLMAdjustModel.Default_RefusalResponse}" BorderThickness="0" Padding="5" Background="Transparent"  Margin="0 5"
-                         VerticalContentAlignment="Top" HorizontalContentAlignment="Left" TextWrapping="Wrap" />
+                         VerticalContentAlignment="Top" HorizontalContentAlignment="Left" TextWrapping="Wrap" AcceptsReturn="True"/>
                         </Border>
                     </StackPanel>
                 </Grid>
@@ -104,7 +104,7 @@
                             <Label Content="系统默认提示词:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
                         <Border   Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray">
                                 <TextBox Text="{Binding LLMAdjustModel.Default_SystemPrompt}" BorderThickness="0" Padding="5" Background="Transparent" Margin="0 5"
-                         TextWrapping="Wrap" MinHeight="150"/>
+                         TextWrapping="Wrap" MinHeight="150" AcceptsReturn="True"/>
                         </Border>
                     </StackPanel>
                 </Grid>

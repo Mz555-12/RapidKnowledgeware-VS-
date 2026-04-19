@@ -1,31 +1,24 @@
 ﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using RapidKnowledgeware.Base;
 using RapidKnowledgeware.Functions.KnowledgeBaseFunc;
-using RapidKnowledgeware.Functions.MainWindowFunc;
 using RapidKnowledgeware.Models;
 using RapidKnowledgeware.Views;
 using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace RapidKnowledgeware.ViewModels
 {
     public class KnowledgeBaseViewModel : ViewModelBase
     {
         public KnowledgeBaseModel KnowledgeBaseModel { get; set; } = KnowledgeBaseModel.Instance;
-        private readonly KnowledgeBaseService _service;
+        private readonly KnowledgeBaseUIService _uiService;
 
         private static KnowledgeBaseViewModel _instance;
         public static KnowledgeBaseViewModel Instance => _instance ?? (_instance = new KnowledgeBaseViewModel());
 
-        private KnowledgeFileItem _currentDisplayedFile;
-
-
         private bool _hasMultipleChunks;
+        /// <summary>
+        /// 是否包含多个分块（用于 UI 控制）
+        /// </summary>
         public bool HasMultipleChunks
         {
             get => _hasMultipleChunks;
@@ -34,194 +27,131 @@ namespace RapidKnowledgeware.ViewModels
 
         private KnowledgeBaseViewModel()
         {
-            _service = new KnowledgeBaseService(KnowledgeBaseModel);
-
-            // 命令初始化
-            AddKnowledgeCommand = new RelayCommand(AddKnowledgeExecute);
-            ViewFileBlocksCommand = new RelayCommand<KnowledgeFileItem>(ViewFileBlocksExecute);
-            DeleteFileCommand = new RelayCommand<KnowledgeFileItem>(DeleteFileExecute);
-            CloseFileBlockViewCommand = new RelayCommand(CloseFileBlockViewExecute);
-            DeleteChunkCommand = new RelayCommand<FileChunkItem>(DeleteChunkExecute);
+            _uiService = new KnowledgeBaseUIService(KnowledgeBaseModel);
         }
 
-        public ICommand AddKnowledgeCommand { get; }
-        public ICommand ViewFileBlocksCommand { get; }
-        public ICommand DeleteFileCommand { get; }
-        public ICommand CloseFileBlockViewCommand { get; }
-        public ICommand DeleteChunkCommand { get; }
-
-        private async void AddKnowledgeExecute()
+        /// <summary>
+        /// 设置知识库视图引用（由 KnowledgeBaseView 在加载时调用）
+        /// </summary>
+        /// <param name="view">KnowledgeBaseView 实例</param>
+        public void SetKnowledgeBaseView(KnowledgeBaseView view)
         {
-            if (string.IsNullOrWhiteSpace(KnowledgeBaseModel.BlockRule))
-            {
-                MessageBox.Show("分块规则不能为空，请先填写规则。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            _uiService.SetKnowledgeBaseView(view);
+        }
 
-            var dialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Filter = "文本文件|*.txt|所有文件|*.*",
-                Multiselect = true
-            };
+        #region 命令定义
 
-            if (dialog.ShowDialog() == true && dialog.FileNames.Length > 0)
+        /// <summary>
+        /// 添加知识文件命令
+        /// </summary>
+        private CommandBase _addKnowledgeCommand;
+        public CommandBase AddKnowledgeCommand
+        {
+            get
             {
-                var selectedFiles = dialog.FileNames;
-                var existingFiles = selectedFiles.Where(f => KnowledgeBaseModel.FileItems.Any(item => item.FilePath == f)).ToList();
-
-                if (existingFiles.Any())
+                if (_addKnowledgeCommand == null)
                 {
-                    string msg = $"以下文件已存在于知识库中：\n{string.Join("\n", existingFiles.Select(System.IO.Path.GetFileName))}\n\n是否覆盖这些文件？";
-                    var result = MessageBox.Show(msg, "文件已存在", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes)
+                    _addKnowledgeCommand = new CommandBase();
+                    _addKnowledgeCommand.DoExecute = new Action<object>(async _ =>
                     {
-                        // 移除所有重复项
-                        foreach (var file in existingFiles)
-                        {
-                            var item = KnowledgeBaseModel.FileItems.First(f => f.FilePath == file);
-                            KnowledgeBaseModel.FileItems.Remove(item);
-                            _service.RemoveFileFromIndex(item.FilePath);
-                        }
-                        // 全部重新索引
-                    }
-                    else
-                    {
-                        // 用户选择不覆盖，则从待处理列表中排除重复文件
-                        selectedFiles = selectedFiles.Except(existingFiles).ToArray();
-                        if (selectedFiles.Length == 0)
-                            return;
-                    }
+                        await _uiService.AddKnowledgeAsync();
+                    });
                 }
+                return _addKnowledgeCommand;
+            }
+        }
 
-                WindowControls.Show_Loading();
-                MainWindow.SetStatusMessage($"开始索引 {selectedFiles.Length} 个文件...");
-
-                var progress = new Progress<(string FileName, bool Success, int ChunkCount, string ErrorMessage)>(report =>
+        /// <summary>
+        /// 查看文件分块命令
+        /// </summary>
+        private CommandBase _viewFileBlocksCommand;
+        public CommandBase ViewFileBlocksCommand
+        {
+            get
+            {
+                if (_viewFileBlocksCommand == null)
                 {
-                    if (report.Success)
-                        MainWindow.SetStatusMessage($"✓ {report.FileName} 索引完成，{report.ChunkCount} 个块");
-                    else
-                        MainWindow.SetStatusMessage($"✗ {report.FileName} 索引失败: {report.ErrorMessage}");
-                });
-
-                int successCount = await _service.IndexFilesAsync(selectedFiles, progress);
-
-                MainWindow.SetStatusMessage($"批量索引完成：成功 {successCount}/{selectedFiles.Length} 个文件。");
-                AppSettingsManager.SaveSettings(KnowledgeBaseModel);
-                WindowControls.Hide_Loading();
+                    _viewFileBlocksCommand = new CommandBase();
+                    _viewFileBlocksCommand.DoExecute = new Action<object>(async param =>
+                    {
+                        if (param is KnowledgeFileItem item)
+                        {
+                            await _uiService.ViewFileBlocksAsync(item);
+                            HasMultipleChunks = _uiService.HasMultipleChunks;
+                        }
+                    });
+                }
+                return _viewFileBlocksCommand;
             }
         }
 
-        private async void ViewFileBlocksExecute(KnowledgeFileItem item)
+        /// <summary>
+        /// 删除文件命令
+        /// </summary>
+        private CommandBase _deleteFileCommand;
+        public CommandBase DeleteFileCommand
         {
-            if (item == null) return;
-            try
+            get
             {
-                MainWindow.SetStatusMessage($"正在加载分块内容: {item.FileName}...");
-                _currentDisplayedFile = item;
-
-                var chunks = await _service.LoadFileChunksAsync(item);
-                KnowledgeBaseModel.FileBlocks.Clear();
-                foreach (var c in chunks)
-                    KnowledgeBaseModel.FileBlocks.Add(c);
-
-                ShowFileBlockOverlay();
-                HasMultipleChunks = KnowledgeBaseModel.FileBlocks.Count > 1;
-
-                KnowledgeBaseModel.CurrentFileName = item.FileName;
-                KnowledgeBaseModel.CurrentFileBlockRule = string.IsNullOrEmpty(item.ImportBlockRule)
-                    ? KnowledgeBaseModel.BlockRule
-                    : item.ImportBlockRule;
-
-
-                MainWindow.SetStatusMessage($"已加载 {item.FileName} 的分块，共 {chunks.Count} 个块");
-            }
-            catch (Exception ex)
-            {
-                MainWindow.SetStatusMessage($"加载分块失败: {ex.Message}");
+                if (_deleteFileCommand == null)
+                {
+                    _deleteFileCommand = new CommandBase();
+                    _deleteFileCommand.DoExecute = new Action<object>(async param =>
+                    {
+                        if (param is KnowledgeFileItem item)
+                        {
+                            await _uiService.DeleteFileAsync(item);
+                        }
+                    });
+                }
+                return _deleteFileCommand;
             }
         }
 
-        private async void DeleteFileExecute(KnowledgeFileItem item)
+        /// <summary>
+        /// 关闭文件块视图命令
+        /// </summary>
+        private CommandBase _closeFileBlockViewCommand;
+        public CommandBase CloseFileBlockViewCommand
         {
-            if (item == null) return;
-            var result = MessageBox.Show($"确定删除文件 {item.FileName} 及其索引吗？", "确认删除", MessageBoxButton.YesNo);
-            if (result == MessageBoxResult.Yes)
+            get
             {
-                WindowControls.Show_Loading();
-
-                // 立即从 UI 列表移除
-                KnowledgeBaseModel.FileItems.Remove(item);
-                AppSettingsManager.SaveSettings(KnowledgeBaseModel);
-
-                // 从内存索引中移除并保存（瞬间完成）
-                _service.RemoveFileFromIndex(item.FilePath);
-
-                // 保证动画至少显示 0.5 秒
-                await Task.Delay(500);
-
-                MainWindow.SetStatusMessage($"已删除文件 {item.FileName}");
-                WindowControls.Hide_Loading();
+                if (_closeFileBlockViewCommand == null)
+                {
+                    _closeFileBlockViewCommand = new CommandBase();
+                    _closeFileBlockViewCommand.DoExecute = new Action<object>(_ =>
+                    {
+                        _uiService.CloseFileBlockOverlay();
+                    });
+                }
+                return _closeFileBlockViewCommand;
             }
         }
 
-        private async void DeleteChunkExecute(FileChunkItem chunkItem)
+        /// <summary>
+        /// 删除分块命令
+        /// </summary>
+        private CommandBase _deleteChunkCommand;
+        public CommandBase DeleteChunkCommand
         {
-            if (_currentDisplayedFile == null || chunkItem == null) return;
-            var result = MessageBox.Show($"确定删除该块吗？", "确认删除", MessageBoxButton.YesNo);
-            if (result != MessageBoxResult.Yes) return;
-
-            WindowControls.Show_Loading();
-
-            _currentDisplayedFile.DeletedChunkIndices.Add(chunkItem.OriginalIndex);
-            _service.RemoveChunkAndSave(_currentDisplayedFile.FilePath, chunkItem.OriginalIndex);
-            _service.RefreshDisplayedChunks(_currentDisplayedFile);
-
-            HasMultipleChunks = KnowledgeBaseModel.FileBlocks.Count > 1;
-            AppSettingsManager.SaveSettings(KnowledgeBaseModel);
-
-            await Task.Delay(500);  // 同样保证动画最短显示时间
-            MainWindow.SetStatusMessage($"已删除块（原索引 {chunkItem.OriginalIndex}）");
-            WindowControls.Hide_Loading();
-        }
-
-        private void CloseFileBlockViewExecute()
-        {
-            var knowledgeView = GetKnowledgeBaseView();
-            if (knowledgeView != null)
+            get
             {
-                var overlay = knowledgeView.FindName("FileBlockOverlay") as Grid;
-                var fileBlockView = knowledgeView.FindName("FileBlockViewControl") as FileBlockView;
-                SlidingView.SlideUpToTop(fileBlockView, overlay);
-            }
-            KnowledgeBaseModel.CurrentFileName = string.Empty;
-            KnowledgeBaseModel.CurrentFileBlockRule = string.Empty;
-            AppSettingsManager.SaveSettings(KnowledgeBaseModel);
-
-        }
-
-        private void ShowFileBlockOverlay()
-        {
-            var knowledgeView = GetKnowledgeBaseView();
-            if (knowledgeView != null)
-            {
-                var overlay = knowledgeView.FindName("FileBlockOverlay") as Grid;
-                var fileBlockView = knowledgeView.FindName("FileBlockViewControl") as FileBlockView;
-                SlidingView.SlideDownToBottom(fileBlockView, overlay);
+                if (_deleteChunkCommand == null)
+                {
+                    _deleteChunkCommand = new CommandBase();
+                    _deleteChunkCommand.DoExecute = new Action<object>(async param =>
+                    {
+                        if (param is FileChunkItem chunkItem)
+                        {
+                            await _uiService.DeleteChunkAsync(chunkItem);
+                            HasMultipleChunks = _uiService.HasMultipleChunks;
+                        }
+                    });
+                }
+                return _deleteChunkCommand;
             }
         }
 
-        private KnowledgeBaseView GetKnowledgeBaseView()
-        {
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            var spaceView = mainWindow?.FindName("SpaceView") as SpaceParametersView;
-            if (spaceView != null)
-            {
-                var container = spaceView.FindName("ViewContainer") as ContentControl;
-                if (container?.Content is KnowledgeBaseView kbView)
-                    return kbView;
-            }
-            return null;
-        }
+        #endregion
     }
 }

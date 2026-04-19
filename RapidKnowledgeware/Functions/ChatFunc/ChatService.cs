@@ -11,17 +11,27 @@ using System.Windows;
 
 namespace RapidKnowledgeware.Functions.ChatFunc
 {
+    /// <summary>
+    /// 聊天服务类，负责处理消息发送、LLM 调用、RAG 检索和流式响应
+    /// </summary>
     public class ChatService
     {
         private readonly ChatSessionModel _session;
         private ContentOut _llmService;
         private CancellationTokenSource _cts;
 
+        /// <summary>
+        /// 初始化聊天服务
+        /// </summary>
+        /// <param name="session">关联的聊天会话</param>
         public ChatService(ChatSessionModel session)
         {
             _session = session;
         }
 
+        /// <summary>
+        /// 确保 LLM 服务已初始化，使用会话专属参数和全局默认配置
+        /// </summary>
         private void EnsureLLMService()
         {
             Debug.WriteLine($"[ChatService] EnsureLLMService 开始，会话: {_session.DisplayName}");
@@ -42,6 +52,11 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             Debug.WriteLine("[ChatService] LLM服务初始化完成");
         }
 
+        /// <summary>
+        /// 发送用户消息并获取 AI 流式响应（支持 RAG 检索增强）
+        /// </summary>
+        /// <param name="userInput">用户输入内容</param>
+        /// <param name="onTokenReceived">每收到一个 token 时的回调</param>
         public async Task SendMessageAsync(string userInput, Action<string> onTokenReceived)
         {
             Debug.WriteLine($"[ChatService] SendMessageAsync 开始，输入: {userInput}");
@@ -59,7 +74,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     Content = userInput
                 });
                 Debug.WriteLine($"[ChatService] 已添加用户消息到会话: {_session.DisplayName}");
-                MainWindow.ScrollChatToEnd();  
+                MainWindow.ScrollChatToEnd();
             });
 
             var aiMessage = new ChatMessageModel
@@ -75,7 +90,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                 Debug.WriteLine("[ChatService] 已添加AI消息占位符");
             });
 
-            // ---------- 新增：RAG 检索 ----------
+            // ---------- RAG 检索 ----------
             string augmentedPrompt = userInput;
             try
             {
@@ -200,6 +215,9 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             }
         }
 
+        /// <summary>
+        /// 停止当前正在生成的 AI 响应
+        /// </summary>
         public void StopGeneration()
         {
             _cts?.Cancel();

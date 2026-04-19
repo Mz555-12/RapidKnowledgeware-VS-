@@ -319,8 +319,9 @@ public class RagService
         _indexedChunks.AddRange(chunks);
     }
 
-
-
+    /// <summary>
+    /// 保存当前索引到文件
+    /// </summary>
     public void SaveIndex()
     {
         try
@@ -343,6 +344,9 @@ public class RagService
         }
     }
 
+    /// <summary>
+    /// 从文件加载索引
+    /// </summary>
     public void LoadIndex()
     {
         if (!File.Exists(IndexFilePath)) return;
@@ -364,12 +368,16 @@ public class RagService
         }
     }
 
+    /// <summary>
+    /// 移除指定文件的特定索引块
+    /// </summary>
+    /// <param name="filePath">源文件路径</param>
+    /// <param name="chunkIndex">分块索引</param>
     public void RemoveChunkBySourceAndIndex(string filePath, int chunkIndex)
     {
         _indexedChunks.RemoveAll(c =>
             c.Metadata["source"]?.ToString() == filePath &&
             Convert.ToInt32(c.Metadata["chunk_index"]) == chunkIndex);
     }
-
 
 }

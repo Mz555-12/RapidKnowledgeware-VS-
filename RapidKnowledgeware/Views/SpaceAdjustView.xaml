@@ -79,7 +79,7 @@
                         <Label Content="查询模式拒绝响应:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
                         <Border  MinHeight="70"  Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray" MaxHeight="100">
                             <TextBox Text="{Binding SpaceAdjustModel.QueryRefusalResponse}" BorderThickness="0" Padding="5" Background="Transparent"  Margin="0 5"
-                         VerticalContentAlignment="Top" HorizontalContentAlignment="Left" TextWrapping="Wrap" />
+                         VerticalContentAlignment="Top" HorizontalContentAlignment="Left" TextWrapping="Wrap"  AcceptsReturn="True"/>
                         </Border>
                     </StackPanel>
                 </Grid>
@@ -88,7 +88,7 @@
                         <Label Content="系统提示词:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
                         <Border   Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray">
                             <TextBox Text="{Binding SpaceAdjustModel.SystemPrompt}" BorderThickness="0" Padding="5" Background="Transparent" Margin="0 5"
-                         TextWrapping="Wrap" MinHeight="150"/>
+                         TextWrapping="Wrap" MinHeight="150" AcceptsReturn="True"/>
                         </Border>
                     </StackPanel>
                 </Grid>
