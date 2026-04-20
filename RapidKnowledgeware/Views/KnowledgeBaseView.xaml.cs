@@ -1,18 +1,5 @@
 ﻿using RapidKnowledgeware.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace RapidKnowledgeware.Views
 {
@@ -26,7 +13,8 @@ namespace RapidKnowledgeware.Views
             InitializeComponent();
             var vm = KnowledgeBaseViewModel.Instance;
             this.DataContext = vm;
-            vm.SetKnowledgeBaseView(this);   // 传递视图引用，使服务层能够操作覆盖层动画
+            vm.SetKnowledgeBaseView(this);
+            vm.SetSlidingViewContainers(FuncViewContainer, SearchViewContainer, FuncView, SearchView);
         }
     }
 }

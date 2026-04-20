@@ -159,6 +159,7 @@
     <Compile Include="Base\CommandBase.cs" />
     <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="Functions\ChatFunc\ChatService.cs" />
+    <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseSearchService.cs" />
     <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseService.cs" />
     <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseUIService.cs" />
     <Compile Include="Functions\LLMAdjustFunc\LLMAdjustService.cs" />
@@ -181,6 +182,12 @@
     <Compile Include="ViewModels\SpaceParametersViewModel.cs" />
     <Compile Include="Views\FileBlockView.xaml.cs">
       <DependentUpon>FileBlockView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\HelperView\KnowledgeBaseFuncView.xaml.cs">
+      <DependentUpon>KnowledgeBaseFuncView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\HelperView\KnowledgeBaseSearchView.xaml.cs">
+      <DependentUpon>KnowledgeBaseSearchView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\KnowledgeBaseView.xaml.cs">
       <DependentUpon>KnowledgeBaseView.xaml</DependentUpon>
@@ -222,6 +229,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\FileBlockView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\HelperView\KnowledgeBaseFuncView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\HelperView\KnowledgeBaseSearchView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

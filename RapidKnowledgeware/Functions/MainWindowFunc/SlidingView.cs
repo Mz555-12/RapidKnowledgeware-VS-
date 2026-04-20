@@ -6,140 +6,235 @@ using System.Windows.Media.Animation;
 
 namespace RapidKnowledgeware.Functions.MainWindowFunc
 {
+    /// <summary>
+    /// 提供视图滑动动画（支持上、下、左、右方向），自动处理 TranslateTransform 和布局尺寸
+    /// </summary>
     public static class SlidingView
     {
+        private const double AnimationDurationMs = 350;
+        private static readonly IEasingFunction DefaultEase = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+
         /// <summary>
-        /// 从顶部滑落到底部（显示）
+        /// 获取或创建视图的 TranslateTransform，并确保其被设置为 RenderTransform
+        /// </summary>
+        private static TranslateTransform EnsureTranslateTransform(FrameworkElement view)
+        {
+            var transform = view.RenderTransform as TranslateTransform;
+            if (transform == null)
+            {
+                transform = new TranslateTransform();
+                view.RenderTransform = transform;
+                view.RenderTransformOrigin = new Point(0.5, 0.5);
+            }
+            return transform;
+        }
+
+        /// <summary>
+        /// 安全获取视图的实际宽度（布局后），若为 0 则强制更新布局并测量
+        /// </summary>
+        private static double GetActualWidth(FrameworkElement view)
+        {
+            view.UpdateLayout();
+            double width = view.ActualWidth;
+            if (width <= 0)
+            {
+                view.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                width = view.DesiredSize.Width;
+            }
+            return width;
+        }
+
+        /// <summary>
+        /// 安全获取视图的实际高度（布局后），若为 0 则强制更新布局并测量
+        /// </summary>
+        private static double GetActualHeight(FrameworkElement view)
+        {
+            view.UpdateLayout();
+            double height = view.ActualHeight;
+            if (height <= 0)
+            {
+                view.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                height = view.DesiredSize.Height;
+            }
+            return height;
+        }
+
+        /// <summary>
+        /// 执行水平方向的平移动画（从 from 到 to）
+        /// </summary>
+        private static void AnimateX(TranslateTransform transform, double from, double to, Action onCompleted = null)
+        {
+            // 停止当前 X 动画，避免冲突
+            transform.BeginAnimation(TranslateTransform.XProperty, null);
+            transform.X = from;
+
+            var anim = new DoubleAnimation(to, TimeSpan.FromMilliseconds(AnimationDurationMs))
+            {
+                EasingFunction = DefaultEase
+            };
+            if (onCompleted != null)
+                anim.Completed += (s, e) => onCompleted();
+
+            transform.BeginAnimation(TranslateTransform.XProperty, anim);
+        }
+
+        /// <summary>
+        /// 执行垂直方向的平移动画（从 from 到 to）
+        /// </summary>
+        private static void AnimateY(TranslateTransform transform, double from, double to, Action onCompleted = null)
+        {
+            transform.BeginAnimation(TranslateTransform.YProperty, null);
+            transform.Y = from;
+
+            var anim = new DoubleAnimation(to, TimeSpan.FromMilliseconds(AnimationDurationMs))
+            {
+                EasingFunction = DefaultEase
+            };
+            if (onCompleted != null)
+                anim.Completed += (s, e) => onCompleted();
+
+            transform.BeginAnimation(TranslateTransform.YProperty, anim);
+        }
+
+        /// <summary>
+        /// 从顶部滑落到底部（显示），先显示容器，再将视图从 -height 滑动到 0
         /// </summary>
         public static void SlideDownToBottom(FrameworkElement view, FrameworkElement overlayContainer)
         {
+            if (view == null || overlayContainer == null) return;
             overlayContainer.Visibility = Visibility.Visible;
-            var transform = view.RenderTransform as TranslateTransform;
-            if (transform == null) return;
 
-            // 确保在布局完成后启动动画
             view.Dispatcher.BeginInvoke(new Action(() =>
             {
-                double height = view.ActualHeight;
-                if (height > 0)
-                {
-                    transform.Y = -height;
-                    var anim = new DoubleAnimation(0, TimeSpan.FromMilliseconds(350))
-                    {
-                        EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-                    };
-                    transform.BeginAnimation(TranslateTransform.YProperty, anim);
-                }
+                var transform = EnsureTranslateTransform(view);
+                double height = GetActualHeight(view);
+                if (height <= 0) return;
+
+                AnimateY(transform, -height, 0);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         /// <summary>
-        /// 从底部滑回到顶部（隐藏），完成后将容器设为 Collapsed
+        /// 从底部滑回到顶部（隐藏），完成后隐藏容器
         /// </summary>
         public static void SlideUpToTop(FrameworkElement view, FrameworkElement overlayContainer)
         {
-            var transform = view.RenderTransform as TranslateTransform;
-            if (transform == null) return;
+            if (view == null || overlayContainer == null) return;
 
             view.Dispatcher.BeginInvoke(new Action(() =>
             {
-                double height = view.ActualHeight;
-                if (height > 0)
+                var transform = EnsureTranslateTransform(view);
+                double height = GetActualHeight(view);
+                if (height <= 0) return;
+
+                AnimateY(transform, 0, -height, () =>
                 {
-                    var anim = new DoubleAnimation(-height, TimeSpan.FromMilliseconds(350))
-                    {
-                        EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-                    };
-                    anim.Completed += (s, e) =>
-                    {
-                        overlayContainer.Visibility = Visibility.Collapsed;
-                        Debug.WriteLine("[SlidingView] 滑回完成，容器已隐藏");
-                    };
-                    transform.BeginAnimation(TranslateTransform.YProperty, anim);
-                }
+                    overlayContainer.Visibility = Visibility.Collapsed;
+                    Debug.WriteLine("[SlidingView] 向上滑回完成，容器已隐藏");
+                });
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         /// <summary>
-        /// 从左侧滑入（显示）
+        /// 从左侧滑入（显示），先显示容器，再将视图从 -width 滑动到 0
         /// </summary>
         public static void SlideInFromLeft(FrameworkElement view, FrameworkElement overlayContainer)
         {
+            if (view == null || overlayContainer == null) return;
             overlayContainer.Visibility = Visibility.Visible;
-            var transform = view.RenderTransform as TranslateTransform;
-            if (transform == null) return;
 
             view.Dispatcher.BeginInvoke(new Action(() =>
             {
-                double width = view.ActualWidth;
-                if (width > 0)
-                {
-                    transform.X = -width;
-                    var anim = new DoubleAnimation(0, TimeSpan.FromMilliseconds(350))
-                    {
-                        EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-                    };
-                    transform.BeginAnimation(TranslateTransform.XProperty, anim);
-                }
+                var transform = EnsureTranslateTransform(view);
+                double width = GetActualWidth(view);
+                if (width <= 0) return;
+
+                AnimateX(transform, -width, 0);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         /// <summary>
-        /// 向右侧滑出（隐藏），完成后将容器设为 Collapsed
+        /// 向左侧滑出（隐藏），注意：方法名虽为 SlideOutToRight，但实际行为是向左滑出（-width）
+        /// 这是为了保持与旧代码兼容，完成后隐藏容器
         /// </summary>
         public static void SlideOutToRight(FrameworkElement view, FrameworkElement overlayContainer)
         {
-            var transform = view.RenderTransform as TranslateTransform;
-            if (transform == null) return;
+            if (view == null || overlayContainer == null) return;
 
             view.Dispatcher.BeginInvoke(new Action(() =>
             {
-                double width = view.ActualWidth;
-                if (width > 0)
+                var transform = EnsureTranslateTransform(view);
+                double width = GetActualWidth(view);
+                if (width <= 0) return;
+
+                AnimateX(transform, 0, -width, () =>
                 {
-                    var anim = new DoubleAnimation(-width, TimeSpan.FromMilliseconds(350))
-                    {
-                        EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-                    };
-                    anim.Completed += (s, e) =>
-                    {
-                        overlayContainer.Visibility = Visibility.Collapsed;
-                        Debug.WriteLine("[SlidingView] 向右滑出完成，容器已隐藏");
-                    };
-                    transform.BeginAnimation(TranslateTransform.XProperty, anim);
-                }
+                    overlayContainer.Visibility = Visibility.Collapsed;
+                    Debug.WriteLine("[SlidingView] 向左滑出完成，容器已隐藏");
+                });
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
-
         /// <summary>
-        /// 立即隐藏视图（无动画），并将覆盖层容器设为 Collapsed
+        /// 立即隐藏视图（无动画），并将容器设为 Collapsed
         /// </summary>
         public static void HideImmediately(FrameworkElement view, FrameworkElement overlayContainer)
         {
-            var transform = view.RenderTransform as TranslateTransform;
-            if (transform != null)
-            {
-                // 停止任何正在进行的 X 动画
-                transform.BeginAnimation(TranslateTransform.XProperty, null);
+            if (view == null || overlayContainer == null) return;
 
-                // 获取视图当前实际宽度（如果尚未布局，则使用 Width 或 Fallback 值）
-                double width = view.ActualWidth > 0 ? view.ActualWidth : view.Width;
-                if (width <= 0 && overlayContainer != null)
-                    width = overlayContainer.ActualWidth;  // 使用容器的宽度作为参考
+            var transform = EnsureTranslateTransform(view);
+            // 停止任何正在进行的动画
+            transform.BeginAnimation(TranslateTransform.XProperty, null);
+            transform.BeginAnimation(TranslateTransform.YProperty, null);
 
-                if (width > 0)
-                {
-                    transform.X = -width;   // 移出左侧屏幕外
-                }
-                else
-                {
-                    transform.X = -1000;    // 保底值（与 XAML 初始值一致）
-                }
-            }
+            // 将视图移出屏幕（根据现有方向优先处理 X 偏移）
+            double width = GetActualWidth(view);
+            if (width > 0)
+                transform.X = -width;
+            else
+                transform.X = -1000; // 保底偏移
 
             overlayContainer.Visibility = Visibility.Collapsed;
-            Debug.WriteLine("[SlidingView] 视图已立即隐藏，X 偏移已重置到左侧外部");
+            Debug.WriteLine("[SlidingView] 视图已立即隐藏，X 偏移重置到左侧外部");
+        }
+
+        /// <summary>
+        /// 向右侧滑出（隐藏），完成后隐藏容器。这是真正的向右滑出（+width）
+        /// </summary>
+        public static void SlideOutToRight2(FrameworkElement view, FrameworkElement overlayContainer)
+        {
+            if (view == null || overlayContainer == null) return;
+
+            view.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var transform = EnsureTranslateTransform(view);
+                double width = GetActualWidth(view);
+                if (width <= 0) return;
+
+                AnimateX(transform, 0, width, () =>
+                {
+                    overlayContainer.Visibility = Visibility.Collapsed;
+                    Debug.WriteLine("[SlidingView] 向右滑出完成，容器已隐藏");
+                });
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        /// <summary>
+        /// 从右侧滑入（显示），先显示容器，再将视图从 +width 滑动到 0
+        /// </summary>
+        public static void SlideInFromRight(FrameworkElement view, FrameworkElement overlayContainer)
+        {
+            if (view == null || overlayContainer == null) return;
+            overlayContainer.Visibility = Visibility.Visible;
+
+            view.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var transform = EnsureTranslateTransform(view);
+                double width = GetActualWidth(view);
+                if (width <= 0) return;
+
+                AnimateX(transform, width, 0);
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
     }
 }

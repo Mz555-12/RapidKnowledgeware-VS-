@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="RapidKnowledgeware.Views.HelperView.KnowledgeBaseSearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RapidKnowledgeware.Views.HelperView"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="748">
+    <Grid Background="White">
+        <StackPanel Margin="0 0 10 0">
+            <Grid Margin="10 25 10 0">
+                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
+                    <StackPanel>
+                        <!-- 搜索输入框和按钮 -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBox Width="300" 
+                                     Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,10,0"
+                                     VerticalContentAlignment="Center"/>
+                            <Button Content="搜索" 
+                                    Width="80" 
+                                    Height="30"
+                                    Command="{Binding SearchCommand}"/>
+                        </StackPanel>
+
+                        <!-- 分页控件（仅搜索视图显示） -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                            <Button Content="◀ 上一页" 
+                                    Width="70" 
+                                    Margin="5"
+                                    Command="{Binding PreviousPageCommand}"
+                                    IsEnabled="{Binding HasPreviousPage}"/>
+                            <TextBlock VerticalAlignment="Center" Margin="10,0">
+                                <Run Text="第 "/>
+                                <Run Text="{Binding CurrentPage, Mode=OneWay}"/>
+                                <Run Text=" 页 / 共 "/>
+                                <Run Text="{Binding TotalPages, Mode=OneWay}"/>
+                                <Run Text=" 页"/>
+                            </TextBlock>
+                            <Button Content="下一页 ▶" 
+                                    Width="70" 
+                                    Margin="5"
+                                    Command="{Binding NextPageCommand}"
+                                    IsEnabled="{Binding HasNextPage}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Label Content="搜索" Margin="20,-10,0,0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" 
+                       Padding="15,0" Background="White" Foreground="#666"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

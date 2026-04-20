@@ -13,6 +13,21 @@ namespace RapidKnowledgeware.Models
     /// </summary>
     public class KnowledgeBaseModel : ObservableObject
     {
+        private static KnowledgeBaseModel _instance;
+        /// <summary>
+        /// 知识库模型单例实例
+        /// </summary>
+        public static KnowledgeBaseModel Instance
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = new KnowledgeBaseModel();
+                return _instance;
+            }
+        }
+        private KnowledgeBaseModel() { }
+
         private string _currentEmbeddingName = "bge-m3:567m";
         /// <summary>
         /// 当前使用的嵌入模型名称
@@ -31,6 +46,26 @@ namespace RapidKnowledgeware.Models
         {
             get => _blockRule;
             set { _blockRule = value; RaisePropertyChanged(); }
+        }
+
+        private int _SearchQuantity = 10;
+        /// <summary>
+        /// 全局分块规则（多个分隔符用英文逗号分隔）
+        /// </summary>
+        public int SearchQuantity
+        {
+            get => _SearchQuantity;
+            set { _SearchQuantity = value; RaisePropertyChanged(); }
+        }
+
+        private float _IndexSimilarityThreshold = 0.6f;
+        /// <summary>
+        /// 全局分块规则（多个分隔符用英文逗号分隔）
+        /// </summary>
+        public float IndexSimilarityThreshold
+        {
+            get => _IndexSimilarityThreshold;
+            set { _IndexSimilarityThreshold = value; RaisePropertyChanged(); }
         }
 
         private string _fileBlockContent;
@@ -53,19 +88,7 @@ namespace RapidKnowledgeware.Models
             set { _fileItems = value; RaisePropertyChanged(); }
         }
 
-        private static KnowledgeBaseModel _instance;
-        /// <summary>
-        /// 知识库模型单例实例
-        /// </summary>
-        public static KnowledgeBaseModel Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new KnowledgeBaseModel();
-                return _instance;
-            }
-        }
+
 
         private ObservableCollection<FileChunkItem> _fileBlocks = new ObservableCollection<FileChunkItem>();
         /// <summary>

@@ -4,36 +4,26 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RapidKnowledgeware.Views"
+             xmlns:helper="clr-namespace:RapidKnowledgeware.Views.HelperView"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="748" FontSize="15">
-    <Grid Background="Transparent">
+    <Grid Background="White">
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="110"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Margin="0 0 10 0">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 0 0">
-                <Label Content="当前嵌入模型："   FontWeight="Bold"/>
-                <TextBox Text="{Binding KnowledgeBaseModel.CurrentEmbeddingName, UpdateSourceTrigger=PropertyChanged}" 
-                         Margin="0 0 5 0" MinWidth="50" MaxWidth="185" BorderThickness="0 0 0 1" Padding="10 0" 
-                         VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-            </StackPanel>
-            <!--多个分隔符请用英文逗号分隔，例如：###,##-->
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Label Content="分块规则："   FontWeight="Bold"/>
-                <TextBox Text="{Binding KnowledgeBaseModel.BlockRule, UpdateSourceTrigger=PropertyChanged}" 
-                         Margin="0 0 0 0" MinWidth="50"  MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0"  
-                         VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-            </StackPanel>
-        </StackPanel>
+        <!-- 标题栏：包含切换按钮 -->
+        <Border Grid.Row="0" Background="#F0F0F0" BorderBrush="#AAA" BorderThickness="0 0 0 1">
+            <Button Content="{Binding SwitchViewButtonText}" Height="30" Width="120" HorizontalAlignment="Left" Margin="15 0 0 0"
+                    Command="{Binding SwitchViewCommand}"/>
+        </Border>
 
-        <Button Content="添加文件" Margin="0 0 20 0" Height="30" Width="100" HorizontalAlignment="Right"
-                Command="{Binding AddKnowledgeCommand}"/>
-
-        <Grid Grid.Row="1" Margin="0 10 10 0">
+        <!-- 原有文件列表（保留） -->
+        <Grid Grid.Row="2" Margin="10 10 10 0">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding KnowledgeBaseModel.FileItems}">
+                <ItemsControl ItemsSource="{Binding DisplayFileItems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="#DDD" BorderThickness="0 0 0 1" Padding="5" Margin="0 10 0 0">
@@ -42,13 +32,10 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <!-- 文件名按钮，点击查看分块 -->
-                                    <Button Content="{Binding FileName}" 
-                                            Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" 
+                                    <Button Content="{Binding FileName}" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" 
                                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                                             Command="{Binding DataContext.ViewFileBlocksCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"/>
-                                    <!-- 删除按钮 -->
                                     <Button Grid.Column="1" Content="删除" Width="40" Margin="5 0"
                                             Command="{Binding DataContext.DeleteFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"/>
@@ -59,9 +46,32 @@
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
+        <!-- 滑动视图容器：覆盖设置面板和文件列表区域 -->
+        <Grid Grid.Row="1"  Background="Transparent">
+            <!-- 知识库功能视图容器（默认显示） -->
+            <Grid x:Name="FuncViewContainer" Visibility="Visible" Background="Transparent">
+                <helper:KnowledgeBaseFuncView x:Name="FuncView"    
+                                              RenderTransformOrigin="0.5,0.5">
+                    <helper:KnowledgeBaseFuncView.RenderTransform>
+                        <TranslateTransform X="0"/>
+                    </helper:KnowledgeBaseFuncView.RenderTransform>
+                </helper:KnowledgeBaseFuncView>
+            </Grid>
+
+            <!-- 搜索视图容器（默认隐藏于右侧外部） -->
+            <Grid x:Name="SearchViewContainer" Visibility="Collapsed" Background="Transparent">
+                <helper:KnowledgeBaseSearchView x:Name="SearchView" 
+                                                RenderTransformOrigin="0.5,0.5">
+                    <helper:KnowledgeBaseSearchView.RenderTransform>
+                        <TranslateTransform X="748"/>
+                        <!-- 初始置于右侧外部，宽度与容器一致 -->
+                    </helper:KnowledgeBaseSearchView.RenderTransform>
+                </helper:KnowledgeBaseSearchView>
+            </Grid>
+        </Grid>
 
         <!-- 浮层显示 FileBlockView，从上滑下 -->
-        <Grid x:Name="FileBlockOverlay" Grid.RowSpan="2" Visibility="Collapsed" Background="Transparent" Margin="0 0 0 5">
+        <Grid x:Name="FileBlockOverlay" Grid.RowSpan="3" Visibility="Collapsed" Background="Transparent" Margin="0 0 0 5">
             <local:FileBlockView x:Name="FileBlockViewControl" Width="802" Height="602"
                                  HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                  RenderTransformOrigin="0.5,0.5">

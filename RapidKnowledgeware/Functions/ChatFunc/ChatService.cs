@@ -111,7 +111,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     {
                         Debug.WriteLine($"[ChatService] RAG 索引中有 {ragService.IndexedChunkCount} 个块，开始检索...");
                         // 提高相似度阈值到 0.5f，减少检索数量到 2，压缩提示词长度
-                        var retrieved = await ragService.RetrieveAsync(userInput, topK: 10, minSimilarity: 0.6f);
+                        var retrieved = await ragService.RetrieveAsync(userInput, topK: KnowledgeBaseModel.Instance.SearchQuantity, minSimilarity: KnowledgeBaseModel.Instance.IndexSimilarityThreshold);
                         Debug.WriteLine($"[ChatService] 检索到 {retrieved.Count} 个相关块，最高相似度: {retrieved.FirstOrDefault().Similarity}");
 
                         if (retrieved.Count > 0)
