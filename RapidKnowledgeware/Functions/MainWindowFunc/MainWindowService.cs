@@ -122,7 +122,9 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 Debug.WriteLine("[Edit] 参数无效");
                 return;
             }
-            Debug.WriteLine($"[Edit] 编辑会话: {session.DisplayName}");
+            Debug.WriteLine($"[Edit] 编辑会话: {session.DisplayName}，IsLinkKnowledgeBase = {session.SpaceParameters.IsLinkKnowledgeBase}");
+
+            // 直接使用内存中的会话对象创建 ViewModel，无需从磁盘重新加载（避免覆盖内存中的最新状态）
             _viewModel.SelectedSession = session;
             _viewModel.SpaceAdjustVM = new SpaceAdjustViewModel(session, _viewModel.CloseSpaceAdjustCommand);
             ShowSpaceAdjustView();

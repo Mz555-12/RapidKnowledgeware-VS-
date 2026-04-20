@@ -99,36 +99,44 @@ namespace RapidKnowledgeware.Functions.ChatFunc
 
             // ---------- RAG 检索（工业级优化版）----------
             string augmentedPrompt = userInput;
-            try
+            // 仅当会话开启知识库对接时才执行检索
+            if (_session.SpaceParameters.IsLinkKnowledgeBase)
             {
-                // 直接获取全局单例，避免重复加载索引和初始化客户端
-                var ragService = KnowledgeBaseFunc.KnowledgeBaseService.RagServiceInstance;
-
-                if (ragService.IndexedChunkCount > 0)
+                try
                 {
-                    Debug.WriteLine($"[ChatService] RAG 索引中有 {ragService.IndexedChunkCount} 个块，开始检索...");
-                    // 提高相似度阈值到 0.5f，减少检索数量到 2，压缩提示词长度
-                    var retrieved = await ragService.RetrieveAsync(userInput, topK: 10, minSimilarity: 0.6f);
-                    Debug.WriteLine($"[ChatService] 检索到 {retrieved.Count} 个相关块，最高相似度: {retrieved.FirstOrDefault().Similarity}");
+                    // 直接获取全局单例，避免重复加载索引和初始化客户端
+                    var ragService = KnowledgeBaseFunc.KnowledgeBaseService.RagServiceInstance;
 
-                    if (retrieved.Count > 0)
+                    if (ragService.IndexedChunkCount > 0)
                     {
-                        augmentedPrompt = ragService.BuildAugmentedPrompt(userInput, retrieved);
-                        Debug.WriteLine($"[ChatService] 已构建增强提示词，长度: {augmentedPrompt.Length}");
+                        Debug.WriteLine($"[ChatService] RAG 索引中有 {ragService.IndexedChunkCount} 个块，开始检索...");
+                        // 提高相似度阈值到 0.5f，减少检索数量到 2，压缩提示词长度
+                        var retrieved = await ragService.RetrieveAsync(userInput, topK: 10, minSimilarity: 0.6f);
+                        Debug.WriteLine($"[ChatService] 检索到 {retrieved.Count} 个相关块，最高相似度: {retrieved.FirstOrDefault().Similarity}");
+
+                        if (retrieved.Count > 0)
+                        {
+                            augmentedPrompt = ragService.BuildAugmentedPrompt(userInput, retrieved);
+                            Debug.WriteLine($"[ChatService] 已构建增强提示词，长度: {augmentedPrompt.Length}");
+                        }
+                        else
+                        {
+                            Debug.WriteLine("[ChatService] 未检索到足够相关内容，使用原始问题");
+                        }
                     }
                     else
                     {
-                        Debug.WriteLine("[ChatService] 未检索到足够相关内容，使用原始问题");
+                        Debug.WriteLine("[ChatService] RAG 索引为空，跳过检索");
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    Debug.WriteLine("[ChatService] RAG 索引为空，跳过检索");
+                    Debug.WriteLine($"[ChatService] RAG 检索失败: {ex.Message}，使用原始问题");
                 }
             }
-            catch (Exception ex)
+            else
             {
-                Debug.WriteLine($"[ChatService] RAG 检索失败: {ex.Message}，使用原始问题");
+                Debug.WriteLine("[ChatService] 当前会话未对接知识库，跳过RAG检索");
             }
             // ---------- RAG 检索结束 ----------
 

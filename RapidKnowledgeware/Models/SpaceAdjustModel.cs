@@ -66,5 +66,16 @@ namespace RapidKnowledgeware.Models
             get => _systemPrompt;
             set { _systemPrompt = value; RaisePropertyChanged(); }
         }
+
+
+        private bool _isLinkKnowledgeBase = true;
+        /// <summary>
+        /// 是否对接知识库（默认开启）
+        /// </summary>
+        public bool IsLinkKnowledgeBase
+        {
+            get => _isLinkKnowledgeBase;
+            set { _isLinkKnowledgeBase = value; RaisePropertyChanged(); }
+        }
     }
 }

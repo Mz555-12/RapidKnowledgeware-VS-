@@ -138,6 +138,7 @@ namespace RapidKnowledgeware.ViewModels
                     RaisePropertyChanged(nameof(HasMessages));      // 添加：切换会话时刷新输入框位置
                     RaisePropertyChanged(nameof(GreetingText));    // 添加：切换会话时刷新问候语
                     (_sendMessageCommand as CommandBase)?.RaiseCanExecuteChanged();
+                    MainWindow.ScrollChatToEnd();   // 切换会话后自动滚动到底部
                 }
             }
         }
@@ -306,6 +307,14 @@ namespace RapidKnowledgeware.ViewModels
         {
             RaisePropertyChanged(nameof(HasMessages));
             RaisePropertyChanged(nameof(GreetingText));
+        }
+
+        /// <summary>
+        /// 保存所有会话（供外部调用）
+        /// </summary>
+        public void SaveSessions()
+        {
+            _service.SaveSessions();
         }
     }
 }

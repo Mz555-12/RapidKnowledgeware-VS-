@@ -11,6 +11,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Assets/Styles/MainWindowStyle.xaml"/>
+                <ResourceDictionary Source="../Assets/Styles/SpaceAdjustStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -42,7 +43,30 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Grid  Margin="10 30 10 0">
+                <StackPanel>
+                    
+                    
+                   <Grid  Margin="10 30 10 0">
+                    <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
+                        <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                        <Label Content="是否对接知识库："/>
+                                        <ToggleButton x:Name="btn_isFun" Margin="0,5,0,5" Background="Transparent" BorderThickness="0" 
+                                                      Template="{StaticResource CapsuleBtnTemplate}"
+                                                      IsChecked="{Binding SpaceAdjustModel.IsLinkKnowledgeBase, Mode=TwoWay}">
+                                        </ToggleButton>
+                                    </StackPanel>
+                                </StackPanel>
+
+                            </StackPanel>
+                    </Border>
+                    <Label Content="知识库" Margin="20 -10 0 0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="15 0" Background="White"  Foreground="#666"/>
+
+                </Grid>   
+                    
+                    
+                   <Grid  Margin="10 30 10 0">
                     <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
@@ -72,7 +96,10 @@
                     </Border>
                     <Label Content="生成参数" Margin="20 -10 0 0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="15 0" Background="White"  Foreground="#666"/>
 
-                </Grid>
+                </Grid>   
+                </StackPanel>
+                
+              
 
                 <Grid Grid.Row="1">
                     <StackPanel>
