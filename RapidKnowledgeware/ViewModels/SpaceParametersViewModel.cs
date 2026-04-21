@@ -29,6 +29,7 @@ namespace RapidKnowledgeware.ViewModels
                         if (_viewContainer == null) return;
                         string viewKey = o as string;
                         ViewSwitcher.SwitchView(_viewContainer, viewKey);
+
                     });
                 }
                 return _viewChangedCommand;
