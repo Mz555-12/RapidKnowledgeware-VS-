@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace RapidKnowledgeware.Functions.LoggingFunc
 {
@@ -40,17 +41,26 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
         public void ShowLoggingView(Grid overlayContainer, FrameworkElement view)
         {
             if (overlayContainer == null || view == null) return;
-            WindowControls.Hide_Title(0);
-            SlidingView.SlideInFromLeft(view, overlayContainer);
-            _viewModel.IsLogViewVisible = true;
 
-            // 加载月份列表并默认选中当前月份
-            RefreshMonthList();
-            string currentMonth = DateTime.Now.ToString("yyyy-MM");
-            if (_viewModel.AvailableMonths.Contains(currentMonth))
-                _viewModel.SelectedMonth = currentMonth;
-            else if (_viewModel.AvailableMonths.Any())
-                _viewModel.SelectedMonth = _viewModel.AvailableMonths.First();
+            // 直接显示
+            overlayContainer.Visibility = Visibility.Visible;
+            // 若之前被动画移出屏幕，需重置偏移
+            var transform = view.RenderTransform as TranslateTransform;
+            if (transform != null)
+            {
+                transform.BeginAnimation(TranslateTransform.XProperty, null);
+                transform.X = 0;
+            }
+
+            _viewModel.IsLogViewVisible = true;
+            RefreshDateList();
+            string today = DateTime.Now.ToString("yyyy-MM-dd");
+            if (_viewModel.AvailableDates.Contains(today))
+                _viewModel.SelectedDate = today;
+            else if (_viewModel.AvailableDates.Any())
+                _viewModel.SelectedDate = _viewModel.AvailableDates.First();
+
+            LoadLogs();
         }
 
         /// <summary>
@@ -59,48 +69,74 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
         public void HideLoggingView(Grid overlayContainer, FrameworkElement view)
         {
             if (overlayContainer == null || view == null) return;
-            WindowControls.Show_Title();
-            SlidingView.HideImmediately(view, overlayContainer);
+            overlayContainer.Visibility = Visibility.Collapsed;
             _viewModel.IsLogViewVisible = false;
         }
 
         /// <summary>
-        /// 刷新月份列表（根据当前日志类型）
+        /// 刷新日期列表（根据当前日志类型，扫描所有月份文件内的实际日期）
         /// </summary>
-        public void RefreshMonthList()
+        public void RefreshDateList()
         {
             string logType = _viewModel.LogType;
+            var dates = new HashSet<string>();
             var months = LoggingService.GetAvailableMonths(logType);
-            _viewModel.AvailableMonths.Clear();
-            foreach (var m in months)
-                _viewModel.AvailableMonths.Add(m);
+            foreach (var month in months)
+            {
+                if (logType == "Chat")
+                {
+                    var logs = LoggingService.LoadChatLogs(month);
+                    foreach (var log in logs)
+                        dates.Add(log.Timestamp.ToString("yyyy-MM-dd"));
+                }
+                else
+                {
+                    var logs = LoggingService.LoadOperationLogs(month);
+                    foreach (var log in logs)
+                        dates.Add(log.Timestamp.ToString("yyyy-MM-dd"));
+                }
+            }
+            var sortedDates = dates.OrderByDescending(d => d).ToList();
+            _viewModel.AvailableDates.Clear();
+            foreach (var d in sortedDates)
+                _viewModel.AvailableDates.Add(d);
 
-            // 如果当前选中的月份不在列表中，自动选第一个
-            if (!_viewModel.AvailableMonths.Contains(_viewModel.SelectedMonth))
-                _viewModel.SelectedMonth = _viewModel.AvailableMonths.FirstOrDefault();
+            if (!_viewModel.AvailableDates.Contains(_viewModel.SelectedDate))
+            {
+                string today = DateTime.Now.ToString("yyyy-MM-dd");
+                if (_viewModel.AvailableDates.Contains(today))
+                    _viewModel.SelectedDate = today;
+                else
+                    _viewModel.SelectedDate = _viewModel.AvailableDates.FirstOrDefault();
+            }
         }
 
         /// <summary>
-        /// 加载当前选中的日志数据
+        /// 加载当前选中的日志数据（按日期过滤）
         /// </summary>
         public void LoadLogs()
         {
             _viewModel.LogEntries.Clear();
-            if (string.IsNullOrEmpty(_viewModel.SelectedMonth)) return;
+            if (string.IsNullOrEmpty(_viewModel.SelectedDate)) return;
+
+            if (!DateTime.TryParseExact(_viewModel.SelectedDate, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime targetDate))
+                return;
+            string month = targetDate.ToString("yyyy-MM");
+            string keyword = _viewModel.SearchKeyword?.Trim() ?? "";
 
             if (_viewModel.LogType == "Chat")
             {
-                var logs = LoggingService.LoadChatLogs(_viewModel.SelectedMonth);
-                string keyword = _viewModel.SearchKeyword?.Trim() ?? "";
-                var filtered = string.IsNullOrEmpty(keyword)
-                    ? logs
-                    : logs.Where(l =>
-                        (l.UserMessage?.Contains(keyword) == true) ||
-                        (l.AIResponse?.Contains(keyword) == true) ||
-                        (l.SessionName?.Contains(keyword) == true)).ToList();
+                var logs = LoggingService.LoadChatLogs(month);
+                var filtered = logs
+                    .Where(l => l.Timestamp.Date == targetDate.Date)
+                    .Where(l => string.IsNullOrEmpty(keyword) ||
+                                (l.UserMessage?.Contains(keyword) == true) ||
+                                (l.AIResponse?.Contains(keyword) == true) ||
+                                (l.SessionName?.Contains(keyword) == true))
+                    .OrderByDescending(l => l.Timestamp)
+                    .ToList();
 
-                _viewModel.LogEntries.Clear();
-                foreach (var log in filtered.OrderByDescending(l => l.Timestamp))
+                foreach (var log in filtered)
                 {
                     _viewModel.LogEntries.Add(new LogEntryViewModel
                     {
@@ -113,16 +149,16 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
             }
             else
             {
-                var logs = LoggingService.LoadOperationLogs(_viewModel.SelectedMonth);
-                string keyword = _viewModel.SearchKeyword?.Trim() ?? "";
-                var filtered = string.IsNullOrEmpty(keyword)
-                    ? logs
-                    : logs.Where(l =>
-                        l.Target?.Contains(keyword) == true ||
-                        (l.Details?.Contains(keyword) == true)).ToList();
+                var logs = LoggingService.LoadOperationLogs(month);
+                var filtered = logs
+                    .Where(l => l.Timestamp.Date == targetDate.Date)
+                    .Where(l => string.IsNullOrEmpty(keyword) ||
+                                (l.Target?.Contains(keyword) == true) ||
+                                (l.Details?.Contains(keyword) == true))
+                    .OrderByDescending(l => l.Timestamp)
+                    .ToList();
 
-                _viewModel.LogEntries.Clear();
-                foreach (var log in filtered.OrderByDescending(l => l.Timestamp))
+                foreach (var log in filtered)
                 {
                     string status = log.Success ? "✓" : "✗";
                     _viewModel.LogEntries.Add(new LogEntryViewModel
@@ -158,13 +194,17 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
         /// </summary>
         public void ExportCurrentLogs()
         {
-            if (string.IsNullOrEmpty(_viewModel.SelectedMonth)) return;
+            if (string.IsNullOrEmpty(_viewModel.SelectedDate)) return;
+
+            if (!DateTime.TryParseExact(_viewModel.SelectedDate, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime date))
+                return;
+            string month = date.ToString("yyyy-MM");
 
             string content;
             if (_viewModel.LogType == "Chat")
-                content = LoggingService.ExportChatLogsToTxt(_viewModel.SelectedMonth);
+                content = LoggingService.ExportChatLogsToTxt(month);
             else
-                content = LoggingService.ExportOperationLogsToTxt(_viewModel.SelectedMonth);
+                content = LoggingService.ExportOperationLogsToTxt(month);
 
             if (string.IsNullOrEmpty(content))
             {
@@ -175,19 +215,19 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
             var dialog = new Microsoft.Win32.SaveFileDialog
             {
                 Filter = "文本文件|*.txt",
-                FileName = $"{_viewModel.LogType}_Log_{_viewModel.SelectedMonth}.txt"
+                FileName = $"{_viewModel.LogType}_Log_{_viewModel.SelectedDate}.txt"
             };
             if (dialog.ShowDialog() == true)
             {
                 System.IO.File.WriteAllText(dialog.FileName, content);
                 MainWindow.SetStatusMessage($"日志已导出至: {System.IO.Path.GetFileName(dialog.FileName)}");
 
-                // 记录导出操作
                 LoggingService.WriteOperationLog(new OperationsLog
                 {
                     Timestamp = DateTime.Now,
                     Type = OperationType.ExportLog,
-                    Target = $"{_viewModel.LogType} - {_viewModel.SelectedMonth}",
+                    ActionName = "导出日志",
+                    Target = $"{_viewModel.LogType} - {_viewModel.SelectedDate}",
                     Success = true,
                     Details = dialog.FileName
                 });

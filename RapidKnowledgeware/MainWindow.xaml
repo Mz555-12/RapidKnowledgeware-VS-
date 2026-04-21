@@ -32,22 +32,38 @@
             <Border Style="{StaticResource TitleBarStyle}"  CornerRadius="10 10 0 0">
                 <Grid Background="#00FFFFFF"  MouseLeftButtonDown="RowDefinition_MouseLeftButtonDown">
                     <Label Content="RapidKnowledgeware V1.0" VerticalAlignment="Center" Margin="5,0,0,0" FontSize="13" FontWeight="Bold"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
-                        <Border Height="30" Width="40"  VerticalAlignment="Center" HorizontalAlignment="Center" Name="TopWindow_Border">
-                            <Border BorderBrush="Gray" BorderThickness="0" Width="40"  HorizontalAlignment="Center" Margin="0,1" Name="border_top">
-                                <Button Template="{StaticResource ButtonTemplate}" Content="&#xe67b;" FontWeight="Bold" FontSize="19" Click="TopWindow_Click" BorderThickness="0" Background="#55DAE3EA"/>
-                            </Border>
-                        </Border>
-                        <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe60c;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
-                                Command="{Binding LogCommand}" />
-                        <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="OpenSpaceParametersView_Btn" Content="&#xe62e;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
-                                Command="{Binding OpenSpaceParametersViewCommand}"/>
-                        <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="Minimum_Btn" Content="&#xe650;" Click="Minimum_Click" BorderThickness="0"  FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"/>
-                        <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="CloseWindow_Btn" Content="&#xe601;" FontWeight="Bold" BorderThickness="0"  Background="#55DAE3EA"
-            Command="{Binding CloseMainWindowCommand}"
-            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <Grid HorizontalAlignment="Right" Margin="0,0,10,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60"/>
+                            <!-- 置顶按钮容器 -->
+                            <ColumnDefinition Width="60"/>
+                            <!-- 日志按钮 -->
+                            <ColumnDefinition Width="60"/>
+                            <!-- 空间参数按钮 -->
+                            <ColumnDefinition Width="60"/>
+                            <!-- 最小化按钮 -->
+                            <ColumnDefinition Width="60"/>
+                            <!-- 关闭按钮 -->
+                        </Grid.ColumnDefinitions>
 
-                    </StackPanel>
+                        <!-- 置顶按钮） -->
+                        <ToggleButton Height="30" Width="40" Template="{StaticResource ToggleButtonTemplate}" Name="TopWindow_Btn" Content="&#xe67b;" FontWeight="Bold" FontSize="19" Click="TopWindow_Click" BorderThickness="0" Background="#55DAE3EA"/>
+                        <!-- 日志按钮 -->
+                        <ToggleButton Grid.Column="1" Height="30" Width="40" Template="{StaticResource ToggleButtonTemplate}" Name="OpenLoggingView_Btn" Content="&#xe60c;" Visibility="Visible" BorderThickness="0" FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"
+                                      Click="LogViewButton_Click" Command="{Binding LogCommand}"/>
+
+                        <!-- 空间参数按钮 -->
+                        <ToggleButton Grid.Column="2" Height="30" Width="40" Template="{StaticResource ToggleButtonTemplate}" Name="OpenSpaceParametersView_Btn" Content="&#xe62e;" Visibility="Visible" BorderThickness="0" FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"
+                                      Click="SpaceViewButton_Click" Command="{Binding OpenSpaceParametersViewCommand}"/>
+
+                        <!-- 最小化按钮 -->
+                        <Button Grid.Column="3" Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="Minimum_Btn" Content="&#xe650;" Click="Minimum_Click" BorderThickness="0" FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"/>
+
+                        <!-- 关闭按钮 -->
+                        <Button Grid.Column="4" Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="CloseWindow_Btn" Content="&#xe601;" FontWeight="Bold" BorderThickness="0" Background="#55DAE3EA"
+                                Command="{Binding CloseMainWindowCommand}"
+                                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </Grid>
                 </Grid>
             </Border>
 
@@ -391,7 +407,7 @@ CommandParameter="{Binding}"/>
                 <views:LoggingView x:Name="LogView" 
                                    RenderTransformOrigin="0.5,0.5">
                     <views:LoggingView.RenderTransform>
-                        <TranslateTransform X="-1000"/>
+                        <TranslateTransform X="0"/><!-- -1000 -->
                     </views:LoggingView.RenderTransform>
                 </views:LoggingView>
             </Grid>

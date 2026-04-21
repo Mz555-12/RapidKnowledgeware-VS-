@@ -1,6 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 /// <summary>
 /// 主窗口静态控件引用及状态信息模型
@@ -12,10 +13,7 @@ public class MainModel : ObservableObject
     /// </summary>
     public static Grid Loading_Grid { get; set; }
 
-    /// <summary>
-    /// 置顶按钮边框
-    /// </summary>
-    public static Border TopWindow_Border { get; set; }
+
 
     /// <summary>
     /// 最小化按钮
@@ -28,9 +26,15 @@ public class MainModel : ObservableObject
     public static Button CloseWindow_Btn { get; set; }
 
     /// <summary>
+    /// 置顶按钮边框
+    /// </summary>
+    public static ToggleButton TopWindow_Btn { get; set; }
+
+    /// <summary>
     /// 打开空间参数视图按钮
     /// </summary>
-    public static Button OpenSpaceParametersView_Btn { get; set; }
+    public static ToggleButton OpenSpaceParametersView_Btn { get; set; }
+    public static ToggleButton OpenLoggingView_Btn { get; set; }
 
     private string _viewInfo;
     /// <summary>

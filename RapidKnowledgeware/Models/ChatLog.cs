@@ -36,5 +36,6 @@ namespace RapidKnowledgeware.Models
         /// 使用的对话模型名称
         /// </summary>
         public string ModelUsed { get; set; }
+
     }
 }

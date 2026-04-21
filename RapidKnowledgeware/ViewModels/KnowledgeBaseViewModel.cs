@@ -193,12 +193,24 @@ namespace RapidKnowledgeware.ViewModels
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
                                     RefreshDisplayFileItems();
+
+                                    // 记录操作日志
+                                    Functions.LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+                                    {
+                                        Timestamp = DateTime.Now,
+                                        Type = OperationType.ReindexFile,
+                                        ActionName = "重新索引文件",
+                                        Target = item.FileName,
+                                        Success = true
+                                    });
                                     MainWindow.SetStatusMessage($"重新索引完成：{item.FileName}");
                                     WindowControls.Hide_Loading();
                                 });
                             });
                         }
                     });
+
+
                 }
                 return _reindexFileCommand;
             }
@@ -244,12 +256,22 @@ namespace RapidKnowledgeware.ViewModels
                                 Application.Current.Dispatcher.Invoke(() =>
                                 {
                                     RefreshDisplayFileItems();
+                                    // 记录操作日志
+                                    Functions.LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+                                    {
+                                        Timestamp = DateTime.Now,
+                                        Type = OperationType.DeleteKnowledgeFile,
+                                        ActionName = "删除知识文件",
+                                        Target = item.FileName,
+                                        Success = true
+                                    });
                                     MainWindow.SetStatusMessage($"已删除文件：{item.FileName}");
                                     WindowControls.Hide_Loading();
                                 });
                             });
                         }
                     });
+
                 }
                 return _deleteFileCommand2;
             }

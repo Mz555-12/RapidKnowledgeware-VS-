@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -26,6 +27,7 @@ namespace RapidKnowledgeware
     public partial class MainWindow : Window
     {
         private bool is_top = false;
+        private bool is_check = false;
         private static System.Windows.Threading.DispatcherTimer _statusTimer;
 
 
@@ -34,9 +36,10 @@ namespace RapidKnowledgeware
             InitializeComponent();
             MainModel.Loading_Grid = this.Loading_Grid;
             MainModel.CloseWindow_Btn = this.CloseWindow_Btn;
-            MainModel.TopWindow_Border = this.TopWindow_Border;
+            MainModel.TopWindow_Btn = this.TopWindow_Btn;
             MainModel.Minimum_Btn = this.Minimum_Btn;
             MainModel.OpenSpaceParametersView_Btn = this.OpenSpaceParametersView_Btn;
+            MainModel.OpenLoggingView_Btn = this.OpenLoggingView_Btn;
 
 
             var vm = new MainWindowModel();
@@ -78,12 +81,6 @@ namespace RapidKnowledgeware
             this.WindowState = WindowState.Minimized;
         }
 
-        private void TopWindow_Click(object sender, RoutedEventArgs e)
-        {
-            is_top = !is_top;
-            this.Topmost = !this.Topmost;
-            this.border_top.BorderThickness = is_top ? new Thickness(0, 0, 0, 2) : new Thickness(0);
-        }
 
 
 
@@ -180,6 +177,36 @@ namespace RapidKnowledgeware
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
+
+        private void LogViewButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleButton btn)
+            {
+                is_check = !is_check;
+                this.OpenLoggingView_Btn.BorderThickness = is_check ? new Thickness(0, 0, 0, 2) : new Thickness(0);
+            }
+        }
+
+        private void SpaceViewButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleButton btn)
+            {
+                is_check = !is_check;
+                this.OpenSpaceParametersView_Btn.BorderThickness = is_check ? new Thickness(0, 0, 0, 2) : new Thickness(0);
+            }
+        }
+
+        private void TopWindow_Click(object sender, RoutedEventArgs e)
+        {
+            is_top = !is_top;
+            this.Topmost = is_top;
+            this.TopWindow_Btn.BorderThickness = is_top ? new Thickness(0, 0, 0, 2) : new Thickness(0);
+
+            if (sender is ToggleButton btn)
+            {
+                btn.IsChecked = is_top;
+            }
+        }
 
     }
 }

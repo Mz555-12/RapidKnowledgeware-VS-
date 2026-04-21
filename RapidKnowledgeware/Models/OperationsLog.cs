@@ -13,9 +13,14 @@ namespace RapidKnowledgeware.Models
         public DateTime Timestamp { get; set; }
 
         /// <summary>
-        /// 操作类型
+        /// 操作类型（枚举）
         /// </summary>
         public OperationType Type { get; set; }
+
+        /// <summary>
+        /// 操作名称（中文描述，便于人工阅读）
+        /// </summary>
+        public string ActionName { get; set; }
 
         /// <summary>
         /// 操作目标对象（如会话名、文件路径）

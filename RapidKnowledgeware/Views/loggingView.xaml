@@ -4,9 +4,61 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RapidKnowledgeware.Views"
+             xmlns:converters="clr-namespace:RapidKnowledgeware.Converters"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=vm:DesignTimeLoggingViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+    <UserControl.Resources>
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+    </UserControl.Resources>
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 标题栏 -->
+        <Border Grid.Row="0" Background="#F0F0F0" BorderBrush="#DDD" BorderThickness="0 0 0 1">
+            <Grid>
+                <StackPanel Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
+                    <RadioButton Content="聊天记录" IsChecked="{Binding LogType, Converter={StaticResource StringToBoolConverter}, ConverterParameter=Chat}" 
+                                 Margin="0,0,15,0" GroupName="LogType"
+                                 Command="{Binding SwitchLogTypeCommand}" CommandParameter="Chat"/>
+                    <RadioButton Content="操作记录" IsChecked="{Binding LogType, Converter={StaticResource StringToBoolConverter}, ConverterParameter=Operations}" 
+                                 Margin="0,0,15,0" GroupName="LogType"
+                                 Command="{Binding SwitchLogTypeCommand}" CommandParameter="Operations"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
+                    <ComboBox ItemsSource="{Binding AvailableDates}" SelectedItem="{Binding SelectedDate}" 
+          Width="100" Margin="5,0" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Width="180" Margin="5,0" 
+                             VerticalContentAlignment="Center" Padding="5,0"/>
+                    <Button Content="搜索" Width="60" Margin="5,0" Command="{Binding SearchCommand}"/>
+                    <Button Content="刷新" Width="60" Margin="5,0" Command="{Binding RefreshCommand}"/>
+                    <Button Content="导出" Width="60" Margin="5,0" Command="{Binding ExportCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 日志列表 -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding LogEntries}" Margin="10">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" Margin="0,0,0,10" Padding="10" Background="#FAFAFA">
+                            <StackPanel>
+                                <Grid>
+                                    <TextBlock Text="{Binding Timestamp}" FontWeight="Bold" Foreground="#2C3E50" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding SessionInfo}" HorizontalAlignment="Right" Foreground="#666"/>
+                                </Grid>
+                                <TextBox Text="{Binding Content}" TextWrapping="Wrap" IsReadOnly="True" 
+                                         BorderThickness="0" Background="Transparent" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </UserControl>

@@ -224,6 +224,18 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     MainWindow.ScrollChatToEnd();
                 });
                 _cts = null;
+
+                // 记录聊天日志
+                var chatLog = new ChatLog
+                {
+                    Timestamp = DateTime.Now,
+                    SessionId = _session.SessionId,
+                    SessionName = _session.DisplayName,
+                    UserMessage = userInput,
+                    AIResponse = fullResponse,
+                    ModelUsed = _session.SpaceParameters.ChatLLM
+                };
+                await LoggingFunc.LoggingService.WriteChatLogAsync(chatLog);
                 Debug.WriteLine("[ChatService] SendMessageAsync 结束");
             }
         }

@@ -61,20 +61,29 @@ namespace RapidKnowledgeware.ViewModels
             set { _logType = value; RaisePropertyChanged(); }
         }
 
-        private string _selectedMonth;
+        private string _selectedDate;
         /// <summary>
-        /// 当前选中的月份
+        /// 当前选中的日期（格式 yyyy-MM-dd）
         /// </summary>
-        public string SelectedMonth
+        public string SelectedDate
         {
-            get => _selectedMonth;
-            set { _selectedMonth = value; RaisePropertyChanged(); }
+            get => _selectedDate;
+            set
+            {
+                if (_selectedDate != value)
+                {
+                    _selectedDate = value;
+                    RaisePropertyChanged();
+                    if (!string.IsNullOrEmpty(_selectedDate))
+                        _uiService.LoadLogs();
+                }
+            }
         }
 
         /// <summary>
-        /// 可用的月份列表
+        /// 可用的日期列表（格式 yyyy-MM-dd），按倒序排列
         /// </summary>
-        public ObservableCollection<string> AvailableMonths { get; } = new ObservableCollection<string>();
+        public ObservableCollection<string> AvailableDates { get; } = new ObservableCollection<string>();
 
         /// <summary>
         /// 日志条目列表（用于 UI 绑定）
@@ -109,36 +118,12 @@ namespace RapidKnowledgeware.ViewModels
                         if (param is string type)
                         {
                             LogType = type;
-                            _uiService.RefreshMonthList();
+                            _uiService.RefreshDateList();
                             _uiService.LoadLogs();
                         }
                     });
                 }
                 return _switchLogTypeCommand;
-            }
-        }
-
-        /// <summary>
-        /// 选择月份命令
-        /// </summary>
-        private CommandBase _selectMonthCommand;
-        public CommandBase SelectMonthCommand
-        {
-            get
-            {
-                if (_selectMonthCommand == null)
-                {
-                    _selectMonthCommand = new CommandBase();
-                    _selectMonthCommand.DoExecute = new Action<object>(param =>
-                    {
-                        if (param is string month)
-                        {
-                            SelectedMonth = month;
-                            _uiService.LoadLogs();
-                        }
-                    });
-                }
-                return _selectMonthCommand;
             }
         }
 
@@ -175,7 +160,7 @@ namespace RapidKnowledgeware.ViewModels
                     _refreshCommand = new CommandBase();
                     _refreshCommand.DoExecute = new Action<object>(_ =>
                     {
-                        _uiService.RefreshMonthList();
+                        _uiService.RefreshDateList();
                         _uiService.LoadLogs();
                     });
                 }

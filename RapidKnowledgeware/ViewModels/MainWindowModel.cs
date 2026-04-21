@@ -2,6 +2,7 @@
 using RapidKnowledgeware.Base;
 using RapidKnowledgeware.Functions.ChatFunc;
 using RapidKnowledgeware.Functions.LLMAdjustFunc;
+using RapidKnowledgeware.Functions.LoggingFunc;
 using RapidKnowledgeware.Functions.MainWindowFunc;
 using RapidKnowledgeware.Models;
 using RapidKnowledgeware.Properties;
@@ -21,6 +22,8 @@ namespace RapidKnowledgeware.ViewModels
         // ---------- 字段绑定 ----------
         public MainModel MainModel { get; set; } = new MainModel();
         private MainWindowService _service;
+        private bool _isLogViewVisible = false;
+        private LoggingViewModel _logVM;
 
         /// <summary>
         /// 当前会话是否有消息（委托给 Service）
@@ -35,6 +38,8 @@ namespace RapidKnowledgeware.ViewModels
         // ---------- 构造函数 ----------
         public MainWindowModel()
         {
+            LoggingService.CleanOldLogs();
+
             _service = new MainWindowService(this, MainModel);
             _service.LoadSessions();
 
@@ -111,6 +116,46 @@ namespace RapidKnowledgeware.ViewModels
                 return _openSpaceParametersViewCommand;
             }
         }
+
+        /// <summary>
+        /// 打开日志视图命令
+        /// </summary>
+        private CommandBase _logCommand;
+        public CommandBase LogCommand
+        {
+            get
+            {
+                if (_logCommand == null)
+                {
+                    _logCommand = new CommandBase();
+                    _logCommand.DoExecute = new Action<object>((o) =>
+                    {
+                        var mainWindow = Application.Current.MainWindow as MainWindow;
+                        var overlay = mainWindow?.FindName("LogOverlayContainer") as Grid;
+                        var logView = mainWindow?.FindName("LogView") as LoggingView;
+                        if (overlay == null || logView == null) return;
+
+                        // 直接使用视图自带的 ViewModel（永远不为 null）
+                        var vm = logView.ViewModel;
+                        vm.SetLoggingView(logView);   // 确保 UI 服务知道视图引用
+
+                        if (!_isLogViewVisible)
+                        {
+                            vm.Show(overlay, logView);
+                            _isLogViewVisible = true;
+                        }
+                        else
+                        {
+                            vm.Hide(overlay, logView);
+                            _isLogViewVisible = false;
+                        }
+                    });
+                }
+                return _logCommand;
+            }
+        }
+
+
 
         // ---------- 会话管理属性 ----------
         private ObservableCollection<ChatSessionModel> _sessions;

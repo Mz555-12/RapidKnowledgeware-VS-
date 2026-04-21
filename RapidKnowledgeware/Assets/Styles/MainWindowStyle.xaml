@@ -114,4 +114,39 @@
     </Style>
 
 
+    <ControlTemplate TargetType="ToggleButton" x:Key="ToggleButtonTemplate">
+        <Border Name="back" 
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" 
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="4">
+            <ContentControl Content="{TemplateBinding Content}" 
+                          FontFamily="{StaticResource iconfont}"  
+                          VerticalAlignment="Center" 
+                          HorizontalAlignment="Center"
+                          Foreground="{StaticResource TextPrimary}"/>
+        </Border>
+        <ControlTemplate.Triggers>
+            <!-- 按下状态 -->
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="#D0E8FF" TargetName="back"/>
+            </Trigger>
+            <!-- 选中状态（优先级最高，放在最后） -->
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Background" Value="#D0E8FF" TargetName="back"/>
+                <Setter Property="BorderBrush" Value="#3964fe" TargetName="back"/>
+            </Trigger>
+            <!-- 鼠标悬浮状态（仅当未选中时生效） -->
+            <MultiTrigger>
+                <MultiTrigger.Conditions>
+                    <Condition Property="IsMouseOver" Value="True"/>
+                    <Condition Property="IsChecked" Value="False"/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Background" Value="#B0C4DE" TargetName="back"/>
+                <Setter Property="BorderBrush" Value="#3964fe" TargetName="back"/>
+            </MultiTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+
 </ResourceDictionary>

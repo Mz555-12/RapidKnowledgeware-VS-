@@ -99,6 +99,17 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
 
                 int successCount = await _knowledgeService.IndexFilesAsync(selectedFiles, progress);
 
+
+                // 记录操作日志
+                LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+                {
+                    Timestamp = DateTime.Now,
+                    Type = OperationType.AddKnowledgeFile,
+                    ActionName = "添加知识文件",
+                    Target = string.Join(", ", selectedFiles.Select(System.IO.Path.GetFileName)),
+                    Success = true
+                });
+
                 MainWindow.SetStatusMessage($"批量索引完成：成功 {successCount}/{selectedFiles.Length} 个文件。");
                 AppSettingsManager.SaveSettings(_model);
                 WindowControls.Hide_Loading();

@@ -23,8 +23,9 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
         {
            MainModel.CloseWindow_Btn.Visibility = Visibility.Visible;
             MainModel.Minimum_Btn.Visibility = Visibility.Visible;
-            MainModel.TopWindow_Border.Visibility = Visibility.Visible;
+            MainModel.TopWindow_Btn.Visibility = Visibility.Visible;
             MainModel.OpenSpaceParametersView_Btn.Visibility = Visibility.Visible;
+            MainModel.OpenLoggingView_Btn.Visibility = Visibility.Visible;
 
         }
 
@@ -36,14 +37,24 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 case 0:
                     MainModel.CloseWindow_Btn.Visibility = Visibility.Collapsed;
                     MainModel.Minimum_Btn.Visibility = Visibility.Collapsed;
-                    MainModel.TopWindow_Border.Visibility = Visibility.Collapsed;
+                    MainModel.TopWindow_Btn.Visibility = Visibility.Collapsed;
                     MainModel.OpenSpaceParametersView_Btn.Visibility = Visibility.Collapsed;
+                    MainModel.OpenLoggingView_Btn.Visibility = Visibility.Collapsed;
                     break;
 
-                case 1:
+                case 1:// 打开空间参数视图
                     MainModel.CloseWindow_Btn.Visibility = Visibility.Collapsed;
                     MainModel.Minimum_Btn.Visibility = Visibility.Collapsed;
-                    MainModel.TopWindow_Border.Visibility = Visibility.Collapsed;
+                    MainModel.TopWindow_Btn.Visibility = Visibility.Collapsed;
+                    MainModel.OpenLoggingView_Btn.Visibility = Visibility.Collapsed;
+                    break;
+
+                case 2:// 打开日志视图时
+                    MainModel.CloseWindow_Btn.Visibility = Visibility.Collapsed;
+                    MainModel.Minimum_Btn.Visibility = Visibility.Collapsed;
+                    MainModel.TopWindow_Btn.Visibility = Visibility.Collapsed;
+                    MainModel.OpenSpaceParametersView_Btn.Visibility = Visibility.Collapsed;
+
                     break;
 
             }

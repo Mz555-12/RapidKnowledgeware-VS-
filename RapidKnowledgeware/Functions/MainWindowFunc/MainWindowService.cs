@@ -87,6 +87,17 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             _viewModel.Sessions.Insert(0, newSession);
             _viewModel.SelectedSession = newSession;
             SaveSessions();
+
+            // 记录操作日志
+            LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+            {
+                Timestamp = DateTime.Now,
+                Type = OperationType.CreateSession,
+                ActionName = "新建会话",
+                Target = newName,
+                Success = true
+            });
+
             MainWindow.SetStatusMessage($"已创建新会话：{newName}");
         }
 
@@ -128,6 +139,16 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             _viewModel.SelectedSession = session;
             _viewModel.SpaceAdjustVM = new SpaceAdjustViewModel(session, _viewModel.CloseSpaceAdjustCommand);
             ShowSpaceAdjustView();
+
+            // 记录操作日志
+            LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+            {
+                Timestamp = DateTime.Now,
+                Type = OperationType.EditSessionParams,
+                ActionName = "编辑会话参数",
+                Target = session.DisplayName,
+                Success = true
+            });
         }
 
         /// <summary>
@@ -174,6 +195,16 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
 
             _viewModel.RefreshUIAssistProperties();
             SaveSessions();
+
+            // 记录操作日志
+            LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+            {
+                Timestamp = DateTime.Now,
+                Type = OperationType.DeleteSession,
+                ActionName = "删除会话",
+                Target = deletedName,
+                Success = true
+            });
             Debug.WriteLine($"[Delete] 已删除会话: {deletedName}");
         }
 
@@ -211,6 +242,18 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             string oldName = session.DisplayName;
             session.DisplayName = newName;
             SaveSessions();
+
+            // 记录操作日志
+            LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+            {
+                Timestamp = DateTime.Now,
+                Type = OperationType.RenameSession,
+                ActionName = "重命名会话",
+                Target = newName,
+                Success = true,
+                Details = $"原名称: {oldName}"
+            });
+
             Debug.WriteLine($"[Rename] 会话重命名为: {newName}");
             MainWindow.SetStatusMessage($"已将“{oldName}”重命名为“{newName}”");
         }

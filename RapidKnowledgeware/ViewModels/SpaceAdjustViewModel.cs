@@ -56,6 +56,19 @@ namespace RapidKnowledgeware.ViewModels
                         var mainWin = Application.Current.MainWindow as MainWindow;
                         var mainVM = mainWin?.DataContext as MainWindowModel;
                         mainVM?.SaveSessions();
+
+
+                        // 记录操作日志
+                        var session = Session;
+                        Functions.LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+                        {
+                            Timestamp = DateTime.Now,
+                            Type = OperationType.ToggleKnowledgeLink,
+                            ActionName = "切换知识库对接",
+                            Target = session.DisplayName,
+                            Success = true,
+                            Details = session.SpaceParameters.IsLinkKnowledgeBase ? "已开启" : "已关闭"
+                        });
                     });
                 }
                 return _isLinkKnowledgeBaseCommand;

@@ -29,6 +29,7 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
                 Directory.CreateDirectory(ChatLogDir);
             if (!Directory.Exists(OpsLogDir))
                 Directory.CreateDirectory(OpsLogDir);
+
         }
 
         #region 写入
@@ -233,7 +234,8 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
             foreach (var log in logs)
             {
                 string status = log.Success ? "成功" : "失败";
-                sb.AppendLine($"[{log.Timestamp:yyyy-MM-dd HH:mm:ss}] {GetOperationTypeName(log.Type)} - {status}");
+                string opName = GetOperationDisplayName(log);
+                sb.AppendLine($"[{log.Timestamp:yyyy-MM-dd HH:mm:ss}] {opName} - {status}");
                 sb.AppendLine($"目标: {log.Target}");
                 if (!string.IsNullOrEmpty(log.Details))
                     sb.AppendLine($"详情: {log.Details}");
@@ -258,6 +260,14 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
                 _ => type.ToString()
             };
         }
+
+        private static string GetOperationDisplayName(OperationsLog log)
+        {
+            if (!string.IsNullOrEmpty(log.ActionName))
+                return log.ActionName;
+            return GetOperationTypeName(log.Type);
+        }
+
 
         #endregion
     }

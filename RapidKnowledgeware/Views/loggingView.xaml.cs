@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RapidKnowledgeware.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,13 @@ namespace RapidKnowledgeware.Views
     /// </summary>
     public partial class LoggingView : UserControl
     {
+        public LoggingViewModel ViewModel { get; private set; }
+
         public LoggingView()
         {
             InitializeComponent();
+            ViewModel = new LoggingViewModel();
+            this.DataContext = ViewModel;
         }
     }
 }
