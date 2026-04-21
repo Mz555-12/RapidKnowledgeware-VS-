@@ -36,6 +36,9 @@ namespace RapidKnowledgeware.ViewModels
             _uiService = new KnowledgeBaseUIService(KnowledgeBaseModel);
             _searchService = new KnowledgeBaseSearchService(KnowledgeBaseModel);
 
+            // 捕获知识库模型快照，用于关闭时对比变更
+            SettingsChangeTracker.CaptureSnapshot(KnowledgeBaseModel);
+
             // 监听文件集合变化，自动刷新对应视图的列表
             KnowledgeBaseModel.FileItems.CollectionChanged += (s, e) =>
             {

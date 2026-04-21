@@ -42,17 +42,12 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
         {
             if (overlayContainer == null || view == null) return;
 
-            // 直接显示
-            overlayContainer.Visibility = Visibility.Visible;
-            // 若之前被动画移出屏幕，需重置偏移
-            var transform = view.RenderTransform as TranslateTransform;
-            if (transform != null)
-            {
-                transform.BeginAnimation(TranslateTransform.XProperty, null);
-                transform.X = 0;
-            }
-
+            // 调用滑动动画显示视图
+            WindowControls.Hide_Title(2);
+            SlidingView.SlideInFromLeft(view, overlayContainer);
             _viewModel.IsLogViewVisible = true;
+
+            // 刷新数据
             RefreshDateList();
             string today = DateTime.Now.ToString("yyyy-MM-dd");
             if (_viewModel.AvailableDates.Contains(today))
@@ -69,7 +64,10 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
         public void HideLoggingView(Grid overlayContainer, FrameworkElement view)
         {
             if (overlayContainer == null || view == null) return;
-            overlayContainer.Visibility = Visibility.Collapsed;
+
+            // 调用立即隐藏方法（无动画），或可改用 SlideOutToRight 实现滑出动画
+            WindowControls.Show_Title();
+            SlidingView.HideImmediately(view, overlayContainer);
             _viewModel.IsLogViewVisible = false;
         }
 

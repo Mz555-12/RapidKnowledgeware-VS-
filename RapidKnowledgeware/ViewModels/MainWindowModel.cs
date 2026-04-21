@@ -56,6 +56,9 @@ namespace RapidKnowledgeware.ViewModels
 
             _service.AttachSessionPropertyChanged();
             Sessions.CollectionChanged += _service.OnSessionsCollectionChanged;
+
+
+
         }
 
         /// <summary>

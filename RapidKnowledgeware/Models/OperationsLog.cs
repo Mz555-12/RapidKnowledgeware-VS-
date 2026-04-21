@@ -51,6 +51,8 @@ namespace RapidKnowledgeware.Models
         DeleteKnowledgeFile,// 删除知识文件
         ReindexFile,        // 重新索引文件
         ToggleKnowledgeLink,// 切换知识库对接
-        ExportLog           // 导出日志
+        ExportLog,                      // 导出日志
+        EditLLMParams,                  // 编辑全局LLM参数
+        EditKnowledgeBaseParams
     }
 }

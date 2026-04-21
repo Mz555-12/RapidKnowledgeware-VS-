@@ -87,7 +87,7 @@
                     <Button Content="开启新对话" Command="{Binding NewSessionCommand}" Template="{StaticResource NewDialogueBtnStyle}"/>
 
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding Sessions}">
+                        <ItemsControl ItemsSource="{Binding Sessions}" >
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <RadioButton GroupName="ChatSessions"
@@ -96,7 +96,7 @@
              Style="{StaticResource SessionRadioButtonStyle}"
              Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
                                         <RadioButton.ContextMenu>
-                                            <ContextMenu>
+                                            <ContextMenu Opened="ContextMenu_Opened" Visibility="{Binding PlacementTarget.Tag.IsSpaceAdjustVisible, RelativeSource={RelativeSource Self}, Converter={StaticResource InverseBoolToVis}}">
 
                                                 <MenuItem Header="删除" 
                   Command="{Binding PlacementTarget.Tag.DeleteSessionCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -407,7 +407,7 @@ CommandParameter="{Binding}"/>
                 <views:LoggingView x:Name="LogView" 
                                    RenderTransformOrigin="0.5,0.5">
                     <views:LoggingView.RenderTransform>
-                        <TranslateTransform X="0"/><!-- -1000 -->
+                        <TranslateTransform X="-1000"/><!-- -1000 -->
                     </views:LoggingView.RenderTransform>
                 </views:LoggingView>
             </Grid>

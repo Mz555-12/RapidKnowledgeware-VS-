@@ -67,6 +67,8 @@ namespace RapidKnowledgeware
                 var instance = RapidKnowledgeware.Functions.KnowledgeBaseFunc.KnowledgeBaseService.RagServiceInstance;
                 Debug.WriteLine($"[MainWindow] RagService 预热完成，索引块数: {instance.IndexedChunkCount}");
             });
+
+
         }
 
         private void RowDefinition_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -86,6 +88,7 @@ namespace RapidKnowledgeware
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+
             AppSettingsManager.SaveSettings(KnowledgeBaseModel.Instance);
         }
 
@@ -205,6 +208,30 @@ namespace RapidKnowledgeware
             if (sender is ToggleButton btn)
             {
                 btn.IsChecked = is_top;
+            }
+        }
+
+        /// <summary>
+        /// 会话项右键菜单打开时检查：若空间参数视图处于显示状态，则阻止菜单弹出。
+        /// </summary>
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            var contextMenu = sender as ContextMenu;
+            if (contextMenu == null) return;
+
+            var placementTarget = contextMenu.PlacementTarget as FrameworkElement;
+            if (placementTarget == null) return;
+
+            // 通过 Tag 获取主窗口的 DataContext（即 MainWindowModel）
+            var window = Window.GetWindow(placementTarget) as MainWindow;
+            if (window == null) return;
+
+            var vm = window.DataContext as MainWindowModel;
+            if (vm != null && vm.IsSpaceAdjustVisible)
+            {
+                // 空间参数视图可见时，立即关闭右键菜单
+                contextMenu.IsOpen = false;
+                e.Handled = true;
             }
         }
 

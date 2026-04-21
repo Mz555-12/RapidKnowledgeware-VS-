@@ -140,15 +140,6 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             _viewModel.SpaceAdjustVM = new SpaceAdjustViewModel(session, _viewModel.CloseSpaceAdjustCommand);
             ShowSpaceAdjustView();
 
-            // 记录操作日志
-            LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
-            {
-                Timestamp = DateTime.Now,
-                Type = OperationType.EditSessionParams,
-                ActionName = "编辑会话参数",
-                Target = session.DisplayName,
-                Success = true
-            });
         }
 
         /// <summary>
@@ -330,6 +321,29 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
         {
             Debug.WriteLine("[HideSpaceAdjustView] 开始隐藏");
             if (_spaceAdjustOverlay == null || _spaceAdjustViewControl == null) return;
+
+            // 对比空间参数变更并记录详细日志
+            if (_viewModel.SpaceAdjustVM?.SpaceAdjustModel != null)
+            {
+                string changes = Functions.MainWindowFunc.SettingsChangeTracker.GetChangesAndClear(_viewModel.SpaceAdjustVM.SpaceAdjustModel);
+                if (!string.IsNullOrEmpty(changes))
+                {
+                    var session = _viewModel.SpaceAdjustVM.Session;
+                    // 将分号替换为换行，美化输出
+                    string formattedChanges = changes.Replace("; ", "\n");
+                    LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+                    {
+                        Timestamp = DateTime.Now,
+                        Type = OperationType.EditSessionParams,
+                        ActionName = "编辑会话参数",
+                        Target = session.DisplayName,
+                        Success = true,
+                        Details = formattedChanges
+                    });
+                    Debug.WriteLine($"[HideSpaceAdjustView] 参数变更:\n{formattedChanges}");
+                }
+            }
+
             WindowControls.Show_Title();
             SlidingView.HideImmediately(_spaceAdjustViewControl, _spaceAdjustOverlay);
             _viewModel.IsSpaceAdjustVisible = false;

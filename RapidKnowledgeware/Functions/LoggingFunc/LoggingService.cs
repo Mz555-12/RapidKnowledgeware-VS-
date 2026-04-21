@@ -20,6 +20,7 @@ namespace RapidKnowledgeware.Functions.LoggingFunc
         private static readonly object ChatLock = new object();
         private static readonly object OpsLock = new object();
 
+
         /// <summary>
         /// 静态构造函数，确保日志目录存在
         /// </summary>

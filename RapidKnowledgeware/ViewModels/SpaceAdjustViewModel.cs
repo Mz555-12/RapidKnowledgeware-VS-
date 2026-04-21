@@ -86,33 +86,11 @@ namespace RapidKnowledgeware.ViewModels
             SpaceAdjustModel = session.SpaceParameters;
             CloseCommand = closeCommand;
             ResetToDefaultCommand = new CommandBase { DoExecute = _ => SpaceAdjustService.ResetToDefault(SpaceAdjustModel) };
+
+            // 捕获原始快照，用于关闭时对比变更
+            Functions.MainWindowFunc.SettingsChangeTracker.CaptureSnapshot(SpaceAdjustModel);
         }
 
-        /// <summary>
-        /// 切换知识库对接状态并播放动画
-        /// </summary>
-        /// <param name="element">触发动画的按钮元素</param>
-        private void ToggleKnowledgeBaseLink(FrameworkElement element)
-        {
-            // 切换状态
-            SpaceAdjustModel.IsLinkKnowledgeBase = !SpaceAdjustModel.IsLinkKnowledgeBase;
-
-            // 播放对应动画
-            if (SpaceAdjustModel.IsLinkKnowledgeBase)
-            {
-                var storyboard = element.FindResource("StartAnimation") as Storyboard;
-                storyboard?.Begin();
-            }
-            else
-            {
-                var storyboard = element.FindResource("StopAnimation") as Storyboard;
-                storyboard?.Begin();
-            }
-
-            // 保存会话设置（持久化）
-            var mainWin = Application.Current.MainWindow as MainWindow;
-            var mainVM = mainWin?.DataContext as MainWindowModel;
-            mainVM?.OnWindowClosing(); // 复用保存逻辑
-        }
+  
     }
 }
