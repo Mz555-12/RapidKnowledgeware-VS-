@@ -38,8 +38,8 @@
                                 <Button Template="{StaticResource ButtonTemplate}" Content="&#xe67b;" FontWeight="Bold" FontSize="19" Click="TopWindow_Click" BorderThickness="0" Background="#55DAE3EA"/>
                             </Border>
                         </Border>
-                        <!--<Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe60c;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
-                                Command="{Binding LogCommand}" />-->
+                        <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Content="&#xe60c;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
+                                Command="{Binding LogCommand}" />
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="OpenSpaceParametersView_Btn" Content="&#xe62e;" Visibility="Visible"  BorderThickness="0" FontWeight="Bold" FontSize="19"  Background="#55DAE3EA" Margin="10,0"
                                 Command="{Binding OpenSpaceParametersViewCommand}"/>
                         <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="Minimum_Btn" Content="&#xe650;" Click="Minimum_Click" BorderThickness="0"  FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"/>
@@ -382,6 +382,20 @@ CommandParameter="{Binding}"/>
                     </views:SpaceParametersView.RenderTransform>
                 </views:SpaceParametersView>
             </Grid>
+
+
+            <!-- 日志视图覆盖层 -->
+            <Grid Grid.RowSpan="2" x:Name="LogOverlayContainer" 
+                  Visibility="Collapsed"   
+                  Background="Transparent" Width="1000" Height="610" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                <views:LoggingView x:Name="LogView" 
+                                   RenderTransformOrigin="0.5,0.5">
+                    <views:LoggingView.RenderTransform>
+                        <TranslateTransform X="-1000"/>
+                    </views:LoggingView.RenderTransform>
+                </views:LoggingView>
+            </Grid>
+
 
             <!-- 覆盖层，用于放置加载动画 -->
             <Grid Background="Transparent" Grid.Row="1" Name="Loading_Grid" Visibility="Collapsed">

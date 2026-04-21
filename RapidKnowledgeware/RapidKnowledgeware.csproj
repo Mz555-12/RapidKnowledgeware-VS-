@@ -195,8 +195,8 @@
     <Compile Include="Views\LLMAdjustView.xaml.cs">
       <DependentUpon>LLMAdjustView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\loggingView.xaml.cs">
-      <DependentUpon>loggingView.xaml</DependentUpon>
+    <Compile Include="Views\LoggingView.xaml.cs">
+      <DependentUpon>LoggingView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SpaceAdjustView.xaml.cs">
       <DependentUpon>SpaceAdjustView.xaml</DependentUpon>
@@ -248,7 +248,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\loggingView.xaml">
+    <Page Include="Views\LoggingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

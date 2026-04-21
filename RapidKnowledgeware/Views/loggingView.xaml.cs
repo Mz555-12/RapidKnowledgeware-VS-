@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace RapidKnowledgeware.Views
 {
     /// <summary>
-    /// loggingView.xaml 的交互逻辑
+    /// LoggingView.xaml 的交互逻辑
     /// </summary>
-    public partial class loggingView : UserControl
+    public partial class LoggingView : UserControl
     {
-        public loggingView()
+        public LoggingView()
         {
             InitializeComponent();
         }
