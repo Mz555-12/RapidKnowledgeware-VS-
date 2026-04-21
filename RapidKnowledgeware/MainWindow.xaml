@@ -261,14 +261,28 @@ CommandParameter="{Binding}"/>
                                         </TextBox.InputBindings>
                                     </TextBox>
                                     <TextBlock Text="Ctrl+Enter 发送" 
-                                               FontSize="14" 
-                                               Foreground="#AAA" 
-                                               FontStyle="Italic"
-                                               HorizontalAlignment="Left" 
-                                               VerticalAlignment="Top"
-                                               Margin="12,10,0,0"
-                                               IsHitTestVisible="False"
-                                               Visibility="{Binding ElementName=CenterInputBox, Path=IsKeyboardFocused, Converter={StaticResource InverseBoolToVis}}"/>
+                                              FontSize="14" 
+                                              Foreground="#AAA" 
+                                              FontStyle="Italic"
+                                              HorizontalAlignment="Left" 
+                                              VerticalAlignment="Top"
+                                              Margin="12,10,0,0"
+                                              IsHitTestVisible="False">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding ElementName=CenterInputBox, Path=IsKeyboardFocused}" Value="False"/>
+                                                            <Condition Binding="{Binding Text, ElementName=CenterInputBox}" Value=""/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </Grid>
                                 <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
                                         HorizontalAlignment="Right" Margin="0 0 10 0" 
@@ -297,14 +311,28 @@ CommandParameter="{Binding}"/>
                                         </TextBox.InputBindings>
                                     </TextBox>
                                     <TextBlock Text="Ctrl+Enter 发送" 
-                                                   FontSize="14" 
-                                                   Foreground="#AAA" 
-                                                   FontStyle="Italic"
-                                                   HorizontalAlignment="Left" 
-                                                   VerticalAlignment="Top"
-                                                   Margin="12,10,0,0"
-                                                   IsHitTestVisible="False"
-                                                   Visibility="{Binding ElementName=BottomInputBox, Path=IsKeyboardFocused, Converter={StaticResource InverseBoolToVis}}"/>
+                                                  FontSize="14" 
+                                                  Foreground="#AAA" 
+                                                  FontStyle="Italic"
+                                                  HorizontalAlignment="Left" 
+                                                  VerticalAlignment="Top"
+                                                  Margin="12,10,0,0"
+                                                  IsHitTestVisible="False">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding ElementName=BottomInputBox, Path=IsKeyboardFocused}" Value="False"/>
+                                                            <Condition Binding="{Binding Text, ElementName=BottomInputBox}" Value=""/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </Grid>
                                 <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
                                         HorizontalAlignment="Right" Margin="0 0 10 0" 

@@ -5,29 +5,57 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RapidKnowledgeware.Views.HelperView"
              mc:Ignorable="d" 
-             d:DesignHeight="200" d:DesignWidth="748">
+             d:DesignHeight="110" d:DesignWidth="748">
     <Grid Background="White">
         <StackPanel Margin="0 0 10 0">
-            <Grid Margin="10 25 10 0">
+            <Grid Margin="10 20 10 0">
                 <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
                     <StackPanel>
-                        <!-- 搜索输入框和按钮 -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <TextBox Width="300" 
-                                     Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
-                                     Margin="0,0,10,0"
-                                     VerticalContentAlignment="Center"/>
-                            <Button Content="搜索" 
-                                    Width="80" 
-                                    Height="30"
-                                    Command="{Binding SearchCommand}"/>
-                        </StackPanel>
+                        <Grid  Margin="0,0,0,10">
+                            <TextBox x:Name="SearchInputBox" BorderThickness="0 0 0 1"
+                                         
+                                         Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,90,0"
+                                         VerticalContentAlignment="Center"
+                                         Padding="10,0">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            <TextBlock Text="Enter 发送" 
+                                           FontSize="14" 
+                                           Foreground="#AAA" 
+                                           FontStyle="Italic"
+                                           HorizontalAlignment="Left" 
+                                           VerticalAlignment="Center"
+                                           Margin="12,0,0,0"
+                                           IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding ElementName=SearchInputBox, Path=IsKeyboardFocused}" Value="False"/>
+                                                    <Condition Binding="{Binding Text, ElementName=SearchInputBox}" Value=""/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <Button Content="搜索" Width="80" Height="30"
+                                   Command="{Binding SearchCommand}" HorizontalAlignment="Right"/>
+                        </Grid>
+
 
                         <!-- 分页控件（仅搜索视图显示） -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,1,0,0">
                             <Button Content="◀ 上一页" 
                                     Width="70" 
-                                    Margin="5"
+                                    Margin="0 0 0 0"
                                     Command="{Binding PreviousPageCommand}"
                                     IsEnabled="{Binding HasPreviousPage}"/>
                             <TextBlock VerticalAlignment="Center" Margin="10,0">
@@ -39,7 +67,7 @@
                             </TextBlock>
                             <Button Content="下一页 ▶" 
                                     Width="70" 
-                                    Margin="5"
+                                    Margin="0 0 0 0"
                                     Command="{Binding NextPageCommand}"
                                     IsEnabled="{Binding HasNextPage}"/>
                         </StackPanel>

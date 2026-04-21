@@ -144,25 +144,114 @@ namespace RapidKnowledgeware.ViewModels
         }
 
         /// <summary>
-        /// 删除文件命令
+        /// 重新索引文件命令
         /// </summary>
-        private CommandBase _deleteFileCommand;
-        public CommandBase DeleteFileCommand
+        private CommandBase _reindexFileCommand;
+        public CommandBase ReindexFileCommand
         {
             get
             {
-                if (_deleteFileCommand == null)
+                if (_reindexFileCommand == null)
                 {
-                    _deleteFileCommand = new CommandBase();
-                    _deleteFileCommand.DoExecute = new Action<object>(async param =>
+                    _reindexFileCommand = new CommandBase();
+                    _reindexFileCommand.DoExecute = new Action<object>(async param =>
                     {
                         if (param is KnowledgeFileItem item)
                         {
-                            await _uiService.DeleteFileAsync(item);
+                            // 检查源文件是否存在
+                            if (!System.IO.File.Exists(item.FilePath))
+                            {
+                                var deleteResult = MessageBox.Show(
+                                    $"文件“{item.FileName}”已不存在（可能被移动或删除）。\n是否从知识库中移除该文件？",
+                                    "文件不存在",
+                                    MessageBoxButton.YesNo,
+                                    MessageBoxImage.Warning);
+                                if (deleteResult == MessageBoxResult.Yes)
+                                {
+                                    // 从UI列表移除
+                                    KnowledgeBaseModel.FileItems.Remove(item);
+                                    // 从索引中移除
+                                    var service = new KnowledgeBaseService(KnowledgeBaseModel);
+                                    service.RemoveFileFromIndex(item.FilePath);
+                                    RefreshDisplayFileItems();
+                                    MainWindow.SetStatusMessage($"已移除文件：{item.FileName}");
+                                }
+                                return;
+                            }
+
+                            var result = MessageBox.Show($"确定重新索引文件“{item.FileName}”吗？",
+                                "重新索引", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                            if (result != MessageBoxResult.Yes) return;
+
+                            WindowControls.Show_Loading();
+                            MainWindow.SetStatusMessage($"正在重新索引 {item.FileName}...");
+
+                            var reindexService = new KnowledgeBaseService(KnowledgeBaseModel);
+                            await System.Threading.Tasks.Task.Run(async () =>
+                            {
+                                await reindexService.ReindexSingleFileAsync(item);
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    RefreshDisplayFileItems();
+                                    MainWindow.SetStatusMessage($"重新索引完成：{item.FileName}");
+                                    WindowControls.Hide_Loading();
+                                });
+                            });
                         }
                     });
                 }
-                return _deleteFileCommand;
+                return _reindexFileCommand;
+            }
+        }
+
+        /// <summary>
+        /// 删除文件命令（带确认提示）
+        /// </summary>
+        private CommandBase _deleteFileCommand2;
+        public CommandBase DeleteFileCommand2
+        {
+            get
+            {
+                if (_deleteFileCommand2 == null)
+                {
+                    _deleteFileCommand2 = new CommandBase();
+                    _deleteFileCommand2.DoExecute = new Action<object>(async param =>
+                    {
+                        if (param is KnowledgeFileItem item)
+                        {
+                            string message = System.IO.File.Exists(item.FilePath)
+                                ? $"确定删除文件“{item.FileName}”及其索引吗？"
+                                : $"文件“{item.FileName}”已不存在，是否从知识库中移除其索引？";
+
+                            var result = MessageBox.Show(message, "确认删除", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                            if (result != MessageBoxResult.Yes) return;
+
+                            WindowControls.Show_Loading();
+                            MainWindow.SetStatusMessage($"正在删除 {item.FileName}...");
+
+                            await System.Threading.Tasks.Task.Run(() =>
+                            {
+                                // 从UI列表移除
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    KnowledgeBaseModel.FileItems.Remove(item);
+                                    AppSettingsManager.SaveSettings(KnowledgeBaseModel);
+                                });
+
+                                var service = new KnowledgeBaseService(KnowledgeBaseModel);
+                                service.RemoveFileFromIndex(item.FilePath);
+
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
+                                    RefreshDisplayFileItems();
+                                    MainWindow.SetStatusMessage($"已删除文件：{item.FileName}");
+                                    WindowControls.Hide_Loading();
+                                });
+                            });
+                        }
+                    });
+                }
+                return _deleteFileCommand2;
             }
         }
 

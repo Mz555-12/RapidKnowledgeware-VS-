@@ -16,7 +16,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         /// <summary>
         /// 每页显示的条目数
         /// </summary>
-        public const int PageSize = 10;
+        public const int PageSize = 9;
 
         /// <summary>
         /// 搜索关键词

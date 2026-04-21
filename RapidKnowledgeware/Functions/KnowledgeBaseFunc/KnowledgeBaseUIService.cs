@@ -141,29 +141,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
             }
         }
 
-        /// <summary>
-        /// 删除文件及其索引（弹出确认框）
-        /// </summary>
-        /// <param name="item">知识库文件项</param>
-        public async Task DeleteFileAsync(KnowledgeFileItem item)
-        {
-            if (item == null) return;
-            var result = MessageBox.Show($"确定删除文件 {item.FileName} 及其索引吗？", "确认删除", MessageBoxButton.YesNo);
-            if (result == MessageBoxResult.Yes)
-            {
-                WindowControls.Show_Loading();
 
-                _model.FileItems.Remove(item);
-                AppSettingsManager.SaveSettings(_model);
-
-                _knowledgeService.RemoveFileFromIndex(item.FilePath);
-
-                await Task.Delay(500);
-
-                MainWindow.SetStatusMessage($"已删除文件 {item.FileName}");
-                WindowControls.Hide_Loading();
-            }
-        }
 
         /// <summary>
         /// 删除单个分块（弹出确认框）
