@@ -50,14 +50,29 @@
                     <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
                         <StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left" >
                                         <Label Content="是否对接知识库："/>
-                                        <ToggleButton x:Name="btn_isFun" Margin="0,5,0,5" Background="Transparent" BorderThickness="0" 
+                                        <ToggleButton x:Name="btn_isFun" Margin="0,5,30,5" Background="Transparent" BorderThickness="0" 
                                                       Template="{StaticResource CapsuleBtnTemplate}"
                                                       IsChecked="{Binding SpaceAdjustModel.IsLinkKnowledgeBase, Mode=TwoWay}">
                                         </ToggleButton>
                                     </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                        <Label Content="相似度阈值："/>
+                                        <TextBox Text="{Binding SpaceAdjustModel.IndexSimilarityThreshold, UpdateSourceTrigger=LostFocus}"   
+Margin="0 0 30 0" MinWidth="120" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" 
+VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                        <Label Content="检索数量："/>
+                                        <TextBox Text="{Binding SpaceAdjustModel.SearchQuantity, UpdateSourceTrigger=LostFocus}"   
+Margin="0 0 0 0" MinWidth="120" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" 
+VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    </StackPanel>
                                 </StackPanel>
+                            
 
                             </StackPanel>
                     </Border>

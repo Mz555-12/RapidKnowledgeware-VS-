@@ -28,44 +28,44 @@ namespace RapidKnowledgeware.Models
         }
         private KnowledgeBaseModel() { }
 
-        private string _currentEmbeddingName = "bge-m3:567m";
+        private string _defalut_currentEmbeddingName = "bge-m3:567m";
         /// <summary>
         /// 当前使用的嵌入模型名称
         /// </summary>
-        public string CurrentEmbeddingName
+        public string Default_CurrentEmbeddingName
         {
-            get => _currentEmbeddingName;
-            set { _currentEmbeddingName = value; RaisePropertyChanged(); }
+            get => _defalut_currentEmbeddingName;
+            set { _defalut_currentEmbeddingName = value; RaisePropertyChanged(); }
         }
 
-        private string _blockRule = "###";
+        private string _defalut_blockRule = "###";
         /// <summary>
         /// 全局分块规则（多个分隔符用英文逗号分隔）
         /// </summary>
-        public string BlockRule
+        public string Default_BlockRule
         {
-            get => _blockRule;
-            set { _blockRule = value; RaisePropertyChanged(); }
+            get => _defalut_blockRule;
+            set { _defalut_blockRule = value; RaisePropertyChanged(); }
         }
 
-        private int _SearchQuantity = 10;
+        private int _defalut_SearchQuantity = 10;
         /// <summary>
         /// 全局分块规则（多个分隔符用英文逗号分隔）
         /// </summary>
-        public int SearchQuantity
+        public int Default_SearchQuantity
         {
-            get => _SearchQuantity;
-            set { _SearchQuantity = value; RaisePropertyChanged(); }
+            get => _defalut_SearchQuantity;
+            set { _defalut_SearchQuantity = value; RaisePropertyChanged(); }
         }
 
-        private float _IndexSimilarityThreshold = 0.6f;
+        private float _defalut_indexSimilarityThreshold = 0.6f;
         /// <summary>
         /// 全局分块规则（多个分隔符用英文逗号分隔）
         /// </summary>
-        public float IndexSimilarityThreshold
+        public float Default_IndexSimilarityThreshold
         {
-            get => _IndexSimilarityThreshold;
-            set { _IndexSimilarityThreshold = value; RaisePropertyChanged(); }
+            get => _defalut_indexSimilarityThreshold;
+            set { _defalut_indexSimilarityThreshold = value; RaisePropertyChanged(); }
         }
 
         private string _fileBlockContent;

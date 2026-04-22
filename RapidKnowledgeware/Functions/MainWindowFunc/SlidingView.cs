@@ -129,7 +129,6 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 AnimateY(transform, 0, -height, () =>
                 {
                     overlayContainer.Visibility = Visibility.Collapsed;
-                    Debug.WriteLine("[SlidingView] 向上滑回完成，容器已隐藏");
                 });
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
@@ -169,7 +168,6 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 AnimateX(transform, 0, -width, () =>
                 {
                     overlayContainer.Visibility = Visibility.Collapsed;
-                    Debug.WriteLine("[SlidingView] 向左滑出完成，容器已隐藏");
                 });
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
@@ -194,7 +192,6 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 transform.X = -1000; // 保底偏移
 
             overlayContainer.Visibility = Visibility.Collapsed;
-            Debug.WriteLine("[SlidingView] 视图已立即隐藏，X 偏移重置到左侧外部");
         }
 
         /// <summary>
@@ -213,7 +210,6 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 AnimateX(transform, 0, width, () =>
                 {
                     overlayContainer.Visibility = Visibility.Collapsed;
-                    Debug.WriteLine("[SlidingView] 向右滑出完成，容器已隐藏");
                 });
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
@@ -233,6 +229,7 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             {
                 var transform = EnsureTranslateTransform(view);
                 double width = GetActualWidth(view);
+                if (width <= 0)
                 if (width <= 0)
                 {
                     onCompleted?.Invoke();

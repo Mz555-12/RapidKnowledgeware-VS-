@@ -16,11 +16,11 @@
                             <StackPanel Orientation="Horizontal">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <Label Content="当前嵌入模型："/>
-                                    <TextBox Text="{Binding KnowledgeBaseModel.CurrentEmbeddingName, UpdateSourceTrigger=PropertyChanged}"    Margin="0 0 30 0" MinWidth="150" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    <TextBox Text="{Binding KnowledgeBaseModel.Default_CurrentEmbeddingName, UpdateSourceTrigger=PropertyChanged}"    Margin="0 0 30 0" MinWidth="150" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <Label Content="相似度阈值："/>
-                                    <TextBox Text="{Binding KnowledgeBaseModel.IndexSimilarityThreshold, UpdateSourceTrigger=LostFocus}"   
+                                    <TextBox Text="{Binding KnowledgeBaseModel.Default_IndexSimilarityThreshold, UpdateSourceTrigger=LostFocus}"   
                        Margin="0 0 30 0" MinWidth="150" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" 
                        VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                 </StackPanel>
@@ -28,14 +28,14 @@
                             <StackPanel Orientation="Horizontal">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <Label Content="检索数量："/>
-                                    <TextBox Text="{Binding KnowledgeBaseModel.SearchQuantity, UpdateSourceTrigger=LostFocus}"   
+                                    <TextBox Text="{Binding KnowledgeBaseModel.Default_SearchQuantity, UpdateSourceTrigger=LostFocus}"   
                        Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" 
                        VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <!--多个分隔符请用英文逗号分隔，例如：###,##-->
                                     <Label Content="分块规则："/>
-                                    <TextBox Text="{Binding KnowledgeBaseModel.BlockRule, UpdateSourceTrigger=PropertyChanged}"    Margin="0 0 30 0" MinWidth="150" MaxWidth="170" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    <TextBox Text="{Binding KnowledgeBaseModel.Default_BlockRule, UpdateSourceTrigger=PropertyChanged}"    Margin="0 0 30 0" MinWidth="150" MaxWidth="170" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
@@ -46,7 +46,7 @@ Command="{Binding AddKnowledgeCommand}"/>
 
                 </Border>
 
-                <Label Content="知识库设置" Margin="20 -10 0 0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="15 0" Background="White"  Foreground="#666"/>
+                <Label Content="默认知识库设置" Margin="20 -10 0 0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="15 0" Background="White"  Foreground="#666"/>
 
             </Grid>
 

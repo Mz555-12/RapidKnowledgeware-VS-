@@ -77,5 +77,26 @@ namespace RapidKnowledgeware.Models
             get => _isLinkKnowledgeBase;
             set { _isLinkKnowledgeBase = value; RaisePropertyChanged(); }
         }
+
+
+        private int _searchQuantity = 10;
+        /// <summary>
+        /// 检索返回的文档块数量（会话级）
+        /// </summary>
+        public int SearchQuantity
+        {
+            get => _searchQuantity;
+            set { _searchQuantity = value; RaisePropertyChanged(); }
+        }
+
+        private float _indexSimilarityThreshold = 0.6f;
+        /// <summary>
+        /// 相似度阈值，0~1（会话级）
+        /// </summary>
+        public float IndexSimilarityThreshold
+        {
+            get => _indexSimilarityThreshold;
+            set { _indexSimilarityThreshold = value; RaisePropertyChanged(); }
+        }
     }
 }

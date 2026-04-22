@@ -43,7 +43,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         // 
         public string[] ParseSeparators()
         {
-            return ParseSeparatorsFromRule(_model.BlockRule);
+            return ParseSeparatorsFromRule(_model.Default_BlockRule);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
                         FilePath = filePath,
                         ChunkCount = chunkCount,
                         IsIndexed = true,
-                        ImportBlockRule = _model.BlockRule   // 记录当前全局规则
+                        ImportBlockRule = _model.Default_BlockRule   // 记录当前全局规则
                     };
                     _model.FileItems.Add(item);
                     successCount++;
@@ -80,7 +80,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            MessageBox.Show($"嵌入模型 \"{_model.CurrentEmbeddingName}\" 不可用，请检查模型名称。\n\n错误详情: {ex.Message}",
+                            MessageBox.Show($"嵌入模型 \"{_model.Default_CurrentEmbeddingName}\" 不可用，请检查模型名称。\n\n错误详情: {ex.Message}",
                                             "嵌入模型错误", MessageBoxButton.OK, MessageBoxImage.Error);
                         });
                         progress?.Report((fileName, false, 0, ex.Message));
@@ -120,12 +120,12 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
             // 移除旧索引
             RagServiceInstance.RemoveChunksBySource(fileItem.FilePath);
 
-            var analysis = new AnalysesFile(embeddingModel: _model.CurrentEmbeddingName);
+            var analysis = new AnalysesFile(embeddingModel: _model.Default_CurrentEmbeddingName);
             string content = await analysis.LoadFileAsync(fileItem.FilePath);
 
             string ruleToUse = !string.IsNullOrWhiteSpace(fileItem.ImportBlockRule)
                                ? fileItem.ImportBlockRule
-                               : _model.BlockRule;
+                               : _model.Default_BlockRule;
             var separators = ParseSeparatorsFromRule(ruleToUse);
             var allChunks = analysis.SplitIntoChunks(content, separators);
 
@@ -164,7 +164,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
 
             string ruleToUse = !string.IsNullOrWhiteSpace(fileItem.ImportBlockRule)
                                ? fileItem.ImportBlockRule
-                               : _model.BlockRule;
+                               : _model.Default_BlockRule;
             var separators = ParseSeparatorsFromRule(ruleToUse);
             var allChunks = analysis.SplitIntoChunks(content, separators);
 
@@ -191,7 +191,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
 
             string ruleToUse = !string.IsNullOrWhiteSpace(fileItem.ImportBlockRule)
                                ? fileItem.ImportBlockRule
-                               : _model.BlockRule;
+                               : _model.Default_BlockRule;
             var separators = ParseSeparatorsFromRule(ruleToUse);
             var allChunks = await Task.Run(() => analysis.SplitIntoChunks(content, separators));
 
@@ -235,7 +235,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         {
             get
             {
-                string currentModel = KnowledgeBaseModel.Instance.CurrentEmbeddingName;
+                string currentModel = KnowledgeBaseModel.Instance.Default_CurrentEmbeddingName;
                 string currentBaseURL = LLMAdjustFunc.LLMAdjustService.Current.Default_BaseURL;
 
                 // 检查是否需要重建实例

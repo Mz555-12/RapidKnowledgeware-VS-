@@ -79,10 +79,22 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
 
             string newName = $"{baseName} {newNumber}";
 
+            // 修改点：显式初始化 SpaceParameters，包含知识库默认参数
             var newSession = new ChatSessionModel
             {
                 DisplayName = newName,
-                SpaceParameters = LLMAdjustService.CreateSpaceParametersFromDefault()
+                SpaceParameters = new SpaceAdjustModel
+                {
+                    ChatLLM = LLMAdjustService.Current.Default_ChatLLM,
+                    Temperature = LLMAdjustService.Current.Default_Temperature,
+                    TopP = LLMAdjustService.Current.Default_TopP,
+                    RepeatPenalty = LLMAdjustService.Current.Default_RepeatPenalty,
+                    SystemPrompt = LLMAdjustService.Current.Default_SystemPrompt,
+                    QueryRefusalResponse = LLMAdjustService.Current.Default_RefusalResponse,
+                    IsLinkKnowledgeBase = true,
+                    SearchQuantity = KnowledgeBaseModel.Instance.Default_SearchQuantity,
+                    IndexSimilarityThreshold = KnowledgeBaseModel.Instance.Default_IndexSimilarityThreshold
+                }
             };
             _viewModel.Sessions.Insert(0, newSession);
             _viewModel.SelectedSession = newSession;

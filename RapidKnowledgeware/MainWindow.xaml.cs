@@ -55,7 +55,7 @@ namespace RapidKnowledgeware
             foreach (var item in KnowledgeBaseModel.Instance.FileItems)
             {
                 if (string.IsNullOrEmpty(item.ImportBlockRule))
-                    item.ImportBlockRule = KnowledgeBaseModel.Instance.BlockRule;
+                    item.ImportBlockRule = KnowledgeBaseModel.Instance.Default_BlockRule;
             }
 
 

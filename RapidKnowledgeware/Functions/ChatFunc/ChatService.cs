@@ -110,9 +110,13 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     if (ragService.IndexedChunkCount > 0)
                     {
                         Debug.WriteLine($"[ChatService] RAG 索引中有 {ragService.IndexedChunkCount} 个块，开始检索...");
-                        // 提高相似度阈值到 0.5f，减少检索数量到 2，压缩提示词长度
-                        var retrieved = await ragService.RetrieveAsync(userInput, topK: KnowledgeBaseModel.Instance.SearchQuantity, minSimilarity: KnowledgeBaseModel.Instance.IndexSimilarityThreshold);
-                        Debug.WriteLine($"[ChatService] 检索到 {retrieved.Count} 个相关块，最高相似度: {retrieved.FirstOrDefault().Similarity}");
+
+
+                        // 使用会话级知识库参数
+                        int searchQuantity = _session.SpaceParameters.SearchQuantity;
+                        float similarityThreshold = _session.SpaceParameters.IndexSimilarityThreshold;
+
+                        var retrieved = await ragService.RetrieveAsync(userInput, topK: searchQuantity, minSimilarity: similarityThreshold);
 
                         if (retrieved.Count > 0)
                         {
@@ -139,7 +143,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            MessageBox.Show($"嵌入模型 \"{KnowledgeBaseModel.Instance.CurrentEmbeddingName}\" 调用失败，请检查模型名称。\n\n错误详情: {ex.Message}",
+                            MessageBox.Show($"嵌入模型 \"{KnowledgeBaseModel.Instance.Default_CurrentEmbeddingName}\" 调用失败，请检查模型名称。\n\n错误详情: {ex.Message}",
                                             "嵌入模型错误", MessageBoxButton.OK, MessageBoxImage.Error);
                         });
                     }

@@ -48,7 +48,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         /// </summary>
         public async Task AddKnowledgeAsync()
         {
-            if (string.IsNullOrWhiteSpace(_model.BlockRule))
+            if (string.IsNullOrWhiteSpace(_model.Default_BlockRule))
             {
                 MessageBox.Show("分块规则不能为空，请先填写规则。", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -141,7 +141,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
 
                 _model.CurrentFileName = item.FileName;
                 _model.CurrentFileBlockRule = string.IsNullOrEmpty(item.ImportBlockRule)
-                    ? _model.BlockRule
+                    ? _model.Default_BlockRule
                     : item.ImportBlockRule;
 
                 MainWindow.SetStatusMessage($"已加载 {item.FileName} 的分块，共 {chunks.Count} 个块");
