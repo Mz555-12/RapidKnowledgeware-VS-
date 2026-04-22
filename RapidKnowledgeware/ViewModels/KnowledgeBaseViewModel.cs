@@ -21,6 +21,8 @@ namespace RapidKnowledgeware.ViewModels
         private static KnowledgeBaseViewModel _instance;
         public static KnowledgeBaseViewModel Instance => _instance ?? (_instance = new KnowledgeBaseViewModel());
 
+        private bool _isAnimating = false;
+
         private bool _hasMultipleChunks;
         /// <summary>
         /// 是否包含多个分块（用于 UI 控制）
@@ -325,10 +327,7 @@ namespace RapidKnowledgeware.ViewModels
         }
 
         /// <summary>
-        /// 切换视图命令
-        /// </summary>
-        /// <summary>
-        /// 切换视图命令
+        /// 切换视图命令（增加动画锁防快速双击）
         /// </summary>
         private CommandBase _switchViewCommand;
         public CommandBase SwitchViewCommand
@@ -340,15 +339,23 @@ namespace RapidKnowledgeware.ViewModels
                     _switchViewCommand = new CommandBase();
                     _switchViewCommand.DoExecute = new Action<object>(_ =>
                     {
-                        if (_funcViewContainer == null || _searchViewContainer == null) return;
+                        // 动画锁：若正在执行动画则直接返回
+                        if (_isAnimating)
+                            return;
+                        if (_funcViewContainer == null || _searchViewContainer == null)
+                            return;
+
+                        _isAnimating = true;
 
                         if (!IsSearchViewVisible)
                         {
                             // 切换到搜索视图
-                            RapidKnowledgeware.Functions.MainWindowFunc.SlidingView.SlideOutToRight2(_funcView, _funcViewContainer);
-                            RapidKnowledgeware.Functions.MainWindowFunc.SlidingView.SlideInFromRight(_searchView, _searchViewContainer);
+                            SlidingView.SlideOutToRight2(_funcView, _funcViewContainer);
+                            SlidingView.SlideInFromRight(_searchView, _searchViewContainer, onCompleted: () =>
+                            {
+                                _isAnimating = false; // 滑入完成后解锁
+                            });
                             IsSearchViewVisible = true;
-                            // 执行初始搜索（若关键词为空则显示全部）
                             _searchService.PerformSearch();
                             RefreshDisplayFileItems();
                             RaiseSearchPropertiesChanged();
@@ -356,16 +363,15 @@ namespace RapidKnowledgeware.ViewModels
                         else
                         {
                             // 切换回功能视图
-                            RapidKnowledgeware.Functions.MainWindowFunc.SlidingView.SlideOutToRight2(_searchView, _searchViewContainer);
-                            RapidKnowledgeware.Functions.MainWindowFunc.SlidingView.SlideInFromRight(_funcView, _funcViewContainer);
+                            SlidingView.SlideOutToRight2(_searchView, _searchViewContainer);
+                            SlidingView.SlideInFromRight(_funcView, _funcViewContainer, onCompleted: () =>
+                            {
+                                _isAnimating = false; // 滑入完成后解锁
+                            });
                             IsSearchViewVisible = false;
-
-                            // 清空搜索关键词并重置搜索服务
                             _searchService.Keyword = string.Empty;
                             RaisePropertyChanged(nameof(SearchKeyword));
                             _searchService.PerformSearch();
-
-                            // 刷新主文件列表
                             RefreshDisplayFileItems();
                         }
                     });

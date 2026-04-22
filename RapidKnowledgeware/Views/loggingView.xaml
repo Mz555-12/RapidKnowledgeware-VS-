@@ -30,7 +30,7 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
                     <ComboBox ItemsSource="{Binding AvailableDates}" SelectedItem="{Binding SelectedDate}" 
-          Width="100" Margin="5,0" VerticalAlignment="Center"/>
+          Width="115  " Margin="5,0" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
                     <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Width="180" Margin="5,0" 
                              VerticalContentAlignment="Center" Padding="5,0"/>
                     <Button Content="搜索" Width="60" Margin="5,0" Command="{Binding SearchCommand}"/>

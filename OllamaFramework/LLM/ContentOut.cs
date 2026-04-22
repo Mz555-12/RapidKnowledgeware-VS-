@@ -118,7 +118,8 @@ namespace OllamaFramework.LLM
             }
             catch (Exception ex)
             {
-                return $"[生成出错: {ex.Message}]";
+                // 重新抛出包含模型名的异常
+                throw new Exception($"对话模型 '{_chatModel}' 调用失败: {ex.Message}", ex);
             }
 
             // 如果没有获得任何响应，返回拒绝响应文本
@@ -166,7 +167,8 @@ namespace OllamaFramework.LLM
             }
             catch (Exception ex)
             {
-                onChunkReceived?.Invoke($"\n[生成出错: {ex.Message}]");
+                // 重新抛出包含模型名的异常
+                throw new Exception($"对话模型 '{_chatModel}' 调用失败: {ex.Message}", ex);
             }
 
             return fullResponse.ToString();

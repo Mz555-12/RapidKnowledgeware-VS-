@@ -64,7 +64,6 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
         /// </summary>
         private static void AnimateX(TranslateTransform transform, double from, double to, Action onCompleted = null)
         {
-            // 停止当前 X 动画，避免冲突
             transform.BeginAnimation(TranslateTransform.XProperty, null);
             transform.X = from;
 
@@ -222,7 +221,10 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
         /// <summary>
         /// 从右侧滑入（显示），先显示容器，再将视图从 +width 滑动到 0
         /// </summary>
-        public static void SlideInFromRight(FrameworkElement view, FrameworkElement overlayContainer)
+        /// <param name="view">要滑入的视图</param>
+        /// <param name="overlayContainer">容器</param>
+        /// <param name="onCompleted">动画完成后的回调（可选）</param>
+        public static void SlideInFromRight(FrameworkElement view, FrameworkElement overlayContainer, Action onCompleted = null)
         {
             if (view == null || overlayContainer == null) return;
             overlayContainer.Visibility = Visibility.Visible;
@@ -231,9 +233,13 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             {
                 var transform = EnsureTranslateTransform(view);
                 double width = GetActualWidth(view);
-                if (width <= 0) return;
+                if (width <= 0)
+                {
+                    onCompleted?.Invoke();
+                    return;
+                }
 
-                AnimateX(transform, width, 0);
+                AnimateX(transform, width, 0, onCompleted);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
     }

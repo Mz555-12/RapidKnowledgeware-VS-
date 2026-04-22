@@ -403,7 +403,7 @@ CommandParameter="{Binding}"/>
             <!-- 日志视图覆盖层 -->
             <Grid Grid.RowSpan="2" x:Name="LogOverlayContainer" 
                   Visibility="Collapsed"   
-                  Background="Transparent" Width="1000" Height="610" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                  Background="Transparent" Width="990" Height="610" HorizontalAlignment="Center" VerticalAlignment="Bottom">
                 <views:LoggingView x:Name="LogView" 
                                    RenderTransformOrigin="0.5,0.5">
                     <views:LoggingView.RenderTransform>

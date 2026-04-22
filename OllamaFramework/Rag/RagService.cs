@@ -130,23 +130,34 @@ public class RagService
         if (_indexedChunks.Count == 0)
             return new List<(DocumentChunk, float)>();
 
-        // 生成查询向量
-        var queryEmbedding = await _embeddingService.GenerateEmbeddingAsync(query);
 
-        // 计算相似度并排序
-        var scored = _indexedChunks
-            .Select(chunk => new
-            {
-                Chunk = chunk,
-                Similarity = AnalysesFile.CosineSimilarity(queryEmbedding, chunk.Embedding)
-            })
-            .Where(x => x.Similarity >= minSimilarity)
-            .OrderByDescending(x => x.Similarity)
-            .Take(topK)
-            .Select(x => (x.Chunk, x.Similarity))
-            .ToList();
+        try
+        {
+            // 生成查询向量
+            var queryEmbedding = await _embeddingService.GenerateEmbeddingAsync(query);
 
-        return scored;
+            // 计算相似度并排序
+            var scored = _indexedChunks
+                .Select(chunk => new
+                {
+                    Chunk = chunk,
+                    Similarity = AnalysesFile.CosineSimilarity(queryEmbedding, chunk.Embedding)
+                })
+                .Where(x => x.Similarity >= minSimilarity)
+                .OrderByDescending(x => x.Similarity)
+                .Take(topK)
+                .Select(x => (x.Chunk, x.Similarity))
+                .ToList();
+
+            return scored;
+
+        }
+        catch (Exception ex)
+        {
+            // 抛出包含模型名称的明确异常，上层（ChatService）可捕获并弹框
+            throw new Exception($"嵌入模型 '{_embeddingService.EmbeddingModelName}' 调用失败: {ex.Message}", ex);
+        }
+
     }
 
     /// <summary>

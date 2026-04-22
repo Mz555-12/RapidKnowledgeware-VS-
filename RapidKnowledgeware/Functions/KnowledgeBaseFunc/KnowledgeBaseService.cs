@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
 {
@@ -12,14 +13,16 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
     {
         private readonly KnowledgeBaseModel _model;
 
-        private readonly RagService _ragService;
+
+
+
+
+
 
         public KnowledgeBaseService(KnowledgeBaseModel model)
         {
             _model = model;
-            _ragService = RagServiceInstance;  // 使用全局单例
-            
-            _ragService.LoadIndex();
+            _ = RagServiceInstance;
         }
 
         /// <summary>
@@ -49,7 +52,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         public async Task<int> IndexFilesAsync(IEnumerable<string> filePaths, IProgress<(string FileName, bool Success, int ChunkCount, string ErrorMessage)> progress = null)
         {
             int successCount = 0;
-            var ragService = _ragService;
+            var ragService = RagServiceInstance;// 每次获取最新实例
             var separators = ParseSeparators();
 
             foreach (var filePath in filePaths)
@@ -71,10 +74,25 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
                 }
                 catch (Exception ex)
                 {
-                    progress?.Report((fileName, false, 0, ex.Message));
+                    // 检查异常消息中是否包含模型错误关键词
+                    string errorMsg = ex.ToString();
+                    if (errorMsg.Contains("model") || errorMsg.Contains("404") || errorMsg.Contains("not found"))
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            MessageBox.Show($"嵌入模型 \"{_model.CurrentEmbeddingName}\" 不可用，请检查模型名称。\n\n错误详情: {ex.Message}",
+                                            "嵌入模型错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        });
+                        progress?.Report((fileName, false, 0, ex.Message));
+                        break; // 模型错误直接终止批量处理
+                    }
+                    else
+                    {
+                        progress?.Report((fileName, false, 0, ex.Message));
+                    }
                 }
             }
-            _ragService.SaveIndex();  // 索引变更后保存
+            ragService.SaveIndex();  // 索引变更后保存
             return successCount;
         }
 
@@ -83,7 +101,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         /// </summary>
         public async Task ReindexAllFilesAsync()
         {
-            _ragService.ClearIndex();
+            RagServiceInstance.ClearIndex();
             var filesSnapshot = _model.FileItems.ToList();
             foreach (var file in filesSnapshot)
             {
@@ -91,7 +109,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
                     continue;
                 await ReindexSingleFileAsync(file);
             }
-            _ragService.SaveIndex();
+            RagServiceInstance.SaveIndex();
         }
 
         /// <summary>
@@ -100,7 +118,7 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
         public async Task ReindexSingleFileAsync(KnowledgeFileItem fileItem)
         {
             // 移除旧索引
-            _ragService.RemoveChunksBySource(fileItem.FilePath);
+            RagServiceInstance.RemoveChunksBySource(fileItem.FilePath);
 
             var analysis = new AnalysesFile(embeddingModel: _model.CurrentEmbeddingName);
             string content = await analysis.LoadFileAsync(fileItem.FilePath);
@@ -129,8 +147,8 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
                     }
                 });
             }
-            _ragService.AddChunks(newChunks);
-            _ragService.SaveIndex();
+            RagServiceInstance.AddChunks(newChunks);
+            RagServiceInstance.SaveIndex();
 
             fileItem.ChunkCount = newChunks.Count;
             fileItem.IsIndexed = true;
@@ -193,38 +211,58 @@ namespace RapidKnowledgeware.Functions.KnowledgeBaseFunc
 
         public void RemoveFileFromIndex(string filePath)
         {
-            _ragService.RemoveChunksBySource(filePath);
-            _ragService.SaveIndex();
+            RagServiceInstance.RemoveChunksBySource(filePath);
+            RagServiceInstance.SaveIndex();
         }
 
         public void RemoveChunkAndSave(string filePath, int chunkIndex)
         {
             // 需要在 RagService 中添加 RemoveChunkBySourceAndIndex 方法
-            _ragService.RemoveChunkBySourceAndIndex(filePath, chunkIndex);
-            _ragService.SaveIndex();
+            RagServiceInstance.RemoveChunkBySourceAndIndex(filePath, chunkIndex);
+            RagServiceInstance.SaveIndex();
         }
 
+
         private static RagService _ragServiceInstance;
+        private static string _lastEmbeddingModel;
+        private static string _lastBaseURL;
         private static readonly object _ragServiceLock = new object();
 
         /// <summary>
-        /// 获取全局唯一的 RagService 单例实例（线程安全，延迟初始化）
+        /// 获取全局唯一的 RagService 单例实例（线程安全，配置变更时自动重建）
         /// </summary>
         public static RagService RagServiceInstance
         {
             get
             {
-                if (_ragServiceInstance == null)
+                string currentModel = KnowledgeBaseModel.Instance.CurrentEmbeddingName;
+                string currentBaseURL = LLMAdjustFunc.LLMAdjustService.Current.Default_BaseURL;
+
+                // 检查是否需要重建实例
+                bool needRebuild = _ragServiceInstance == null ||
+                                   _lastEmbeddingModel != currentModel ||
+                                   _lastBaseURL != currentBaseURL;
+
+                if (needRebuild)
                 {
                     lock (_ragServiceLock)
                     {
-                        if (_ragServiceInstance == null)
+                        // 双重检查
+                        if (_ragServiceInstance == null ||
+                            _lastEmbeddingModel != currentModel ||
+                            _lastBaseURL != currentBaseURL)
                         {
+                            // 保存旧索引？此处自动重建会丢失之前加载的索引数据，但索引已持久化到磁盘，
+                            // 重建后调用 LoadIndex() 即可恢复。若担心性能，可考虑保留索引缓存。
                             _ragServiceInstance = new RagService(
-                                ollamaEndpoint: LLMAdjustFunc.LLMAdjustService.Current.Default_BaseURL,
-                                embeddingModel: KnowledgeBaseModel.Instance.CurrentEmbeddingName
+                                ollamaEndpoint: currentBaseURL,
+                                embeddingModel: currentModel
                             );
                             _ragServiceInstance.LoadIndex();
+                            _lastEmbeddingModel = currentModel;
+                            _lastBaseURL = currentBaseURL;
+
+                            System.Diagnostics.Debug.WriteLine($"[RagService] 配置变更重建，模型：{currentModel}，BaseURL：{currentBaseURL}");
                         }
                     }
                 }

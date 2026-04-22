@@ -293,7 +293,7 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
         /// </summary>
         public void RecordAndSaveAllSettingsChanges()
         {
-            // 1. 处理 LLM 全局模型（直接调用现有 Save 方法，其内部已实现对比与日志记录）
+            // 1. 处理 LLM 全局模型
             LLMAdjustFunc.LLMAdjustService.Save();
 
             // 2. 处理知识库模型
@@ -317,10 +317,11 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             // 3. 保存知识库配置到文件
             AppSettingsManager.SaveSettings(kbModel);
 
-            // 4. 【关键】重新捕获知识库模型快照，为下一次编辑做准备
+            // 4. 重新捕获快照
             SettingsChangeTracker.CaptureSnapshot(kbModel);
-
         }
+
+        
 
         #endregion
 

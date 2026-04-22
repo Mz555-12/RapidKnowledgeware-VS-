@@ -132,6 +132,17 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"[ChatService] RAG 检索失败: {ex.Message}，使用原始问题");
+
+                    // 检查是否为嵌入模型错误
+                    string errorMsg = ex.ToString();
+                    if (errorMsg.Contains("model") || errorMsg.Contains("404") || errorMsg.Contains("not found"))
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            MessageBox.Show($"嵌入模型 \"{KnowledgeBaseModel.Instance.CurrentEmbeddingName}\" 调用失败，请检查模型名称。\n\n错误详情: {ex.Message}",
+                                            "嵌入模型错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        });
+                    }
                 }
             }
             else
@@ -208,9 +219,26 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[ChatService] 生成出错: {ex.GetType().Name} - {ex.Message}");
-                Debug.WriteLine($"[ChatService] 堆栈: {ex.StackTrace}");
-                aiMessage.Content2 = $"[错误: {ex.Message}]";
+                Debug.WriteLine($"[ChatService] LLM 生成失败: {ex.Message}");
+
+                // 检查是否为对话模型错误
+                string errorMsg = ex.ToString();
+                if (errorMsg.Contains("model") || errorMsg.Contains("404") || errorMsg.Contains("not found"))
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show($"对话模型 \"{_session.SpaceParameters.ChatLLM}\" 调用失败，请检查模型名称。\n\n错误详情: {ex.Message}",
+                                        "对话模型错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
+                }
+                else
+                {
+                    // 非模型错误仍显示在聊天界面
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        aiMessage.Content2 = $"[错误: {ex.Message}]";
+                    });
+                }
             }
             finally
             {

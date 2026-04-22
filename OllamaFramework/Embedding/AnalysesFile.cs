@@ -19,6 +19,8 @@ namespace OllamaFramework.Embedding
         private readonly IOllamaApiClient _ollamaClient;
         private readonly string _embeddingModel;
 
+        public string EmbeddingModelName => _embeddingModel;
+
         /// <summary>
         /// 初始化分析服务
         /// </summary>
@@ -138,14 +140,24 @@ namespace OllamaFramework.Embedding
                 Model = _embeddingModel,
                 Input = new List<string> { text }
             };
+            try
+            {
+                var response = await _ollamaClient.EmbedAsync(request);
+                var embedding = response?.Embeddings?.FirstOrDefault();
 
-            var response = await _ollamaClient.EmbedAsync(request);
-            var embedding = response?.Embeddings?.FirstOrDefault();
+                if (embedding == null || !embedding.Any())
+                    throw new InvalidOperationException("嵌入向量生成失败");
 
-            if (embedding == null || !embedding.Any())
-                throw new InvalidOperationException("嵌入向量生成失败");
+                return embedding.ToArray();
+            }
+            catch (Exception ex)
+            {
 
-            return embedding.ToArray();
+                // 重新抛出包含模型名的异常，便于上层识别
+                throw new Exception($"嵌入模型 '{_embeddingModel}' 调用失败: {ex.Message}", ex);
+            }
+
+
         }
 
         /// <summary>
