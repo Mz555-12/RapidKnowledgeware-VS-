@@ -157,9 +157,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Base\CommandBase.cs" />
+    <Compile Include="Converters\DebugLevelToColorConverter.cs" />
     <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\StringToBoolConverter.cs" />
     <Compile Include="Functions\ChatFunc\ChatService.cs" />
+    <Compile Include="Functions\ChatFunc\PromptTruncationService.cs" />
+    <Compile Include="Functions\DebugFunc\DebugService.cs" />
     <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseSearchService.cs" />
     <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseService.cs" />
     <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseUIService.cs" />
@@ -176,17 +179,22 @@
     <Compile Include="Models\ChatLog.cs" />
     <Compile Include="Models\ChatMessageModel.cs" />
     <Compile Include="Models\ChatSessionModel.cs" />
+    <Compile Include="Models\DebugModel.cs" />
     <Compile Include="Models\KnowledgeBaseModel.cs" />
     <Compile Include="Models\MainModel.cs" />
     <Compile Include="Models\LLMAdjustModel.cs" />
     <Compile Include="Models\OperationsLog.cs" />
     <Compile Include="Models\SpaceAdjustModel.cs" />
+    <Compile Include="ViewModels\DebugWindowModel.cs" />
     <Compile Include="ViewModels\KnowledgeBaseViewModel.cs" />
     <Compile Include="ViewModels\LoggingViewModel.cs" />
     <Compile Include="ViewModels\MainWindowModel.cs" />
     <Compile Include="ViewModels\LLMAdjustViewModel.cs" />
     <Compile Include="ViewModels\SpaceAdjustViewModel.cs" />
     <Compile Include="ViewModels\SpaceParametersViewModel.cs" />
+    <Compile Include="Views\DebugWindow.xaml.cs">
+      <DependentUpon>DebugWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\FileBlockView.xaml.cs">
       <DependentUpon>FileBlockView.xaml</DependentUpon>
     </Compile>
@@ -232,6 +240,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Assets\Styles\SpaceParametersStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DebugWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

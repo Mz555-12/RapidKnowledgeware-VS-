@@ -23,7 +23,6 @@ namespace RapidKnowledgeware.ViewModels
         public MainModel MainModel { get; set; } = new MainModel();
         private MainWindowService _service;
         private bool _isLogViewVisible = false;
-        private LoggingViewModel _logVM;
 
         /// <summary>
         /// 当前会话是否有消息（委托给 Service）
@@ -157,6 +156,27 @@ namespace RapidKnowledgeware.ViewModels
                     });
                 }
                 return _logCommand;
+            }
+        }
+
+        /// <summary>
+        /// 打开调试窗口命令
+        /// </summary>
+        private CommandBase _openDebugWindowCommand;
+        public CommandBase OpenDebugWindowCommand
+        {
+            get
+            {
+                if (_openDebugWindowCommand == null)
+                {
+                    _openDebugWindowCommand = new CommandBase();
+                    _openDebugWindowCommand.DoExecute = new Action<object>(_ =>
+                    {
+                        var debugWindow = new DebugWindow();
+                        debugWindow.Show();
+                    });
+                }
+                return _openDebugWindowCommand;
             }
         }
 

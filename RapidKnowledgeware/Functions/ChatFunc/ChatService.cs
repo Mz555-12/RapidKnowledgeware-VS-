@@ -1,5 +1,7 @@
-﻿using OllamaFramework.LLM;
+﻿using Microsoft.Extensions.AI;
+using OllamaFramework.LLM;
 using OllamaFramework.Models;
+using RapidKnowledgeware.Functions.DebugFunc;
 using RapidKnowledgeware.Models;
 using System;
 using System.Diagnostics;
@@ -19,6 +21,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         private readonly ChatSessionModel _session;
         private ContentOut _llmService;
         private CancellationTokenSource _cts;
+        private SpaceAdjustModel space;
 
         /// <summary>
         /// 初始化聊天服务
@@ -35,7 +38,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         private void EnsureLLMService()
         {
             Debug.WriteLine($"[ChatService] EnsureLLMService 开始，会话: {_session.DisplayName}");
-            var space = _session.SpaceParameters;
+            
             var defaultConfig = LLMAdjustFunc.LLMAdjustService.Current;
             Debug.WriteLine($"[ChatService] 使用 BaseURL: {defaultConfig.Default_BaseURL}, ChatLLM: {space.ChatLLM}");
             _llmService = new ContentOut(defaultConfig.Default_BaseURL, space.ChatLLM);
@@ -59,6 +62,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         /// <param name="onTokenReceived">每收到一个 token 时的回调</param>
         public async Task SendMessageAsync(string userInput, Action<string> onTokenReceived)
         {
+            space = _session.SpaceParameters;
             Debug.WriteLine($"[ChatService] SendMessageAsync 开始，输入: {userInput}");
             if (string.IsNullOrWhiteSpace(userInput))
             {
@@ -74,8 +78,11 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     Content = userInput
                 });
                 Debug.WriteLine($"[ChatService] 已添加用户消息到会话: {_session.DisplayName}");
-                MainWindow.ScrollChatToEnd();
+                DebugService.Info($"############### {_session.DisplayName} 聊天开始 #################");
+                DebugService.Info($"模型为：{space.ChatLLM}");
+                DebugService.Info($"{_session.DisplayName} 输入: {userInput}");
 
+                MainWindow.ScrollChatToEnd();
                 // 立即刷新输入框布局（居中→底部）
                 var mainWin = Application.Current.MainWindow as MainWindow;
                 if (mainWin?.DataContext is RapidKnowledgeware.ViewModels.MainWindowModel vm)
@@ -109,32 +116,59 @@ namespace RapidKnowledgeware.Functions.ChatFunc
 
                     if (ragService.IndexedChunkCount > 0)
                     {
+                        DebugService.Info($"RAG 索引中有 {ragService.IndexedChunkCount} 个块，开始检索...");
                         Debug.WriteLine($"[ChatService] RAG 索引中有 {ragService.IndexedChunkCount} 个块，开始检索...");
 
 
                         // 使用会话级知识库参数
                         int searchQuantity = _session.SpaceParameters.SearchQuantity;
                         float similarityThreshold = _session.SpaceParameters.IndexSimilarityThreshold;
-
+                        DebugService.Info($"当前相似度阈值为：{similarityThreshold}，最大可检索：{searchQuantity} 个块");
                         var retrieved = await ragService.RetrieveAsync(userInput, topK: searchQuantity, minSimilarity: similarityThreshold);
+                        // 将检索结果拼接成一条完整的调试信息
+                        var sb = new StringBuilder();
+                        sb.AppendLine("#############索引到的块#################");
+                        for (int i = 0; i < retrieved.Count; i++)
+                        {
+                            var item = retrieved[i];
+                            string source = item.Chunk.Metadata.TryGetValue("source", out object src) ? src.ToString() : "未知来源";
+                            string chunkIndex = item.Chunk.Metadata.TryGetValue("chunk_index", out object idx) ? idx.ToString() : "?";
+
+                            sb.AppendLine($"\n  [{i + 1}] 相似度：{item.Similarity:F4}");
+                            sb.AppendLine($"     来源：{System.IO.Path.GetFileName(source)}");
+                            sb.AppendLine($"     块为：{chunkIndex}\n");
+                            
+                        }
+                        sb.AppendLine("######################################");
+                        DebugService.Info(sb.ToString());
 
                         if (retrieved.Count > 0)
                         {
-                            augmentedPrompt = ragService.BuildAugmentedPrompt(userInput, retrieved);
+                            DebugService.Info($"找到了 {retrieved.Count} 个块");
+                            // 直接使用全局默认上下文大小
+                            int contextSize = LLMAdjustFunc.LLMAdjustService.Current.Default_ContextSize;
+                            augmentedPrompt = PromptTruncationService.BuildTruncatedPrompt(userInput, retrieved, contextSize);
+                            DebugService.Info($"已构建增强提示词（上下文窗口：{contextSize}字符），实际长度: {augmentedPrompt.Length}");
                             Debug.WriteLine($"[ChatService] 已构建增强提示词，长度: {augmentedPrompt.Length}");
+
+                            
+
                         }
                         else
                         {
+                            DebugService.Info("未检索到足够相关内容");
                             Debug.WriteLine("[ChatService] 未检索到足够相关内容，使用原始问题");
                         }
                     }
                     else
                     {
+                        DebugService.Info("RAG 索引为空，跳过检索");
                         Debug.WriteLine("[ChatService] RAG 索引为空，跳过检索");
                     }
                 }
                 catch (Exception ex)
                 {
+                    DebugService.Error($"RAG 检索失败,跳过检索：", ex);
                     Debug.WriteLine($"[ChatService] RAG 检索失败: {ex.Message}，使用原始问题");
 
                     // 检查是否为嵌入模型错误
@@ -143,6 +177,8 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
+
+                            DebugService.Error($"嵌入模型 \"{KnowledgeBaseModel.Instance.Default_CurrentEmbeddingName}\" 调用失败，请检查模型名称。\n\n错误详情：",ex);
                             MessageBox.Show($"嵌入模型 \"{KnowledgeBaseModel.Instance.Default_CurrentEmbeddingName}\" 调用失败，请检查模型名称。\n\n错误详情: {ex.Message}",
                                             "嵌入模型错误", MessageBoxButton.OK, MessageBoxImage.Error);
                         });
@@ -151,6 +187,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             }
             else
             {
+                DebugService.Info($"当前会话未对接知识库，跳过RAG检索");
                 Debug.WriteLine("[ChatService] 当前会话未对接知识库，跳过RAG检索");
             }
             // ---------- RAG 检索结束 ----------
@@ -165,6 +202,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
 
             try
             {
+                
                 Debug.WriteLine($"[ChatService] 开始调用 GenerateStreamingAsync，模型: {_llmService.DefaultParameters}");
                 await _llmService.GenerateStreamingAsync(
                     augmentedPrompt,   // 使用增强后的提示词
@@ -214,15 +252,19 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     },
                     parameters: _llmService.DefaultParameters,
                     cancellationToken: _cts.Token);
+                DebugService.Info($"AI回复：{aiMessage.Content2}");
+                DebugService.Info($"完成，共接收 {tokenCount} 个token，最终回答长度: {fullResponse.Length}");
                 Debug.WriteLine($"[ChatService] GenerateStreamingAsync 完成，共接收 {tokenCount} 个token，最终回答长度: {fullResponse.Length}");
             }
             catch (OperationCanceledException ex)
             {
+                DebugService.Error($"生成被取消：",ex);
                 Debug.WriteLine($"[ChatService] 生成被取消: {ex.Message}");
                 aiMessage.Content2 += "\n[生成已中止]";
             }
             catch (Exception ex)
             {
+                DebugService.Error("生成失败：",ex);
                 Debug.WriteLine($"[ChatService] LLM 生成失败: {ex.Message}");
 
                 // 检查是否为对话模型错误
@@ -231,6 +273,8 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
+
+                        DebugService.Error($"对话模型 \"{_session.SpaceParameters.ChatLLM}\" 调用失败，请检查模型名称。\n\n错误详情:", ex);
                         MessageBox.Show($"对话模型 \"{_session.SpaceParameters.ChatLLM}\" 调用失败，请检查模型名称。\n\n错误详情: {ex.Message}",
                                         "对话模型错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     });
@@ -251,6 +295,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     if (aiMessage.IsLoading)
                     {
                         aiMessage.IsLoading = false;
+                        DebugService.Error($"关闭加载状态，Content2长度: {aiMessage.Content2?.Length ?? 0}");
                         Debug.WriteLine($"[ChatService] finally中关闭加载状态，Content2长度: {aiMessage.Content2?.Length ?? 0}");
                     }
                     MainWindow.ScrollChatToEnd();
@@ -268,6 +313,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     ModelUsed = _session.SpaceParameters.ChatLLM
                 };
                 await LoggingFunc.LoggingService.WriteChatLogAsync(chatLog);
+                DebugService.Info($"############### 本轮 {_session.DisplayName} 聊天结束 #################");
                 Debug.WriteLine("[ChatService] SendMessageAsync 结束");
             }
         }

@@ -27,7 +27,7 @@ namespace RapidKnowledgeware.Models
             set { _defaultBaseURL = value; RaisePropertyChanged(); }
         }
 
-        private int _defaultContextSize = 4096;
+        private int _defaultContextSize = 2000;
         /// <summary>
         /// 默认上下文窗口大小
         /// </summary>
