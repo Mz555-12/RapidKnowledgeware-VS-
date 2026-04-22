@@ -53,6 +53,6 @@ namespace RapidKnowledgeware.Models
         ToggleKnowledgeLink,// 切换知识库对接
         ExportLog,                      // 导出日志
         EditLLMParams,                  // 编辑全局LLM参数
-        EditKnowledgeBaseParams
+        EditKnowledgeBaseParams,        // 编辑知识库参数（新增）
     }
 }

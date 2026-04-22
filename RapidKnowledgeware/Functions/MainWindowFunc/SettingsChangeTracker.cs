@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿// RapidKnowledgeware.Functions.MainWindowFunc.SettingsChangeTracker.cs
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,15 +13,41 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
     {
         private static readonly Dictionary<object, string> _snapshots = new Dictionary<object, string>();
 
+        // 需要排除的 KnowledgeBaseModel 属性名称（这些属性由文件操作管理，不应参与配置编辑日志）
+        private static readonly HashSet<string> _excludedPropertiesForKbModel = new HashSet<string>
+        {
+            "FileItems",
+            "FileBlocks",
+            "CurrentFileName",
+            "CurrentFileBlockRule",
+            "FileBlockContent"
+        };
+
         /// <summary>
-        /// 捕获对象的 JSON 快照（用于后续对比）
+        /// 捕获对象的 JSON 快照（用于后续对比），KnowledgeBaseModel 会排除集合和临时状态字段
         /// </summary>
         /// <param name="target">要追踪的对象</param>
         public static void CaptureSnapshot(object target)
         {
             if (target == null) return;
-            string json = JsonConvert.SerializeObject(target);
+
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                ContractResolver = new PropertyExcludingContractResolver(GetExcludedPropertiesForType(target))
+            };
+
+            string json = JsonConvert.SerializeObject(target, Formatting.None, settings);
             _snapshots[target] = json;
+        }
+
+        /// <summary>
+        /// 根据对象类型返回需要排除的属性名称集合
+        /// </summary>
+        private static HashSet<string> GetExcludedPropertiesForType(object target)
+        {
+            if (target is RapidKnowledgeware.Models.KnowledgeBaseModel)
+                return _excludedPropertiesForKbModel;
+            return new HashSet<string>(); // 其他类型默认不排除任何属性
         }
 
         /// <summary>
@@ -35,7 +62,12 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                 return null;
 
             _snapshots.Remove(target);
-            string newJson = JsonConvert.SerializeObject(target);
+
+            JsonSerializerSettings settings = new JsonSerializerSettings
+            {
+                ContractResolver = new PropertyExcludingContractResolver(GetExcludedPropertiesForType(target))
+            };
+            string newJson = JsonConvert.SerializeObject(target, Formatting.None, settings);
 
             if (oldJson == newJson)
                 return null;
@@ -72,6 +104,25 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             if (value is string s && s.Length > 50)
                 return s.Substring(0, 47) + "...";
             return value.ToString();
+        }
+
+        /// <summary>
+        /// 自定义契约解析器，用于排除指定属性
+        /// </summary>
+        private class PropertyExcludingContractResolver : Newtonsoft.Json.Serialization.DefaultContractResolver
+        {
+            private readonly HashSet<string> _excludedProps;
+
+            public PropertyExcludingContractResolver(HashSet<string> excludedProps)
+            {
+                _excludedProps = excludedProps ?? new HashSet<string>();
+            }
+
+            protected override IList<Newtonsoft.Json.Serialization.JsonProperty> CreateProperties(Type type, Newtonsoft.Json.MemberSerialization memberSerialization)
+            {
+                var properties = base.CreateProperties(type, memberSerialization);
+                return properties.Where(p => !_excludedProps.Contains(p.PropertyName)).ToList();
+            }
         }
     }
 }

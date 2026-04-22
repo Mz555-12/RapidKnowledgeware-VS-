@@ -58,6 +58,11 @@ namespace RapidKnowledgeware
                     item.ImportBlockRule = KnowledgeBaseModel.Instance.BlockRule;
             }
 
+
+            // === 捕获全局模型的初始快照 ===
+            Functions.MainWindowFunc.SettingsChangeTracker.CaptureSnapshot(KnowledgeBaseModel.Instance);
+            Functions.MainWindowFunc.SettingsChangeTracker.CaptureSnapshot(Functions.LLMAdjustFunc.LLMAdjustService.Current);
+
             this.Closing += MainWindow_Closing;
 
 

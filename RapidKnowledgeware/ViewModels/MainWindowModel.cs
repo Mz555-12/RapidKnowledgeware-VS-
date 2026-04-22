@@ -109,6 +109,8 @@ namespace RapidKnowledgeware.ViewModels
                         }
                         else
                         {
+                            // === 隐藏前记录变更并保存 ===
+                            _service.RecordAndSaveAllSettingsChanges();
                             WindowControls.Show_Title();
                             SlidingView.HideImmediately(spaceView, overlay);
                             AppSettingsManager.SaveSettings(KnowledgeBaseModel.Instance);

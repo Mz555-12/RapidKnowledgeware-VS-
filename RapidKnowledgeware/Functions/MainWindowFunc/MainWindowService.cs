@@ -286,6 +286,42 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             AppSettingsManager.SaveSettings(KnowledgeBaseModel.Instance);
         }
 
+
+        // RapidKnowledgeware.Functions.MainWindowFunc.MainWindowService.cs 中的 RecordAndSaveAllSettingsChanges 方法
+        /// <summary>
+        /// 对比知识库模型和 LLM 全局模型的快照，记录详细变更日志，并保存配置
+        /// </summary>
+        public void RecordAndSaveAllSettingsChanges()
+        {
+            // 1. 处理 LLM 全局模型（直接调用现有 Save 方法，其内部已实现对比与日志记录）
+            LLMAdjustFunc.LLMAdjustService.Save();
+
+            // 2. 处理知识库模型
+            var kbModel = KnowledgeBaseModel.Instance;
+            string kbChanges = SettingsChangeTracker.GetChangesAndClear(kbModel);
+            if (!string.IsNullOrEmpty(kbChanges))
+            {
+                string formattedChanges = kbChanges.Replace("; ", "\n");
+                LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+                {
+                    Timestamp = DateTime.Now,
+                    Type = OperationType.EditKnowledgeBaseParams,
+                    ActionName = "编辑知识库参数",
+                    Target = "全局知识库设置",
+                    Success = true,
+                    Details = formattedChanges
+                });
+                Debug.WriteLine($"[MainWindowService] 知识库参数变更:\n{formattedChanges}");
+            }
+
+            // 3. 保存知识库配置到文件
+            AppSettingsManager.SaveSettings(kbModel);
+
+            // 4. 【关键】重新捕获知识库模型快照，为下一次编辑做准备
+            SettingsChangeTracker.CaptureSnapshot(kbModel);
+
+        }
+
         #endregion
 
         #region SpaceAdjustView 动画控制
