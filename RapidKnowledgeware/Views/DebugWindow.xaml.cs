@@ -1,4 +1,5 @@
 ﻿using RapidKnowledgeware.ViewModels;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -9,6 +10,8 @@ namespace RapidKnowledgeware.Views
     /// </summary>
     public partial class DebugWindow : Window
     {
+        private readonly NotifyCollectionChangedEventHandler _logEntriesHandler;
+
         public DebugWindow()
         {
             InitializeComponent();
@@ -18,13 +21,20 @@ namespace RapidKnowledgeware.Views
             var collectionView = System.Windows.Data.CollectionViewSource.GetDefaultView(((DebugWindowModel)DataContext).DebugModel.LogEntries);
             collectionView.SortDescriptions.Add(new System.ComponentModel.SortDescription("Timestamp", System.ComponentModel.ListSortDirection.Descending));
 
-            // 自动滚动：当有新日志添加时滚动到顶部
-            ((DebugWindowModel)DataContext).DebugModel.LogEntries.CollectionChanged += (s, e) =>
+            // 保存事件处理委托以便取消订阅
+            _logEntriesHandler = (s, e) =>
             {
                 if (AutoScrollCheck.IsChecked == true)
                 {
                     LogScrollViewer.ScrollToHome();
                 }
+            };
+            ((DebugWindowModel)DataContext).DebugModel.LogEntries.CollectionChanged += _logEntriesHandler;
+
+            // 窗口关闭时移除事件订阅
+            this.Closed += (s, e) =>
+            {
+                ((DebugWindowModel)DataContext).DebugModel.LogEntries.CollectionChanged -= _logEntriesHandler;
             };
 
             // 新增：将滚轮事件转发给外层 ScrollViewer，使列表可滚动

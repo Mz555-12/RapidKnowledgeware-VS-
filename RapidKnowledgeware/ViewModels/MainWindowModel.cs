@@ -21,6 +21,12 @@ namespace RapidKnowledgeware.ViewModels
     {
         // ---------- 字段绑定 ----------
         public MainModel MainModel { get; set; } = new MainModel();
+
+        /// <summary>
+        /// LLM 全局参数模型（用于 XAML 绑定）
+        /// </summary>
+        public LLMAdjustModel LLMAdjustModel => Functions.LLMAdjustFunc.LLMAdjustService.Current;
+
         private MainWindowService _service;
         private bool _isLogViewVisible = false;
 
@@ -183,7 +189,14 @@ namespace RapidKnowledgeware.ViewModels
                     _openDebugWindowCommand.DoExecute = new Action<object>(_ =>
                     {
                         var debugWindow = new DebugWindow();
-                        debugWindow.Owner = Application.Current.MainWindow;  // 设置所有者
+                        debugWindow.Owner = Application.Current.MainWindow;//主次关系
+                        // 获取工作区尺寸
+                        var workArea = SystemParameters.WorkArea;
+                        // Left = 0 贴左边
+                        debugWindow.Left = 0;
+                        // Top = (工作区高度 - 窗口高度) / 2 实现垂直居中
+                        debugWindow.Top = (workArea.Height - debugWindow.Height) / 2;
+
                         debugWindow.Show();
                     });
                 }
@@ -389,6 +402,48 @@ namespace RapidKnowledgeware.ViewModels
         }
 
 
+        // 放在 StopMessageCommand 之后、SetSpaceAdjustViewReferences 之前
+
+        private CommandBase _deepThinkingCommand;
+        /// <summary>
+        /// 切换深度思考模式命令（全局状态）
+        /// </summary>
+        public CommandBase DeepThinkingCommand
+        {
+            get
+            {
+                if (_deepThinkingCommand == null)
+                {
+                    _deepThinkingCommand = new CommandBase();
+                    _deepThinkingCommand.DoExecute = new Action<object>(_ =>
+                    {
+                        var globalModel = Functions.LLMAdjustFunc.LLMAdjustService.Current;
+                        bool newState = !globalModel.GlobalIsDeepThinking;
+                        globalModel.GlobalIsDeepThinking = newState;
+                        Functions.LLMAdjustFunc.LLMAdjustService.Save();
+
+                        // 通知 UI 刷新
+                        RaisePropertyChanged(nameof(LLMAdjustModel.GlobalIsDeepThinking));
+
+                        string status = newState ? "开启" : "关闭";
+                        MainWindow.SetStatusMessage($"深度思考模式已{status}");
+
+                        Functions.LoggingFunc.LoggingService.WriteOperationLog(new OperationsLog
+                        {
+                            Timestamp = DateTime.Now,
+                            Type = OperationType.ToggleDeepThinking,
+                            ActionName = "切换深度思考",
+                            Target = "全局设置",
+                            Success = true,
+                            Details = status
+                        });
+                    });
+                }
+                return _deepThinkingCommand;
+            }
+        }
+
+
 
         /// <summary>
         /// 设置 SpaceAdjustView 的视图引用（由 MainWindow 调用）
@@ -414,7 +469,7 @@ namespace RapidKnowledgeware.ViewModels
 
         /// <summary>
         /// 保存所有会话（供外部调用）
-        /// </summary>
+        /// </summary>f
         public void SaveSessions()
         {
             _service.SaveSessions();

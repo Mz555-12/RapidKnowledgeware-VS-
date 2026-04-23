@@ -41,13 +41,18 @@
                                                 <TextBox Text="{Binding LLMAdjustModel.Default_ChatLLM}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                            <Label Content="BaseURL："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_BaseURL}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="350" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                            <Label Content="DeepThinkingLLM："/>
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_DeepThinkingLLM}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>
+                                        
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                <Label Content="BaseURL："/>
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_BaseURL}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="350" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                             <Label Content="ContextSize："/>
                                                 <TextBox Text="{Binding LLMAdjustModel.Default_ContextSize}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>

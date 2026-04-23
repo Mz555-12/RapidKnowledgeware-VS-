@@ -45,9 +45,9 @@
                     <StackPanel Orientation="Horizontal" >
                         <Label Content="&#xe639;" Name="lable" FontFamily="{StaticResource iconfont}" FontSize="12" Margin="1 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         <TextBlock Text="{TemplateBinding Content}" Name="text" FontSize="{TemplateBinding FontSize}" VerticalAlignment="Center"   Margin="0 0 6 0" Foreground="{StaticResource TextPrimary}" FontFamily="Microsoft YaHei"/>
-                        
+
                     </StackPanel>
-               
+
                 </Border>
                 <ControlTemplate.Triggers>
                     <!-- 选中状态（优先级最高，放在最后） -->
@@ -210,7 +210,7 @@ CommandParameter="{Binding}"/>
                                         <!-- AI消息（左侧） -->
                                         <Border Background="#FFFFFF" 
                                                 HorizontalAlignment="Left" 
-                                                CornerRadius="5" 
+                                                CornerRadius="10" 
                                                 Margin="0,0,50,5"
                                                 Visibility="{Binding IsUserMessage, Converter={StaticResource InverseBoolToVis}}" Padding="10">
                                             <Grid>
@@ -359,9 +359,9 @@ CommandParameter="{Binding}"/>
                                     </TextBlock>
                                 </Grid>
                                 <Grid Grid.Row="1">
-                                    
-                                    
-                                    
+
+
+
                                     <!-- 发送按钮：IsSending == false 时显示 -->
                                     <Button Content="&#xe7fc;" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
         HorizontalAlignment="Right" Margin="0 0 10 0" Foreground="#3964fe" FontSize="28"
@@ -374,7 +374,11 @@ CommandParameter="{Binding}"/>
         Command="{Binding StopMessageCommand}"
         Visibility="{Binding IsSending, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
 
-                                    <ToggleButton Content="深度思考" Background="Transparent" BorderBrush="#AAA" BorderThickness="1"  HorizontalAlignment="Left" Margin="10 0 0 6" VerticalAlignment="Bottom"  FontSize="10" Template="{StaticResource DeepThinkingTBtn_Template}"/>
+                                    <ToggleButton Content="深度思考" Background="Transparent" BorderBrush="#AAA" BorderThickness="1"  
+              HorizontalAlignment="Left" Margin="10 0 0 6" VerticalAlignment="Bottom" FontSize="10" 
+              Template="{StaticResource DeepThinkingTBtn_Template}"
+              IsChecked="{Binding LLMAdjustModel.GlobalIsDeepThinking, Mode=OneWay}"
+              Command="{Binding DeepThinkingCommand}"/>
                                 </Grid>
 
                             </Grid>
@@ -425,18 +429,22 @@ CommandParameter="{Binding}"/>
                                     </TextBlock>
                                 </Grid>
                                 <Grid Grid.Row="1">
-                                     <!-- 发送按钮：IsSending == false 时显示 -->
-                                <Button Content="&#xe7fc;" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                    <!-- 发送按钮：IsSending == false 时显示 -->
+                                    <Button Content="&#xe7fc;" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
                                     HorizontalAlignment="Right" Margin="0 0 10 0" Foreground="#3964fe" FontSize="28"
                                     Command="{Binding SendMessageCommand}"
                                     Visibility="{Binding IsSending, Converter={StaticResource InverseBoolToVis}}"/>
 
-                                <!-- 停止按钮：IsSending == true 时显示 -->
-                                <Button Content="&#xe800;" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                    <!-- 停止按钮：IsSending == true 时显示 -->
+                                    <Button Content="&#xe800;" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
                                         HorizontalAlignment="Right" Margin="0 0.2 7.9 0" Foreground="#3964fe" FontSize="32.2"
                                         Command="{Binding StopMessageCommand}"
                                         Visibility="{Binding IsSending, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
-                                    <ToggleButton Content="深度思考" Background="Transparent" BorderBrush="#AAA" BorderThickness="1"  HorizontalAlignment="Left" Margin="10 0 0 6" VerticalAlignment="Bottom"  FontSize="10" Template="{StaticResource DeepThinkingTBtn_Template}"/>
+                                    <ToggleButton Content="深度思考" Background="Transparent" BorderBrush="#AAA" BorderThickness="1"  
+              HorizontalAlignment="Left" Margin="10 0 0 6" VerticalAlignment="Bottom" FontSize="10" 
+              Template="{StaticResource DeepThinkingTBtn_Template}"
+              IsChecked="{Binding LLMAdjustModel.GlobalIsDeepThinking, Mode=OneWay}"
+              Command="{Binding DeepThinkingCommand}"/>
                                 </Grid>
 
                             </Grid>

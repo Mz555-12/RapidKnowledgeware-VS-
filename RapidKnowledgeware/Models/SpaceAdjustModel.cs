@@ -98,5 +98,25 @@ namespace RapidKnowledgeware.Models
             get => _indexSimilarityThreshold;
             set { _indexSimilarityThreshold = value; RaisePropertyChanged(); }
         }
+
+        private string _deepThinkingLLM;
+        /// <summary>
+        /// 当前会话的深度思考模型名称（覆盖 ChatLLM，可为空）
+        /// </summary>
+        public string DeepThinkingLLM
+        {
+            get => _deepThinkingLLM;
+            set { _deepThinkingLLM = value; RaisePropertyChanged(); }
+        }
+
+        private bool _isDeepThinking;
+        /// <summary>
+        /// 是否启用深度思考模式
+        /// </summary>
+        public bool IsDeepThinking
+        {
+            get => _isDeepThinking;
+            set { _isDeepThinking = value; RaisePropertyChanged(); }
+        }
     }
 }

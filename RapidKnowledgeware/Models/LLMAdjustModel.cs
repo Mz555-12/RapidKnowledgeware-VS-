@@ -17,6 +17,16 @@ namespace RapidKnowledgeware.Models
             set { _defaultChatLLM = value; RaisePropertyChanged(); }
         }
 
+        private string _defaultDeepThinkingLLM;
+        /// <summary>
+        /// 默认深度思考模型名称（可选，空字符串或null表示不使用）
+        /// </summary>
+        public string Default_DeepThinkingLLM
+        {
+            get => _defaultDeepThinkingLLM;
+            set { _defaultDeepThinkingLLM = value; RaisePropertyChanged(); }
+        }
+
         private string _defaultBaseURL = "http://localhost:11434";
         /// <summary>
         /// Ollama 服务地址
@@ -86,5 +96,15 @@ namespace RapidKnowledgeware.Models
             get => _defaultRefusalResponse;
             set { _defaultRefusalResponse = value; RaisePropertyChanged(); }
         }
+        private bool _globalIsDeepThinking;
+        /// <summary>
+        /// 全局深度思考开关（所有会话共享）
+        /// </summary>
+        public bool GlobalIsDeepThinking
+        {
+            get => _globalIsDeepThinking;
+            set { _globalIsDeepThinking = value; RaisePropertyChanged(); }
+        }
+
     }
 }

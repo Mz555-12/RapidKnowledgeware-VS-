@@ -22,7 +22,6 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         private ContentOut _llmService;
         private CancellationTokenSource _cts;
         private CancellationTokenSource _ragCts;
-        private SpaceAdjustModel space;
 
         /// <summary>
         /// 初始化聊天服务
@@ -39,10 +38,25 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         private void EnsureLLMService()
         {
             Debug.WriteLine($"[ChatService] EnsureLLMService 开始，会话: {_session.DisplayName}");
-            
+            var space = _session.SpaceParameters;
             var defaultConfig = LLMAdjustFunc.LLMAdjustService.Current;
-            Debug.WriteLine($"[ChatService] 使用 BaseURL: {defaultConfig.Default_BaseURL}, ChatLLM: {space.ChatLLM}");
-            _llmService = new ContentOut(defaultConfig.Default_BaseURL, space.ChatLLM);
+
+            // 根据是否开启深度思考选择模型
+            string modelToUse = space.ChatLLM;
+            bool isDeepThinkingEnabled = LLMAdjustFunc.LLMAdjustService.Current.GlobalIsDeepThinking;
+            if (isDeepThinkingEnabled)
+            {
+                if (string.IsNullOrWhiteSpace(space.DeepThinkingLLM))
+                {
+                    DebugService.Error("深度思考模式已开启，但未配置深度思考模型。");
+                    throw new InvalidOperationException("深度思考模型未配置，请先在空间参数中设置 DeepThinkingLLM。");
+                }
+                modelToUse = space.DeepThinkingLLM;
+                DebugService.Info($"深度思考模式启用");
+            }
+
+            Debug.WriteLine($"[ChatService] 使用 BaseURL: {defaultConfig.Default_BaseURL}, 模型: {modelToUse}");
+            _llmService = new ContentOut(defaultConfig.Default_BaseURL, modelToUse);
             _llmService.DefaultParameters = new LLMParameters
             {
                 Temperature = space.Temperature,
@@ -63,10 +77,25 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         /// <param name="onTokenReceived">每收到一个 token 时的回调</param>
         public async Task SendMessageAsync(string userInput, Action<string> onTokenReceived)
         {
+            var space = _session.SpaceParameters;
+            bool isDeepThinkingEnabled = LLMAdjustFunc.LLMAdjustService.Current.GlobalIsDeepThinking;
+            string actualModel = isDeepThinkingEnabled ? (space.DeepThinkingLLM ?? space.ChatLLM) : space.ChatLLM;
+
+            // 提前验证模型配置，避免发送后才失败
+            if (LLMAdjustFunc.LLMAdjustService.Current.GlobalIsDeepThinking && string.IsNullOrWhiteSpace(space.DeepThinkingLLM))
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show("深度思考模式已开启，但未配置深度思考模型。\n请先在空间参数中填写 DeepThinkingLLM。",
+                                    "模型未配置", MessageBoxButton.OK, MessageBoxImage.Warning);
+                });
+                return;
+            }
+
             // 去除前后空白字符，保留中间内容
             userInput = userInput?.Trim();
 
-            space = _session.SpaceParameters;
+            
             Debug.WriteLine($"[ChatService] SendMessageAsync 开始，输入: {userInput}");
             if (string.IsNullOrWhiteSpace(userInput))
             {
@@ -83,7 +112,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                 });
                 Debug.WriteLine($"[ChatService] 已添加用户消息到会话: {_session.DisplayName}");
                 DebugService.Info($"############### {_session.DisplayName} 聊天开始 #################");
-                DebugService.Info($"模型为：{space.ChatLLM}");
+                DebugService.Info($"模型为：{actualModel}");
                 DebugService.Info($"{_session.DisplayName} 输入: {userInput}");
 
                 MainWindow.ScrollChatToEnd();

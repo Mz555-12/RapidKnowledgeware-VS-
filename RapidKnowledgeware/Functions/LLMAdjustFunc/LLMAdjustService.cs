@@ -99,7 +99,9 @@ namespace RapidKnowledgeware.Functions.LLMAdjustFunc
                 TopP = Current.Default_TopP,
                 RepeatPenalty = Current.Default_RepeatPenalty,
                 SystemPrompt = Current.Default_SystemPrompt,
-                QueryRefusalResponse = Current.Default_RefusalResponse
+                QueryRefusalResponse = Current.Default_RefusalResponse,
+                DeepThinkingLLM = Current.Default_DeepThinkingLLM,
+                IsDeepThinking = false
             };
         }
     }

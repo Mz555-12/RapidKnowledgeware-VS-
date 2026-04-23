@@ -93,7 +93,10 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
                     QueryRefusalResponse = LLMAdjustService.Current.Default_RefusalResponse,
                     IsLinkKnowledgeBase = true,
                     SearchQuantity = KnowledgeBaseModel.Instance.Default_SearchQuantity,
-                    IndexSimilarityThreshold = KnowledgeBaseModel.Instance.Default_IndexSimilarityThreshold
+                    IndexSimilarityThreshold = KnowledgeBaseModel.Instance.Default_IndexSimilarityThreshold,
+
+                    DeepThinkingLLM = LLMAdjustService.Current.Default_DeepThinkingLLM,
+                    IsDeepThinking = false
                 }
             };
             _viewModel.Sessions.Insert(0, newSession);
