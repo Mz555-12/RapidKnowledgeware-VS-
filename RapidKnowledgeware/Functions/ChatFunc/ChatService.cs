@@ -79,7 +79,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                 _session.Messages.Add(new ChatMessageModel
                 {
                     IsUserMessage = true,
-                    Content = userInput
+                    UserContent = userInput
                 });
                 Debug.WriteLine($"[ChatService] 已添加用户消息到会话: {_session.DisplayName}");
                 DebugService.Info($"############### {_session.DisplayName} 聊天开始 #################");
@@ -99,7 +99,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             {
                 IsUserMessage = false,
                 IsLoading = true,
-                Content = "",
+                ThinkingContent = "",
                 Content2 = ""
             };
             Application.Current.Dispatcher.Invoke(() =>
@@ -242,7 +242,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
 
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            aiMessage.Content = thinkContent;
+                            aiMessage.ThinkingContent = thinkContent;
                             aiMessage.Content2 = mainContent;
 
                             if (aiMessage.IsLoading && !string.IsNullOrEmpty(mainContent))

@@ -35,6 +35,38 @@
                     </Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
+
+            <ControlTemplate TargetType="ToggleButton" x:Key="DeepThinkingTBtn_Template">
+                <Border Name="back" 
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" 
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="10">
+                    <StackPanel Orientation="Horizontal" >
+                        <Label Content="&#xe639;" Name="lable" FontFamily="{StaticResource iconfont}" FontSize="12" Margin="1 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{TemplateBinding Content}" Name="text" FontSize="{TemplateBinding FontSize}" VerticalAlignment="Center"   Margin="0 0 6 0" Foreground="{StaticResource TextPrimary}" FontFamily="Microsoft YaHei"/>
+                        
+                    </StackPanel>
+               
+                </Border>
+                <ControlTemplate.Triggers>
+                    <!-- 选中状态（优先级最高，放在最后） -->
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="Background" Value="#edf3fe" TargetName="back"/>
+                        <Setter Property="Foreground" Value="#3964fe" TargetName="text"/>
+                        <Setter Property="BorderBrush" Value="#b7c8fe" TargetName="back"/>
+                        <Setter Property="Foreground" Value="#3964fe" TargetName="lable"/>
+                    </Trigger>
+                    <!-- 鼠标悬浮状态（仅当未选中时生效） -->
+                    <MultiTrigger>
+                        <MultiTrigger.Conditions>
+                            <Condition Property="IsMouseOver" Value="True"/>
+                            <Condition Property="IsChecked" Value="False"/>
+                        </MultiTrigger.Conditions>
+                        <Setter Property="Background" Value="#EEE" TargetName="back"/>
+                    </MultiTrigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
         </ResourceDictionary>
 
     </Window.Resources>
@@ -165,7 +197,7 @@ CommandParameter="{Binding}"/>
                                                 CornerRadius="5" 
                                                 Margin="50,0,0,5"
                                                 Visibility="{Binding IsUserMessage, Converter={StaticResource BoolToVis}}">
-                                            <TextBox Text="{Binding Content}" 
+                                            <TextBox Text="{Binding UserContent}" 
                                                      Margin="10" 
                                                      TextWrapping="Wrap" 
                                                      IsReadOnly="True" 
@@ -180,23 +212,23 @@ CommandParameter="{Binding}"/>
                                                 HorizontalAlignment="Left" 
                                                 CornerRadius="5" 
                                                 Margin="0,0,50,5"
-                                                Visibility="{Binding IsUserMessage, Converter={StaticResource InverseBoolToVis}}">
+                                                Visibility="{Binding IsUserMessage, Converter={StaticResource InverseBoolToVis}}" Padding="10">
                                             <Grid>
                                                 <StackPanel>
                                                     <!-- 可折叠的 think 区域 -->
-                                                    <Expander x:Name="ThinkExpander" 
+                                                    <Expander x:Name="ThinkExpander"
                                                               Header="思考过程" 
                                                               IsExpanded="False" 
                                                               Margin="10,5,10,5" 
                                                               Foreground="#7597DB" 
                                                               Background="Transparent"
                                                               Visibility="{Binding HasThinkContent, Converter={StaticResource BoolToVis}}">
-                                                        <TextBox Text="{Binding Content}"  
+                                                        <TextBox Text="{Binding ThinkingContent}" 
                                                                  Margin="0,5,0,0"
                                                                  TextWrapping="Wrap" 
                                                                  IsReadOnly="True" 
                                                                  Foreground="#7597DB"
-                                                                 MaxWidth="370"  
+                                                                 MaxWidth="390"  
                                                                  BorderBrush="Transparent" 
                                                                  BorderThickness="0"/>
                                                     </Expander>
@@ -204,10 +236,10 @@ CommandParameter="{Binding}"/>
                                                     <!-- 正式回答内容 -->
                                                     <TextBox Text="{Binding Content2}"  
                                                              Visibility="{Binding HasMainContent, Converter={StaticResource BoolToVis}}"
-                                                             Margin="10,5,10,10" 
+                                                             Margin="10,5,10,10"  
                                                              TextWrapping="Wrap" 
                                                              IsReadOnly="True" 
-                                                             MaxWidth="370"  
+                                                             MaxWidth="390"  
                                                              BorderBrush="Transparent" 
                                                              BorderThickness="0"/>
                                                 </StackPanel>
@@ -326,18 +358,25 @@ CommandParameter="{Binding}"/>
                                         </TextBlock.Style>
                                     </TextBlock>
                                 </Grid>
-
-                                <!-- 发送按钮：IsSending == false 时显示 -->
-                                <Button Content="&#xe7fc;" Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                <Grid Grid.Row="1">
+                                    
+                                    
+                                    
+                                    <!-- 发送按钮：IsSending == false 时显示 -->
+                                    <Button Content="&#xe7fc;" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
         HorizontalAlignment="Right" Margin="0 0 10 0" Foreground="#3964fe" FontSize="28"
         Command="{Binding SendMessageCommand}"
         Visibility="{Binding IsSending, Converter={StaticResource InverseBoolToVis}}"/>
 
-                                <!-- 停止按钮：IsSending == true 时显示 -->
-                                <Button Content="&#xe800;" Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                    <!-- 停止按钮：IsSending == true 时显示 -->
+                                    <Button Content="&#xe800;" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
         HorizontalAlignment="Right" Margin="0 0.2 7.9 0" Foreground="#3964fe" FontSize="32.2"
         Command="{Binding StopMessageCommand}"
-        Visibility="{Binding IsSending, Converter={StaticResource BoolToVis}}"/>
+        Visibility="{Binding IsSending, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
+
+                                    <ToggleButton Content="深度思考" Background="Transparent" BorderBrush="#AAA" BorderThickness="1"  HorizontalAlignment="Left" Margin="10 0 0 6" VerticalAlignment="Bottom"  FontSize="10" Template="{StaticResource DeepThinkingTBtn_Template}"/>
+                                </Grid>
+
                             </Grid>
                         </Border>
                     </Grid>
@@ -385,17 +424,21 @@ CommandParameter="{Binding}"/>
                                         </TextBlock.Style>
                                     </TextBlock>
                                 </Grid>
-                                <!-- 发送按钮：IsSending == false 时显示 -->
-                                <Button Content="&#xe7fc;" Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                <Grid Grid.Row="1">
+                                     <!-- 发送按钮：IsSending == false 时显示 -->
+                                <Button Content="&#xe7fc;" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
                                     HorizontalAlignment="Right" Margin="0 0 10 0" Foreground="#3964fe" FontSize="28"
                                     Command="{Binding SendMessageCommand}"
                                     Visibility="{Binding IsSending, Converter={StaticResource InverseBoolToVis}}"/>
 
                                 <!-- 停止按钮：IsSending == true 时显示 -->
-                                <Button Content="&#xe800;" Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                <Button Content="&#xe800;" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
                                         HorizontalAlignment="Right" Margin="0 0.2 7.9 0" Foreground="#3964fe" FontSize="32.2"
                                         Command="{Binding StopMessageCommand}"
-                                        Visibility="{Binding IsSending, Converter={StaticResource BoolToVis}}"/>
+                                        Visibility="{Binding IsSending, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}"/>
+                                    <ToggleButton Content="深度思考" Background="Transparent" BorderBrush="#AAA" BorderThickness="1"  HorizontalAlignment="Left" Margin="10 0 0 6" VerticalAlignment="Bottom"  FontSize="10" Template="{StaticResource DeepThinkingTBtn_Template}"/>
+                                </Grid>
+
                             </Grid>
                         </Border>
                     </Grid>

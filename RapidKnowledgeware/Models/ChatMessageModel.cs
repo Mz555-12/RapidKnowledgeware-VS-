@@ -17,19 +17,29 @@ namespace RapidKnowledgeware.Models
             set { _isUserMessage = value; RaisePropertyChanged(); }
         }
 
-        private string _content;
+        private string _thingking_content;
         /// <summary>
         /// AI消息的思考内容（think标签内容），用户消息时存储用户输入
         /// </summary>
-        public string Content
+        public string ThinkingContent
         {
-            get => _content;
+            get => _thingking_content;
             set
             {
-                _content = value;
+                _thingking_content = value;
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(HasThinkContent));
             }
+        }
+        // 在 ChatMessageModel 类中添加以下属性
+        private string _userContent;
+        /// <summary>
+        /// 用户消息的文本内容（仅当 IsUserMessage=true 时使用）
+        /// </summary>
+        public string UserContent
+        {
+            get => _userContent;
+            set { _userContent = value; RaisePropertyChanged(); }
         }
 
         private string _content2;
@@ -60,7 +70,7 @@ namespace RapidKnowledgeware.Models
         /// <summary>
         /// 是否有思考内容（用于控制思考区域显示）
         /// </summary>
-        public bool HasThinkContent => !string.IsNullOrEmpty(Content);
+        public bool HasThinkContent => !string.IsNullOrEmpty(ThinkingContent);
 
         /// <summary>
         /// 是否有正式回答内容（用于控制回答区域显示）
