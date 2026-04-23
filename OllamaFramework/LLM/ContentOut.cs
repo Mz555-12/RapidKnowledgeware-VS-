@@ -135,16 +135,17 @@ namespace OllamaFramework.LLM
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns>完整回答文本拼接结果</returns>
         public async Task<string> GenerateStreamingAsync(
-            string prompt,
-            Action<string> onChunkReceived,
-            LLMParameters parameters = null,
-            CancellationToken cancellationToken = default)
+    string prompt,
+    Action<string> onChunkReceived,
+    LLMParameters parameters = null,
+    CancellationToken cancellationToken = default)
         {
             var p = parameters ?? _defaultParameters;
             var request = BuildRequest(prompt, p);
             request.Stream = true;
 
             var fullResponse = new StringBuilder();
+            bool isThinking = false;
 
             try
             {
@@ -153,9 +154,24 @@ namespace OllamaFramework.LLM
                     if (cancellationToken.IsCancellationRequested)
                         break;
 
-                    var token = chunk?.Response;
-                    if (!string.IsNullOrEmpty(token))
+                    // 处理思考内容（qwen3 等模型会在这里返回）
+                    if (!string.IsNullOrEmpty(chunk?.Thinking))
                     {
+                        if (!isThinking)
+                        {
+                            isThinking = true;
+                            onChunkReceived?.Invoke("<think>");   // 插入开始标记
+                        }
+                        onChunkReceived?.Invoke(chunk.Thinking);
+                    }
+                    else if (!string.IsNullOrEmpty(chunk?.Response))
+                    {
+                        if (isThinking)
+                        {
+                            isThinking = false;
+                            onChunkReceived?.Invoke("</think>");   // 插入结束标记
+                        }
+                        var token = chunk.Response;
                         fullResponse.Append(token);
                         onChunkReceived?.Invoke(token);
                     }
@@ -167,7 +183,6 @@ namespace OllamaFramework.LLM
             }
             catch (Exception ex)
             {
-                // 重新抛出包含模型名的异常
                 throw new Exception($"对话模型 '{_chatModel}' 调用失败: {ex.Message}", ex);
             }
 

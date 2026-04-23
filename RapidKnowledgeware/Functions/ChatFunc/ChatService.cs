@@ -249,32 +249,63 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                         tokenCount++;
                         fullResponse += token;
 
-                        // 解析 think 标签
+                        // 解析 think 标签（兼容多种标记）
                         string thinkContent = "";
                         string mainContent = fullResponse;
 
-                        int thinkStart = fullResponse.IndexOf("<think>");
-                        if (thinkStart != -1)
+                       
+                        // 支持多种思考标记（XML 与纯文本格式）
+                        string[] startTags = { "<think>", "<thinking>", "<思考>", "Thinking..." };
+                        string[] endTags = { "</think>", "</thinking>", "</思考>", "...done thinking." };
+
+                        int thinkStart = -1;
+                        int thinkEnd = -1;          // ← 提升到这里声明
+                        int selectedTagIndex = -1;
+                        for (int i = 0; i < startTags.Length; i++)
                         {
-                            int thinkEnd = fullResponse.IndexOf("</think>", thinkStart);
-                            if (thinkEnd != -1)
+                            int idx = fullResponse.IndexOf(startTags[i]);
+                            if (idx != -1)
                             {
-                                thinkContent = fullResponse.Substring(thinkStart + 7, thinkEnd - thinkStart - 7);
-                                mainContent = fullResponse.Substring(0, thinkStart) + fullResponse.Substring(thinkEnd + 8);
-                            }
-                            else
-                            {
-                                thinkContent = fullResponse.Substring(thinkStart + 7);
-                                mainContent = fullResponse.Substring(0, thinkStart);
+                                thinkStart = idx;
+                                selectedTagIndex = i;
+                                break;
                             }
                         }
 
+                        if (thinkStart != -1)
+                        {
+                            thinkEnd = fullResponse.IndexOf(endTags[selectedTagIndex], thinkStart + startTags[selectedTagIndex].Length);  // ← 直接赋值
+                            if (thinkEnd != -1)
+                            {
+                                int thinkContentStart = thinkStart + startTags[selectedTagIndex].Length;
+                                thinkContent = fullResponse.Substring(thinkContentStart, thinkEnd - thinkContentStart);
+                                mainContent = fullResponse.Substring(0, thinkStart) + fullResponse.Substring(thinkEnd + endTags[selectedTagIndex].Length);
+                            }
+                            else
+                            {
+                                thinkContent = fullResponse.Substring(thinkStart + startTags[selectedTagIndex].Length);
+                                mainContent = fullResponse.Substring(0, thinkStart);
+                            }
+                        }
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             aiMessage.ThinkingContent = thinkContent;
                             aiMessage.Content2 = mainContent;
 
-                            if (aiMessage.IsLoading && !string.IsNullOrEmpty(mainContent))
+                            // 控制思考区域自动展开/折叠
+                            bool thinkClosed = thinkEnd != -1;  // 现在可以访问了
+                            if (!string.IsNullOrEmpty(thinkContent) && !thinkClosed)
+                            {
+                                // 思考进行中 → 展开
+                                aiMessage.IsThinkingExpanded = true;
+                            }
+                            else if (thinkClosed || !string.IsNullOrEmpty(mainContent))
+                            {
+                                // 思考已结束或没有思考内容 → 折叠
+                                aiMessage.IsThinkingExpanded = false;
+                            }
+
+                            if (aiMessage.IsLoading && (!string.IsNullOrEmpty(thinkContent) || !string.IsNullOrEmpty(mainContent)))
                             {
                                 aiMessage.IsLoading = false;
                             }
@@ -282,11 +313,6 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                             onTokenReceived?.Invoke(token);
                             MainWindow.ScrollChatToEnd();
                         });
-
-                        if (tokenCount % 50 == 0)
-                        {
-                            Debug.WriteLine($"[ChatService] 已接收 {tokenCount} 个token");
-                        }
                     },
                     parameters: _llmService.DefaultParameters,
                     cancellationToken: _cts.Token);

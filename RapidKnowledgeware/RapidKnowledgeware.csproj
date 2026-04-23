@@ -159,6 +159,7 @@
     <Compile Include="Base\CommandBase.cs" />
     <Compile Include="Converters\DebugLevelToColorConverter.cs" />
     <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\ModelDisplayConverter.cs" />
     <Compile Include="Converters\StringToBoolConverter.cs" />
     <Compile Include="Functions\ChatFunc\ChatService.cs" />
     <Compile Include="Functions\ChatFunc\PromptTruncationService.cs" />

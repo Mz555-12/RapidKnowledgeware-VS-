@@ -101,6 +101,9 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             };
             _viewModel.Sessions.Insert(0, newSession);
             _viewModel.SelectedSession = newSession;
+            _viewModel.ResetAndStartGreetingAnimation();   // 新建会话时触发问候动画
+
+
             SaveSessions();
 
             // 记录操作日志

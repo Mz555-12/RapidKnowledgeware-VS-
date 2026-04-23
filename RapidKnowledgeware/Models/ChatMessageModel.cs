@@ -67,6 +67,17 @@ namespace RapidKnowledgeware.Models
             set { _isLoading = value; RaisePropertyChanged(); }
         }
 
+
+        private bool _isThinkingExpanded;
+        /// <summary>
+        /// 是否展开思考区域（默认折叠，开始思考时展开，思考结束后自动折叠）
+        /// </summary>
+        public bool IsThinkingExpanded
+        {
+            get => _isThinkingExpanded;
+            set { _isThinkingExpanded = value; RaisePropertyChanged(); }
+        }
+
         /// <summary>
         /// 是否有思考内容（用于控制思考区域显示）
         /// </summary>

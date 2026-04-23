@@ -11,6 +11,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -39,6 +40,24 @@ namespace RapidKnowledgeware.ViewModels
         /// 根据时间生成的问候语（委托给 Service）
         /// </summary>
         public string GreetingText => _service.GreetingText;
+
+
+        private bool _greetingAnimationPlayed = false; // 是否已播放过问候动画
+        private bool _isGreetingAnimating = false;     // 动画是否正在进行
+        private CancellationTokenSource _greetingCts;  // 取消令牌
+
+
+        private string _greetingDisplayText = "";
+        /// <summary>
+        /// 问候语流式显示文本（动画逐字填充）
+        /// </summary>
+        public string GreetingDisplayText
+        {
+            get => _greetingDisplayText;
+            set { _greetingDisplayText = value; RaisePropertyChanged(); }
+        }
+
+
 
         private bool _isSending = false;
         /// <summary>
@@ -73,7 +92,8 @@ namespace RapidKnowledgeware.ViewModels
             Sessions.CollectionChanged += _service.OnSessionsCollectionChanged;
 
 
-
+            // 检查并启动问候动画（程序初次启动无消息时）
+            CheckAndStartGreetingAnimation();
         }
 
         /// <summary>
@@ -233,6 +253,10 @@ namespace RapidKnowledgeware.ViewModels
                     RaisePropertyChanged(nameof(GreetingText));    // 添加：切换会话时刷新问候语
                     (_sendMessageCommand as CommandBase)?.RaiseCanExecuteChanged();
                     MainWindow.ScrollChatToEnd();   // 切换会话后自动滚动到底部
+
+                    // 如果切换到有消息的会话，停止问候动画
+                    if (HasMessages)
+                        StopGreetingAnimation();
                 }
             }
         }
@@ -473,6 +497,68 @@ namespace RapidKnowledgeware.ViewModels
         public void SaveSessions()
         {
             _service.SaveSessions();
+        }
+
+
+
+
+        /// <summary>
+        /// 检查条件并启动问候动画（仅当无消息且未播放过）
+        /// </summary>
+        private void CheckAndStartGreetingAnimation()
+        {
+            if (!HasMessages && !_greetingAnimationPlayed && !_isGreetingAnimating)
+            {
+                _ = StartGreetingAnimationAsync();
+            }
+        }
+
+        /// <summary>
+        /// 异步逐字显示问候语
+        /// </summary>
+        private async System.Threading.Tasks.Task StartGreetingAnimationAsync()
+        {
+            _isGreetingAnimating = true;
+            _greetingCts = new CancellationTokenSource();
+            string fullText = GreetingText;
+            GreetingDisplayText = "";
+
+            try
+            {
+                for (int i = 0; i < fullText.Length; i++)
+                {
+                    if (_greetingCts.Token.IsCancellationRequested)
+                        break;
+
+                    GreetingDisplayText += fullText[i];
+                    await System.Threading.Tasks.Task.Delay(40, _greetingCts.Token);
+                }
+            }
+            catch (System.Threading.Tasks.TaskCanceledException) { }
+            finally
+            {
+                _isGreetingAnimating = false;
+                _greetingAnimationPlayed = true;
+                if (!_greetingCts.Token.IsCancellationRequested)
+                    GreetingDisplayText = fullText;
+            }
+        }
+
+        /// <summary>
+        /// 停止正在进行的问候动画
+        /// </summary>
+        public void StopGreetingAnimation()
+        {
+            _greetingCts?.Cancel();
+        }
+
+        /// <summary>
+        /// 重置问候动画标志并重新启动（新建会话时调用）
+        /// </summary>
+        public void ResetAndStartGreetingAnimation()
+        {
+            _greetingAnimationPlayed = false;
+            CheckAndStartGreetingAnimation();
         }
     }
 }
