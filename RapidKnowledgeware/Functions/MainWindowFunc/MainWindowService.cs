@@ -126,11 +126,23 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
 
             var userInput = _viewModel.InputText;
             _viewModel.InputText = "";
+            _viewModel.IsSending = true; // 开始发送，隐藏发送按钮显示停止按钮
 
             _currentChatService = new ChatService(_viewModel.SelectedSession);
-            await _currentChatService.SendMessageAsync(userInput, token => { /* UI 已自动更新 */ });
-            _viewModel.RefreshUIAssistProperties();   // 消息已添加，刷新界面
-            SaveSessions();
+            try
+            {
+                await _currentChatService.SendMessageAsync(userInput, token => { /* UI 已自动更新 */ });
+                _viewModel.RefreshUIAssistProperties();   // 消息已添加，刷新界面
+                SaveSessions();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MainWindowService] 发送消息异常: {ex.Message}");
+            }
+            finally
+            {
+                _viewModel.IsSending = false; // 发送完成或停止后恢复发送按钮
+            }
         }
 
         /// <summary>
@@ -261,6 +273,18 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             MainWindow.SetStatusMessage($"已将“{oldName}”重命名为“{newName}”");
         }
 
+
+
+        /// <summary>
+        /// 停止当前正在生成的消息
+        /// </summary>
+        public void StopMessage()
+        {
+            _currentChatService?.StopGeneration();
+            _viewModel.IsSending = false;
+        }
+
+
         #endregion
 
         #region 持久化
@@ -333,9 +357,12 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             SettingsChangeTracker.CaptureSnapshot(kbModel);
         }
 
-        
+
 
         #endregion
+
+
+
 
         #region SpaceAdjustView 动画控制
 

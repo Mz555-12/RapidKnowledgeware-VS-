@@ -34,6 +34,16 @@ namespace RapidKnowledgeware.ViewModels
         /// </summary>
         public string GreetingText => _service.GreetingText;
 
+        private bool _isSending = false;
+        /// <summary>
+        /// 是否正在发送消息（用于切换发送/停止按钮显示）
+        /// </summary>
+        public bool IsSending
+        {
+            get => _isSending;
+            set { _isSending = value; RaisePropertyChanged(); }
+        }
+
         // ---------- 构造函数 ----------
         public MainWindowModel()
         {
@@ -173,6 +183,7 @@ namespace RapidKnowledgeware.ViewModels
                     _openDebugWindowCommand.DoExecute = new Action<object>(_ =>
                     {
                         var debugWindow = new DebugWindow();
+                        debugWindow.Owner = Application.Current.MainWindow;  // 设置所有者
                         debugWindow.Show();
                     });
                 }
@@ -355,6 +366,28 @@ namespace RapidKnowledgeware.ViewModels
                 return _renameSessionCommand;
             }
         }
+
+
+        /// <summary>
+        /// 停止生成消息命令
+        /// </summary>
+        private CommandBase _stopMessageCommand;
+        public CommandBase StopMessageCommand
+        {
+            get
+            {
+                if (_stopMessageCommand == null)
+                {
+                    _stopMessageCommand = new CommandBase();
+                    _stopMessageCommand.DoExecute = new Action<object>(_ =>
+                    {
+                        _service.StopMessage();
+                    });
+                }
+                return _stopMessageCommand;
+            }
+        }
+
 
 
         /// <summary>

@@ -33,48 +33,8 @@ namespace RapidKnowledgeware.ViewModels
             set { _hasMultipleChunks = value; RaisePropertyChanged(); }
         }
 
-        private KnowledgeBaseViewModel()
-        {
-            _uiService = new KnowledgeBaseUIService(KnowledgeBaseModel);
-            _searchService = new KnowledgeBaseSearchService(KnowledgeBaseModel);
-
-            // 捕获知识库模型快照，用于关闭时对比变更
-            SettingsChangeTracker.CaptureSnapshot(KnowledgeBaseModel);
-
-            // 监听文件集合变化，自动刷新对应视图的列表
-            KnowledgeBaseModel.FileItems.CollectionChanged += (s, e) =>
-            {
-                _searchService.RefreshIfNeeded();
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    RefreshDisplayFileItems();                     
-                    RaiseSearchPropertiesChanged();               
-                });
-            };
-
-            // 初始填充主文件列表
-            RefreshDisplayFileItems();
-        }
-
-        /// <summary>
-        /// 设置知识库视图引用（由 KnowledgeBaseView 在加载时调用）
-        /// </summary>
-        /// <param name="view">KnowledgeBaseView 实例</param>
-        public void SetKnowledgeBaseView(KnowledgeBaseView view)
-        {
-            _uiService.SetKnowledgeBaseView(view);
-        }
 
         private bool _isSearchViewVisible = false;
-        /// <summary>
-        /// 当前是否显示搜索视图
-        /// </summary>
-        public bool IsSearchViewVisible
-        {
-            get => _isSearchViewVisible;
-            set { _isSearchViewVisible = value; RaisePropertyChanged(); RaisePropertyChanged(nameof(SwitchViewButtonText)); }
-        }
-
 
         /// <summary>
         /// 切换按钮显示的文本
@@ -85,6 +45,15 @@ namespace RapidKnowledgeware.ViewModels
         private Grid _funcViewContainer, _searchViewContainer;
         private FrameworkElement _funcView, _searchView;
 
+
+        /// <summary>
+        /// 当前是否显示搜索视图
+        /// </summary>
+        public bool IsSearchViewVisible
+        {
+            get => _isSearchViewVisible;
+            set { _isSearchViewVisible = value; RaisePropertyChanged(); RaisePropertyChanged(nameof(SwitchViewButtonText)); }
+        }
 
 
 
@@ -101,6 +70,38 @@ namespace RapidKnowledgeware.ViewModels
             IsSearchViewVisible = false;
         }
 
+
+        private KnowledgeBaseViewModel()
+        {
+            _uiService = new KnowledgeBaseUIService(KnowledgeBaseModel);
+            _searchService = new KnowledgeBaseSearchService(KnowledgeBaseModel);
+
+            // 捕获知识库模型快照，用于关闭时对比变更
+            SettingsChangeTracker.CaptureSnapshot(KnowledgeBaseModel);
+
+            // 监听文件集合变化，自动刷新对应视图的列表
+            KnowledgeBaseModel.FileItems.CollectionChanged += (s, e) =>
+            {
+                _searchService.RefreshIfNeeded();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    RefreshDisplayFileItems();
+                    RaiseSearchPropertiesChanged();
+                });
+            };
+
+            // 初始填充主文件列表
+            RefreshDisplayFileItems();
+        }
+
+        /// <summary>
+        /// 设置知识库视图引用（由 KnowledgeBaseView 在加载时调用）
+        /// </summary>
+        /// <param name="view">KnowledgeBaseView 实例</param>
+        public void SetKnowledgeBaseView(KnowledgeBaseView view)
+        {
+            _uiService.SetKnowledgeBaseView(view);
+        }
 
         #region 命令定义
 
@@ -380,6 +381,9 @@ namespace RapidKnowledgeware.ViewModels
             }
         }
 
+
+
+
         #endregion
 
         #region 搜索
@@ -491,7 +495,7 @@ namespace RapidKnowledgeware.ViewModels
                         if (_searchService.HasPreviousPage)
                         {
                             _searchService.CurrentPage--;
-                            RefreshDisplayFileItems();  
+                            RefreshDisplayFileItems();
                             RaiseSearchPropertiesChanged();
                         }
                     });

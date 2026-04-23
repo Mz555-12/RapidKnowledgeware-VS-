@@ -57,7 +57,7 @@
                             Template="{StaticResource OpenDebugBtn_Template}"
                             Command="{Binding OpenDebugWindowCommand}"/>
 
-                    
+
                     <Grid HorizontalAlignment="Right" Margin="0,0,10,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="60"/>
@@ -326,9 +326,18 @@ CommandParameter="{Binding}"/>
                                         </TextBlock.Style>
                                     </TextBlock>
                                 </Grid>
-                                <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
-                                        HorizontalAlignment="Right" Margin="0 0 10 0" 
-                                        Command="{Binding SendMessageCommand}"/>
+
+                                <!-- 发送按钮：IsSending == false 时显示 -->
+                                <Button Content="&#xe7fc;" Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+        HorizontalAlignment="Right" Margin="0 0 10 0" Foreground="#3964fe" FontSize="28"
+        Command="{Binding SendMessageCommand}"
+        Visibility="{Binding IsSending, Converter={StaticResource InverseBoolToVis}}"/>
+
+                                <!-- 停止按钮：IsSending == true 时显示 -->
+                                <Button Content="&#xe800;" Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+        HorizontalAlignment="Right" Margin="0 0.2 7.9 0" Foreground="#3964fe" FontSize="32.2"
+        Command="{Binding StopMessageCommand}"
+        Visibility="{Binding IsSending, Converter={StaticResource BoolToVis}}"/>
                             </Grid>
                         </Border>
                     </Grid>
@@ -376,9 +385,17 @@ CommandParameter="{Binding}"/>
                                         </TextBlock.Style>
                                     </TextBlock>
                                 </Grid>
-                                <Button Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
-                                        HorizontalAlignment="Right" Margin="0 0 10 0" 
-                                        Command="{Binding SendMessageCommand}"/>
+                                <!-- 发送按钮：IsSending == false 时显示 -->
+                                <Button Content="&#xe7fc;" Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                    HorizontalAlignment="Right" Margin="0 0 10 0" Foreground="#3964fe" FontSize="28"
+                                    Command="{Binding SendMessageCommand}"
+                                    Visibility="{Binding IsSending, Converter={StaticResource InverseBoolToVis}}"/>
+
+                                <!-- 停止按钮：IsSending == true 时显示 -->
+                                <Button Content="&#xe800;" Grid.Row="1" BorderThickness="0" Template="{StaticResource SendMessageBtn}" 
+                                        HorizontalAlignment="Right" Margin="0 0.2 7.9 0" Foreground="#3964fe" FontSize="32.2"
+                                        Command="{Binding StopMessageCommand}"
+                                        Visibility="{Binding IsSending, Converter={StaticResource BoolToVis}}"/>
                             </Grid>
                         </Border>
                     </Grid>
@@ -433,7 +450,8 @@ CommandParameter="{Binding}"/>
                 <views:LoggingView x:Name="LogView" 
                                    RenderTransformOrigin="0.5,0.5">
                     <views:LoggingView.RenderTransform>
-                        <TranslateTransform X="-1000"/><!-- -1000 -->
+                        <TranslateTransform X="-1000"/>
+                        <!-- -1000 -->
                     </views:LoggingView.RenderTransform>
                 </views:LoggingView>
             </Grid>

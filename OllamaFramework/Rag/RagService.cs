@@ -125,18 +125,16 @@ public class RagService
     /// <param name="topK">返回最相关的前 K 个块</param>
     /// <param name="minSimilarity">最小相似度阈值（0~1），低于此值的结果将被过滤</param>
     /// <returns>按相似度降序排列的检索结果</returns>
-    public async Task<List<(DocumentChunk Chunk, float Similarity)>> RetrieveAsync(string query, int topK = 3, float minSimilarity = 0.0f)
+    public async Task<List<(DocumentChunk Chunk, float Similarity)>> RetrieveAsync(
+    string query, int topK = 3, float minSimilarity = 0.0f, CancellationToken cancellationToken = default)
     {
         if (_indexedChunks.Count == 0)
             return new List<(DocumentChunk, float)>();
 
-
         try
         {
-            // 生成查询向量
-            var queryEmbedding = await _embeddingService.GenerateEmbeddingAsync(query);
+            var queryEmbedding = await _embeddingService.GenerateEmbeddingAsync(query, cancellationToken);
 
-            // 计算相似度并排序
             var scored = _indexedChunks
                 .Select(chunk => new
                 {
@@ -150,14 +148,15 @@ public class RagService
                 .ToList();
 
             return scored;
-
+        }
+        catch (OperationCanceledException)
+        {
+            throw; // 直接抛出，上层捕获处理
         }
         catch (Exception ex)
         {
-            // 抛出包含模型名称的明确异常，上层（ChatService）可捕获并弹框
             throw new Exception($"嵌入模型 '{_embeddingService.EmbeddingModelName}' 调用失败: {ex.Message}", ex);
         }
-
     }
 
     /// <summary>

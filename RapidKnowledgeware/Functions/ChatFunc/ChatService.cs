@@ -21,6 +21,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         private readonly ChatSessionModel _session;
         private ContentOut _llmService;
         private CancellationTokenSource _cts;
+        private CancellationTokenSource _ragCts;
         private SpaceAdjustModel space;
 
         /// <summary>
@@ -62,6 +63,9 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         /// <param name="onTokenReceived">每收到一个 token 时的回调</param>
         public async Task SendMessageAsync(string userInput, Action<string> onTokenReceived)
         {
+            // 去除前后空白字符，保留中间内容
+            userInput = userInput?.Trim();
+
             space = _session.SpaceParameters;
             Debug.WriteLine($"[ChatService] SendMessageAsync 开始，输入: {userInput}");
             if (string.IsNullOrWhiteSpace(userInput))
@@ -109,6 +113,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             // 仅当会话开启知识库对接时才执行检索
             if (_session.SpaceParameters.IsLinkKnowledgeBase)
             {
+                _ragCts = new CancellationTokenSource();
                 try
                 {
                     // 直接获取全局单例，避免重复加载索引和初始化客户端
@@ -124,26 +129,30 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                         int searchQuantity = _session.SpaceParameters.SearchQuantity;
                         float similarityThreshold = _session.SpaceParameters.IndexSimilarityThreshold;
                         DebugService.Info($"当前相似度阈值为：{similarityThreshold}，最大可检索：{searchQuantity} 个块");
-                        var retrieved = await ragService.RetrieveAsync(userInput, topK: searchQuantity, minSimilarity: similarityThreshold);
+                        var retrieved = await ragService.RetrieveAsync(userInput, topK: searchQuantity, minSimilarity: similarityThreshold,
+                cancellationToken: _ragCts.Token);
                         // 将检索结果拼接成一条完整的调试信息
                         var sb = new StringBuilder();
-                        sb.AppendLine("#############索引到的块#################");
-                        for (int i = 0; i < retrieved.Count; i++)
-                        {
-                            var item = retrieved[i];
-                            string source = item.Chunk.Metadata.TryGetValue("source", out object src) ? src.ToString() : "未知来源";
-                            string chunkIndex = item.Chunk.Metadata.TryGetValue("chunk_index", out object idx) ? idx.ToString() : "?";
-
-                            sb.AppendLine($"\n  [{i + 1}] 相似度：{item.Similarity:F4}");
-                            sb.AppendLine($"     来源：{System.IO.Path.GetFileName(source)}");
-                            sb.AppendLine($"     块为：{chunkIndex}\n");
-                            
-                        }
-                        sb.AppendLine("######################################");
-                        DebugService.Info(sb.ToString());
+                        
 
                         if (retrieved.Count > 0)
                         {
+                            sb.AppendLine("############ 索引到的块 ################");
+                            for (int i = 0; i < retrieved.Count; i++)
+                            {
+                                var item = retrieved[i];
+                                string source = item.Chunk.Metadata.TryGetValue("source", out object src) ? src.ToString() : "未知来源";
+                                string chunkIndex = item.Chunk.Metadata.TryGetValue("chunk_index", out object idx) ? idx.ToString() : "?";
+
+                                sb.AppendLine($"\n  [{i + 1}] 相似度：{item.Similarity:F4}");
+                                sb.AppendLine($"     来源：{System.IO.Path.GetFileName(source)}");
+                                sb.AppendLine($"     块为：{chunkIndex}\n");
+
+                            }
+                            sb.AppendLine("######################################");
+                            DebugService.Info(sb.ToString());
+
+
                             DebugService.Info($"找到了 {retrieved.Count} 个块");
                             // 直接使用全局默认上下文大小
                             int contextSize = LLMAdjustFunc.LLMAdjustService.Current.Default_ContextSize;
@@ -258,9 +267,10 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             }
             catch (OperationCanceledException ex)
             {
-                DebugService.Error($"生成被取消：",ex);
+                DebugService.Info("LLM 生成被用户取消");
+                aiMessage.Content2 = "[生成已中止]";
                 Debug.WriteLine($"[ChatService] 生成被取消: {ex.Message}");
-                aiMessage.Content2 += "\n[生成已中止]";
+                throw; // 重新抛出，让外层 catch 处理
             }
             catch (Exception ex)
             {
@@ -313,8 +323,12 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                     ModelUsed = _session.SpaceParameters.ChatLLM
                 };
                 await LoggingFunc.LoggingService.WriteChatLogAsync(chatLog);
+
+                _ragCts = null;  // 检索完成后释放
+
                 DebugService.Info($"############### 本轮 {_session.DisplayName} 聊天结束 #################");
                 Debug.WriteLine("[ChatService] SendMessageAsync 结束");
+                
             }
         }
 
@@ -323,6 +337,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         /// </summary>
         public void StopGeneration()
         {
+            _ragCts?.Cancel();
             _cts?.Cancel();
         }
     }

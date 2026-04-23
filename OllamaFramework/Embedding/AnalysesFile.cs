@@ -1,13 +1,14 @@
-﻿using System;
+﻿using OllamaFramework.Models;
+using OllamaSharp;
+using OllamaSharp.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using OllamaFramework.Models;
-using OllamaSharp;
-using OllamaSharp.Models;
 
 namespace OllamaFramework.Embedding
 {
@@ -130,7 +131,7 @@ namespace OllamaFramework.Embedding
         /// <summary>
         /// 为单个文本生成嵌入向量
         /// </summary>
-        public async Task<float[]> GenerateEmbeddingAsync(string text)
+        public async Task<float[]> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentException("输入文本不能为空", nameof(text));
@@ -140,9 +141,10 @@ namespace OllamaFramework.Embedding
                 Model = _embeddingModel,
                 Input = new List<string> { text }
             };
+
             try
             {
-                var response = await _ollamaClient.EmbedAsync(request);
+                var response = await _ollamaClient.EmbedAsync(request, cancellationToken);
                 var embedding = response?.Embeddings?.FirstOrDefault();
 
                 if (embedding == null || !embedding.Any())
@@ -152,23 +154,19 @@ namespace OllamaFramework.Embedding
             }
             catch (Exception ex)
             {
-
-                // 重新抛出包含模型名的异常，便于上层识别
                 throw new Exception($"嵌入模型 '{_embeddingModel}' 调用失败: {ex.Message}", ex);
             }
-
-
         }
 
         /// <summary>
         /// 批量为多个文本块生成嵌入向量
         /// </summary>
-        public async Task<List<float[]>> GenerateEmbeddingsAsync(IEnumerable<string> chunks)
+        public async Task<List<float[]>> GenerateEmbeddingsAsync(IEnumerable<string> chunks, CancellationToken cancellationToken = default)
         {
             var embeddings = new List<float[]>();
             foreach (var chunk in chunks)
             {
-                var vector = await GenerateEmbeddingAsync(chunk);
+                var vector = await GenerateEmbeddingAsync(chunk, cancellationToken);
                 embeddings.Add(vector);
             }
             return embeddings;

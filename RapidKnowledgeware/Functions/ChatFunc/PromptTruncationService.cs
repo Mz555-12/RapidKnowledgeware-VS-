@@ -127,11 +127,11 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                 var cutSb = new StringBuilder();
                 foreach (var (id, kept, cut, origLen, keptLen) in cutDetails)
                 {
-                    cutSb.AppendLine($"################{id}####################");
+                    cutSb.AppendLine($"############### {id} ###################");
                     cutSb.AppendLine($"\n{id}(原{origLen}字→保留{keptLen}字)\n");
-                    cutSb.AppendLine("#############保留内容#################");
+                    cutSb.AppendLine("############ 保留内容 ################");
                     cutSb.AppendLine($"\n保留内容：{kept}\n");
-                    cutSb.AppendLine("#############截断内容#################");
+                    cutSb.AppendLine("############ 截断内容 ################");
                     cutSb.AppendLine($"\n截断内容：{cut}\n");
                     cutSb.AppendLine($"####################################");
                 }
