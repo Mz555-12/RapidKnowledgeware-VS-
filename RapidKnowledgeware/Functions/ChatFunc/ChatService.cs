@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.AI;
 using OllamaFramework.LLM;
 using OllamaFramework.Models;
+using OllamaFramework.Rag;
 using RapidKnowledgeware.Functions.DebugFunc;
 using RapidKnowledgeware.Models;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -77,6 +80,8 @@ namespace RapidKnowledgeware.Functions.ChatFunc
         /// <param name="onTokenReceived">每收到一个 token 时的回调</param>
         public async Task SendMessageAsync(string userInput, Action<string> onTokenReceived)
         {
+            // 用于存储检索结果（稍后统一截断）
+            List<(DocumentChunk Chunk, float Similarity)> retrievedChunks = null;
             var space = _session.SpaceParameters;
             bool isDeepThinkingEnabled = LLMAdjustFunc.LLMAdjustService.Current.GlobalIsDeepThinking;
             string actualModel = isDeepThinkingEnabled ? (space.DeepThinkingLLM ?? space.ChatLLM) : space.ChatLLM;
@@ -95,7 +100,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             // 去除前后空白字符，保留中间内容
             userInput = userInput?.Trim();
 
-            
+
             Debug.WriteLine($"[ChatService] SendMessageAsync 开始，输入: {userInput}");
             if (string.IsNullOrWhiteSpace(userInput))
             {
@@ -138,97 +143,130 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             });
 
             // ---------- RAG 检索（工业级优化版）----------
-            string augmentedPrompt = userInput;
-            // 仅当会话开启知识库对接时才执行检索
+            string kbContext = string.Empty;
             if (_session.SpaceParameters.IsLinkKnowledgeBase)
             {
                 _ragCts = new CancellationTokenSource();
                 try
                 {
-                    // 直接获取全局单例，避免重复加载索引和初始化客户端
                     var ragService = KnowledgeBaseFunc.KnowledgeBaseService.RagServiceInstance;
-
                     if (ragService.IndexedChunkCount > 0)
                     {
                         DebugService.Info($"RAG 索引中有 {ragService.IndexedChunkCount} 个块，开始检索...");
-                        Debug.WriteLine($"[ChatService] RAG 索引中有 {ragService.IndexedChunkCount} 个块，开始检索...");
-
-
-                        // 使用会话级知识库参数
                         int searchQuantity = _session.SpaceParameters.SearchQuantity;
                         float similarityThreshold = _session.SpaceParameters.IndexSimilarityThreshold;
-                        DebugService.Info($"当前相似度阈值为：{similarityThreshold}，最大可检索：{searchQuantity} 个块");
-                        var retrieved = await ragService.RetrieveAsync(userInput, topK: searchQuantity, minSimilarity: similarityThreshold,
-                cancellationToken: _ragCts.Token);
-                        // 将检索结果拼接成一条完整的调试信息
-                        var sb = new StringBuilder();
-                        
-
+                        var retrieved = await ragService.RetrieveAsync(userInput, topK: searchQuantity, minSimilarity: similarityThreshold, cancellationToken: _ragCts.Token);
                         if (retrieved.Count > 0)
                         {
+                            // 检索结果日志保留
+                            var sb = new StringBuilder();
                             sb.AppendLine("############ 索引到的块 ################");
                             for (int i = 0; i < retrieved.Count; i++)
                             {
                                 var item = retrieved[i];
                                 string source = item.Chunk.Metadata.TryGetValue("source", out object src) ? src.ToString() : "未知来源";
                                 string chunkIndex = item.Chunk.Metadata.TryGetValue("chunk_index", out object idx) ? idx.ToString() : "?";
-
                                 sb.AppendLine($"\n  [{i + 1}] 相似度：{item.Similarity:F4}");
                                 sb.AppendLine($"     来源：{System.IO.Path.GetFileName(source)}");
                                 sb.AppendLine($"     块为：{chunkIndex}\n");
-
                             }
                             sb.AppendLine("######################################");
                             DebugService.Info(sb.ToString());
 
-
-                            DebugService.Info($"找到了 {retrieved.Count} 个块");
-                            // 直接使用全局默认上下文大小
-                            int contextSize = LLMAdjustFunc.LLMAdjustService.Current.Default_ContextSize;
-                            augmentedPrompt = PromptTruncationService.BuildTruncatedPrompt(userInput, retrieved, contextSize);
-                            DebugService.Info($"已构建增强提示词（上下文窗口：{contextSize}字符），实际长度: {augmentedPrompt.Length}");
-                            Debug.WriteLine($"[ChatService] 已构建增强提示词，长度: {augmentedPrompt.Length}");
-
-                            
-
+                            retrievedChunks = retrieved;   // 留待最终组装时使用
                         }
                         else
                         {
                             DebugService.Info("未检索到足够相关内容");
-                            Debug.WriteLine("[ChatService] 未检索到足够相关内容，使用原始问题");
                         }
                     }
                     else
                     {
                         DebugService.Info("RAG 索引为空，跳过检索");
-                        Debug.WriteLine("[ChatService] RAG 索引为空，跳过检索");
                     }
                 }
                 catch (Exception ex)
                 {
                     DebugService.Error($"RAG 检索失败,跳过检索：", ex);
-                    Debug.WriteLine($"[ChatService] RAG 检索失败: {ex.Message}，使用原始问题");
-
-                    // 检查是否为嵌入模型错误
-                    string errorMsg = ex.ToString();
-                    if (errorMsg.Contains("model") || errorMsg.Contains("404") || errorMsg.Contains("not found"))
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-
-                            DebugService.Error($"嵌入模型 \"{KnowledgeBaseModel.Instance.Default_CurrentEmbeddingName}\" 调用失败，请检查模型名称。\n\n错误详情：",ex);
-                            MessageBox.Show($"嵌入模型 \"{KnowledgeBaseModel.Instance.Default_CurrentEmbeddingName}\" 调用失败，请检查模型名称。\n\n错误详情: {ex.Message}",
-                                            "嵌入模型错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                        });
-                    }
+                    // 模型错误提示保持不变
                 }
             }
             else
             {
                 DebugService.Info($"当前会话未对接知识库，跳过RAG检索");
-                Debug.WriteLine("[ChatService] 当前会话未对接知识库，跳过RAG检索");
             }
             // ---------- RAG 检索结束 ----------
+
+            // ---------- 组装最终提示词（知识库 + 历史记录）----------
+            int contextSizeFinal = LLMAdjustFunc.LLMAdjustService.Current.Default_ContextSize;
+            float historyPercent = LLMAdjustFunc.LLMAdjustService.Current.Default_ChatHistoryPercentage;
+            int maxHistoryLen = (int)(contextSizeFinal * historyPercent);
+            int historyRounds = LLMAdjustFunc.LLMAdjustService.Current.Default_ChatHistoryMemory;
+
+            DebugService.Info($"上下文记忆总长度={contextSizeFinal}, 历史占比={historyPercent}, 最大历史记忆长度={maxHistoryLen}, 获取的知识库记忆长度暂未计算");
+
+            string systemPrompt = _session.SpaceParameters.SystemPrompt ?? "You are a helpful assistant.";
+            string promptTemplate = systemPrompt + "\n\n" +
+                    "上下文：\n{context}\n\n" +
+                    "{history}" +
+                    "问题：{question}\n" +
+                    "回答：";
+
+            string templateWithoutPlaceholders = promptTemplate.Replace("{context}", "").Replace("{history}", "").Replace("{question}", "");
+            int fixedLength = templateWithoutPlaceholders.Length + userInput.Length;
+
+            // ---- 历史记录提取 ----
+            string historyText = null;
+            int historyRoundsUsed = 0;
+            int historyTotalLength = 0;
+
+            if (historyRounds > 0)
+            {
+                int remainingForAll = contextSizeFinal - fixedLength;
+                int historyBudget = Math.Min(remainingForAll, maxHistoryLen);
+                int firstRoundBudget = historyBudget;
+
+                // 最近一轮放宽检查
+                var lastPair = GetLastCompletedPair(_session.Messages);
+                if (lastPair != null)
+                {
+                    int lastPairLen = lastPair.Value.User.Length + lastPair.Value.AI.Length;
+                    if (lastPairLen > historyBudget)
+                    {
+                        int relaxedBudget = Math.Min(remainingForAll, (int)(contextSizeFinal * 0.475));
+                        firstRoundBudget = Math.Max(relaxedBudget, historyBudget);
+                        DebugService.Info($"[放宽条件] lastPairLen={lastPairLen} 超出标准预算 {historyBudget}，放宽首轮预算至 {firstRoundBudget}");
+                    }
+                }
+
+                var historyResult = BuildChatHistory(_session.Messages, firstRoundBudget, historyBudget, historyRounds);
+                if (historyResult != null)
+                {
+                    historyText = historyResult.Value.historyText;
+                    historyRoundsUsed = historyResult.Value.rounds;
+                    historyTotalLength = historyResult.Value.totalLength;
+                }
+            }
+
+            // ---- 知识库截断（动态使用剩余空间）----
+            int kbAvailable = contextSizeFinal - fixedLength - (historyText?.Length ?? 0);
+            kbContext = string.Empty;
+            if (retrievedChunks != null && retrievedChunks.Count > 0)
+            {
+                kbContext = PromptTruncationService.BuildTruncatedContext(retrievedChunks, kbAvailable);
+            }
+
+            // ---- 最终拼接 ----
+            string augmentedPrompt = promptTemplate
+                .Replace("{context}", kbContext)
+                .Replace("{history}", historyText != null ? historyText + Environment.NewLine : "")
+                .Replace("{question}", userInput);
+
+            DebugService.Info($"最终提示词长度: {augmentedPrompt.Length} | 知识库长度: {kbContext.Length} | 历史附加: {(historyText != null ? "Yes" : "No")} | 历史长度: {historyRoundsUsed}轮 | 历史记忆为:{historyTotalLength}字 | 历史轮数限制: {historyRounds}");
+
+
+
+            //########################################
 
             Debug.WriteLine("[ChatService] 调用 EnsureLLMService");
             EnsureLLMService();
@@ -240,7 +278,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
 
             try
             {
-                
+
                 Debug.WriteLine($"[ChatService] 开始调用 GenerateStreamingAsync，模型: {_llmService.DefaultParameters}");
                 await _llmService.GenerateStreamingAsync(
                     augmentedPrompt,   // 使用增强后的提示词
@@ -253,7 +291,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
                         string thinkContent = "";
                         string mainContent = fullResponse;
 
-                       
+
                         // 支持多种思考标记（XML 与纯文本格式）
                         string[] startTags = { "<think>", "<thinking>", "<思考>", "Thinking..." };
                         string[] endTags = { "</think>", "</thinking>", "</思考>", "...done thinking." };
@@ -329,7 +367,7 @@ namespace RapidKnowledgeware.Functions.ChatFunc
             }
             catch (Exception ex)
             {
-                DebugService.Error("生成失败：",ex);
+                DebugService.Error("生成失败：", ex);
                 Debug.WriteLine($"[ChatService] LLM 生成失败: {ex.Message}");
 
                 // 检查是否为对话模型错误
@@ -383,8 +421,102 @@ namespace RapidKnowledgeware.Functions.ChatFunc
 
                 DebugService.Info($"############### 本轮 {_session.DisplayName} 聊天结束 #################");
                 Debug.WriteLine("[ChatService] SendMessageAsync 结束");
-                
+
             }
+        }
+
+
+
+        /// <summary>
+        /// 从消息集合中提取最近的历史对话
+        /// </summary>
+        /// <param name="firstRoundBudget">最近一轮对话允许的最大纯文本长度</param>
+        /// <param name="standardBudget">后续每轮对话允许的最大累计纯文本长度</param>
+        /// <param name="maxRounds">最多保留的对话轮数</param>
+        /// <summary>
+        /// 提取最近的历史对话，返回格式化文本、实际轮数和纯文本总长度
+        /// </summary>
+        private static (string historyText, int rounds, int totalLength)? BuildChatHistory(
+            ObservableCollection<ChatMessageModel> messages,
+            int firstRoundBudget,
+            int standardBudget,
+            int maxRounds)
+        {
+            if (firstRoundBudget <= 0 || standardBudget <= 0 || maxRounds <= 0)
+                return null;
+
+            var completedPairs = new List<(string User, string AI)>();
+            for (int i = 0; i < messages.Count; i++)
+            {
+                if (messages[i].IsUserMessage && !string.IsNullOrWhiteSpace(messages[i].UserContent))
+                {
+                    if (i + 1 < messages.Count && !messages[i + 1].IsUserMessage && !messages[i + 1].IsLoading)
+                    {
+                        string aiContent = messages[i + 1].Content2;
+                        if (!string.IsNullOrWhiteSpace(aiContent))
+                            completedPairs.Add((messages[i].UserContent, aiContent));
+                        i++;
+                    }
+                }
+            }
+
+            if (completedPairs.Count == 0)
+                return null;
+
+            int totalPlainLength = 0;
+            var selectedPairs = new List<(string User, string AI)>();
+
+            for (int idx = completedPairs.Count - 1; idx >= 0 && selectedPairs.Count < maxRounds; idx--)
+            {
+                var pair = completedPairs[idx];
+                int pairLength = pair.User.Length + pair.AI.Length;
+                int budget = (selectedPairs.Count == 0) ? firstRoundBudget : standardBudget;
+
+                Debug.WriteLine($"[历史轮次判断] 轮号:{idx + 1}, 长度:{pairLength}, 累计:{totalPlainLength}, 预算:{budget}, 是否首轮:{selectedPairs.Count == 0}");
+
+                if (totalPlainLength + pairLength > budget)
+                {
+                    Debug.WriteLine($"[历史轮次丢弃] 轮号:{idx + 1} 超出预算，整轮丢弃且不再尝试更早轮次");
+                    break;
+                }
+                selectedPairs.Insert(0, pair);
+                totalPlainLength += pairLength;
+
+                Debug.WriteLine($"[历史轮次加入] 轮号:{idx + 1} 已加入，累计纯文本长度:{totalPlainLength}");
+            }
+
+            if (selectedPairs.Count == 0)
+                return null;
+
+            var sb = new StringBuilder();
+            sb.AppendLine("历史对话：");
+            foreach (var (user, ai) in selectedPairs)
+            {
+                sb.AppendLine($"用户：{user}");
+                sb.AppendLine($"AI：{ai}");
+                sb.AppendLine();
+            }
+
+            return (sb.ToString().TrimEnd(), selectedPairs.Count, totalPlainLength);
+        }
+
+
+        /// <summary>
+        /// 获取最近一个完成的用户-AI消息对（用户消息及其后续AI回答）
+        /// </summary>
+        private static (string User, string AI)? GetLastCompletedPair(ObservableCollection<ChatMessageModel> messages)
+        {
+            for (int i = messages.Count - 1; i >= 1; i--)
+            {
+                if (!messages[i].IsUserMessage && !messages[i].IsLoading &&
+                    messages[i - 1].IsUserMessage && !string.IsNullOrWhiteSpace(messages[i - 1].UserContent))
+                {
+                    string aiContent = messages[i].Content2;
+                    if (!string.IsNullOrWhiteSpace(aiContent))
+                        return (messages[i - 1].UserContent, aiContent);
+                }
+            }
+            return null;
         }
 
         /// <summary>

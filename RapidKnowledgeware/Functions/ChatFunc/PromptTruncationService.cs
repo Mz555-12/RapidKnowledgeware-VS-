@@ -144,5 +144,72 @@ namespace RapidKnowledgeware.Functions.ChatFunc
 
             return finalPrompt;
         }
+
+
+
+
+        /// <summary>
+        /// 仅构建截断后的知识库上下文字符串（不含问题与指令模板）
+        /// </summary>
+        /// <param name="retrievedChunks">已按相似度降序排列的检索结果</param>
+        /// <param name="maxContextLength">知识库上下文最大字符数</param>
+        /// <returns>截断后的纯上下文文本</returns>
+        public static string BuildTruncatedContext(
+            List<(DocumentChunk Chunk, float Similarity)> retrievedChunks,
+            int maxContextLength)
+        {
+            if (retrievedChunks == null || retrievedChunks.Count == 0)
+                return string.Empty;
+
+            // 可用字符数（直接作为上下文可用长度）
+            int availableForContext = maxContextLength;
+            if (availableForContext <= 0)
+                return string.Empty;
+
+            var contextBuilder = new StringBuilder();
+            int usedContextChars = 0;
+            int usedChunkCount = 0;
+
+            foreach (var item in retrievedChunks)
+            {
+                string chunkContent = item.Chunk.Content;
+                int chunkLength = chunkContent.Length;
+
+                string sourceFile = Path.GetFileName(item.Chunk.Metadata["source"]?.ToString() ?? "未知");
+                string chunkIndex = item.Chunk.Metadata["chunk_index"]?.ToString() ?? "?";
+
+                string header = $"[片段 {usedChunkCount + 1}] (来源: {sourceFile}, 相似度: {item.Similarity:F4})";
+                string headerWithNewline = header + Environment.NewLine;
+                int headerLength = headerWithNewline.Length;
+                int chunkTotalLength = headerLength + chunkLength + Environment.NewLine.Length;
+
+                int remaining = availableForContext - usedContextChars;
+                if (remaining <= 0)
+                    break;
+
+                if (chunkTotalLength <= remaining)
+                {
+                    contextBuilder.Append(headerWithNewline);
+                    contextBuilder.AppendLine(chunkContent);
+                    usedContextChars += chunkTotalLength;
+                    usedChunkCount++;
+                }
+                else
+                {
+                    int availableForContent = remaining - headerLength - Environment.NewLine.Length;
+                    if (availableForContent > 0)
+                    {
+                        string keptContent = chunkContent.Substring(0, availableForContent);
+                        contextBuilder.Append(headerWithNewline);
+                        contextBuilder.AppendLine(keptContent);
+                        usedContextChars += headerLength + availableForContent + Environment.NewLine.Length;
+                        usedChunkCount++;
+                    }
+                    break;
+                }
+            }
+
+            return contextBuilder.ToString().Trim();
+        }
     }
 }

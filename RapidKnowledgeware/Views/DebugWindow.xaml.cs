@@ -1,4 +1,6 @@
-﻿using RapidKnowledgeware.ViewModels;
+﻿using RapidKnowledgeware.Models;
+using RapidKnowledgeware.ViewModels;
+using System;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,13 +39,20 @@ namespace RapidKnowledgeware.Views
                 ((DebugWindowModel)DataContext).DebugModel.LogEntries.CollectionChanged -= _logEntriesHandler;
             };
 
-            // 新增：将滚轮事件转发给外层 ScrollViewer，使列表可滚动
             LogScrollViewer.PreviewMouseWheel += (s, e) =>
             {
+                // 根据滚轮增量计算滚动行数（Delta 通常为 ±120，此处每 40 单位滚动 1 行）
+                int lines = Math.Max(1, Math.Abs(e.Delta) / 40);
                 if (e.Delta > 0)
-                    LogScrollViewer.LineUp();
+                {
+                    for (int i = 0; i < lines; i++)
+                        LogScrollViewer.LineUp();
+                }
                 else
-                    LogScrollViewer.LineDown();
+                {
+                    for (int i = 0; i < lines; i++)
+                        LogScrollViewer.LineDown();
+                }
                 e.Handled = true;
             };
         }

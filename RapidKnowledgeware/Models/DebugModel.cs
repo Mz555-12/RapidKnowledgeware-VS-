@@ -17,6 +17,8 @@ namespace RapidKnowledgeware.Models
         public ObservableCollection<DebugLogEntry> LogEntries { get; } = new ObservableCollection<DebugLogEntry>();
 
         private DebugModel() { }
+
+        
     }
 
 

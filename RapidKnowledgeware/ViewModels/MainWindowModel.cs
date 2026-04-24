@@ -216,7 +216,8 @@ namespace RapidKnowledgeware.ViewModels
                         debugWindow.Left = 0;
                         // Top = (工作区高度 - 窗口高度) / 2 实现垂直居中
                         debugWindow.Top = (workArea.Height - debugWindow.Height) / 2;
-
+                        // 每次打开调试窗口前清空旧日志（当次运行只保留新产生的内容）
+                        DebugModel.Instance.LogEntries.Clear();
                         debugWindow.Show();
                     });
                 }

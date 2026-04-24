@@ -77,7 +77,7 @@ namespace RapidKnowledgeware.Models
             set { _defaultRepeatPenalty = value; RaisePropertyChanged(); }
         }
 
-        private string _defaultSystemPrompt = "You are a helpful assistant.";
+        private string _defaultSystemPrompt = "You are a helpful assistant \n\n 使用以下提供的上下文信息回答问题，请优先信赖和引用上下文中的相关描述。\n如果确实找不到任何相关信息，再明确告知无法回答。";
         /// <summary>
         /// 默认系统提示词
         /// </summary>
@@ -105,6 +105,28 @@ namespace RapidKnowledgeware.Models
             get => _globalIsDeepThinking;
             set { _globalIsDeepThinking = value; RaisePropertyChanged(); }
         }
+
+        private float _defaultChatHistoryPercentage = 0.25f;
+        /// <summary>
+        /// 历史记录占上下文窗口的最大比例（0~1）
+        /// </summary>
+        public float Default_ChatHistoryPercentage
+        {
+            get => _defaultChatHistoryPercentage;
+            set { _defaultChatHistoryPercentage = value; RaisePropertyChanged(); }
+        }
+
+        private int _defaultChatHistoryMemory = 5;
+        /// <summary>
+        /// 最多保留的历史轮数
+        /// </summary>
+        public int Default_ChatHistoryMemory
+        {
+            get => _defaultChatHistoryMemory;
+            set { _defaultChatHistoryMemory = value; RaisePropertyChanged(); }
+        }
+
+
 
     }
 }
