@@ -38,11 +38,11 @@
                                     <StackPanel Orientation="Horizontal">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                             <Label Content="ChatLLM："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_ChatLLM}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_ChatLLM}"   Margin="0 0 30 0" Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                             <Label Content="DeepThinkingLLM："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_DeepThinkingLLM}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_DeepThinkingLLM}"   Margin="0 0 30 0"  Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>
                                         
                                     </StackPanel>
@@ -54,7 +54,7 @@
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                             <Label Content="ContextSize："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_ContextSize}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_ContextSize}"   Margin="0 0 30 0"  Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
@@ -70,19 +70,32 @@
                                     <StackPanel Orientation="Horizontal">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                             <Label Content="Temperature："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_Temperature}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_Temperature}"   Margin="0 0 15 0" Width="110"  BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                             <Label Content="Top-P："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_TopP}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_TopP}"   Margin="0 0 15 0" Width="110" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                            <Label Content="RepeatPenalty："/>
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_RepeatPenalty}"   Margin="0 0 30 0" Width="110" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        </StackPanel>
+                                        
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
 
+                                        
+
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                            <Label Content="RepeatPenalty："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_RepeatPenalty}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                                <Label Content="ChatHistoryPercentage ："/>
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_ChatHistoryPercentage}"   Margin="0 0 30 0" MinWidth="120" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        </StackPanel>
+                                        
+
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                <Label Content="ChatHistoryMemory："/>
+                                                <TextBox Text="{Binding LLMAdjustModel.Default_ChatHistoryMemory}"   Margin="0 0 30 0" Width="120" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                         </StackPanel>
                                     </StackPanel>
                                 </StackPanel>

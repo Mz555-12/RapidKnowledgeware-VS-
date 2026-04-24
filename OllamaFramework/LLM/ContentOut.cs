@@ -154,7 +154,7 @@ namespace OllamaFramework.LLM
                     if (cancellationToken.IsCancellationRequested)
                         break;
 
-                    // 处理思考内容（qwen3 等模型会在这里返回）
+                    // 处理思考内容（模型会在这里返回）
                     if (!string.IsNullOrEmpty(chunk?.Thinking))
                     {
                         if (!isThinking)

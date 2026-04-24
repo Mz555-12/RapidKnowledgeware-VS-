@@ -61,14 +61,14 @@
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                         <Label Content="相似度阈值："/>
                                         <TextBox Text="{Binding SpaceAdjustModel.IndexSimilarityThreshold, UpdateSourceTrigger=LostFocus}"   
-Margin="0 0 30 0" MinWidth="120" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" 
+Margin="0 0 30 0" Width="120"  BorderThickness="0 0 0 1" Padding="10 0" 
 VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                         <Label Content="检索数量："/>
                                         <TextBox Text="{Binding SpaceAdjustModel.SearchQuantity, UpdateSourceTrigger=LostFocus}"   
-Margin="0 0 0 0" MinWidth="120" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" 
+Margin="0 0 0 0" Width="120"  BorderThickness="0 0 0 1" Padding="10 0" 
 VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                     </StackPanel>
                                 </StackPanel>
@@ -87,11 +87,11 @@ VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                         <Label Content="ChatLLM："/>
-                                        <TextBox Text="{Binding SpaceAdjustModel.ChatLLM}"   Margin="0 0 30 0" MinWidth="120" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        <TextBox Text="{Binding SpaceAdjustModel.ChatLLM}"   Margin="0 0 30 0" Width="120"  BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                         <Label Content="DeepThinkingLLM："/>
-                                        <TextBox Text="{Binding SpaceAdjustModel.DeepThinkingLLM}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        <TextBox Text="{Binding SpaceAdjustModel.DeepThinkingLLM}"   Margin="0 0 30 0" Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                     </StackPanel>
                                 </StackPanel>
 
@@ -99,18 +99,18 @@ VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
 
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                         <Label Content="Temperature："/>
-                                        <TextBox Text="{Binding SpaceAdjustModel.Temperature}"   Margin="0 0 20 0" MinWidth="100" MaxWidth="100" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        <TextBox Text="{Binding SpaceAdjustModel.Temperature}"   Margin="0 0 20 0" Width="100" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                     </StackPanel>
 
 
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                         <Label Content="Top-P："/>
-                                        <TextBox Text="{Binding SpaceAdjustModel.TopP}"   Margin="0 0 20 0" MinWidth="100" MaxWidth="100" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        <TextBox Text="{Binding SpaceAdjustModel.TopP}"   Margin="0 0 20 0" Width="100" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                         <Label Content="RepeatPenalty："/>
-                                        <TextBox Text="{Binding SpaceAdjustModel.RepeatPenalty}"   Margin="0 0 10 0" MinWidth="100" MaxWidth="100" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        <TextBox Text="{Binding SpaceAdjustModel.RepeatPenalty}"   Margin="0 0 10 0" Width="100" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>

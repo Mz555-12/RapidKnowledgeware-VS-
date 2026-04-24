@@ -16,7 +16,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <Label Content="当前嵌入模型："/>
-                                    <TextBox Text="{Binding KnowledgeBaseModel.Default_CurrentEmbeddingName, UpdateSourceTrigger=PropertyChanged}"    Margin="0 0 30 0" MinWidth="150" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    <TextBox Text="{Binding KnowledgeBaseModel.Default_CurrentEmbeddingName, UpdateSourceTrigger=PropertyChanged}"  Margin="0 0 30 0" Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <Label Content="相似度阈值："/>
@@ -29,7 +29,7 @@
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <Label Content="检索数量："/>
                                     <TextBox Text="{Binding KnowledgeBaseModel.Default_SearchQuantity, UpdateSourceTrigger=LostFocus}"   
-                       Margin="0 0 30 0" MinWidth="150" MaxWidth="150" BorderThickness="0 0 0 1" Padding="10 0" 
+                       Margin="0 0 30 0" Width="150" BorderThickness="0 0 0 1" Padding="10 0" 
                        VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
