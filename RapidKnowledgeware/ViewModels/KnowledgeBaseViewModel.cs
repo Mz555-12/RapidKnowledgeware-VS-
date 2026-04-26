@@ -7,6 +7,7 @@ using RapidKnowledgeware.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -32,6 +33,19 @@ namespace RapidKnowledgeware.ViewModels
             get => _hasMultipleChunks;
             set { _hasMultipleChunks = value; RaisePropertyChanged(); }
         }
+
+
+        // 在 HasMultipleChunks 下方添加以下属性
+        /// <summary>
+        /// 当前文件总块数
+        /// </summary>
+        public int TotalBlockCount => KnowledgeBaseModel.FileBlocks.Count;
+
+        /// <summary>
+        /// 当前文件所有块的总字数（不含控制字符）
+        /// </summary>
+        public int TotalWordCount => KnowledgeBaseModel.FileBlocks.Sum(b => b.EffectiveCharCount);
+
 
 
         private bool _isSearchViewVisible = false;
@@ -79,19 +93,20 @@ namespace RapidKnowledgeware.ViewModels
             // 捕获知识库模型快照，用于关闭时对比变更
             SettingsChangeTracker.CaptureSnapshot(KnowledgeBaseModel);
 
-            // 监听文件集合变化，自动刷新对应视图的列表
-            KnowledgeBaseModel.FileItems.CollectionChanged += (s, e) =>
-            {
-                _searchService.RefreshIfNeeded();
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    RefreshDisplayFileItems();
-                    RaiseSearchPropertiesChanged();
-                });
-            };
+
 
             // 初始填充主文件列表
             RefreshDisplayFileItems();
+
+            // 监听文件集合变化
+            KnowledgeBaseModel.FileItems.CollectionChanged += (s, e) => RefreshDisplayFileItems();
+
+            // 订阅 FileBlocks 集合变更，刷新总块数/总字数
+            KnowledgeBaseModel.FileBlocks.CollectionChanged += (s, e) =>
+            {
+                RaisePropertyChanged(nameof(TotalBlockCount));
+                RaisePropertyChanged(nameof(TotalWordCount));
+            };
         }
 
         /// <summary>

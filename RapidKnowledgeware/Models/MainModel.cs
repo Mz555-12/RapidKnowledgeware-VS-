@@ -46,6 +46,17 @@ public class MainModel : ObservableObject
         set { _viewInfo = value; RaisePropertyChanged(); }
     }
 
+    private bool _isExpanded;
+    /// <summary>
+    /// 窗口是否处于展开状态
+    /// </summary>
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set { _isExpanded = value; RaisePropertyChanged(); }
+    }
+
+
     /// <summary>
     /// 初始化主窗口模型，确保加载动画初始隐藏
     /// </summary>

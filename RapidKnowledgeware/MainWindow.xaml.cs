@@ -1,4 +1,5 @@
-﻿using RapidKnowledgeware.Functions.MainWindowFunc;
+﻿using RapidKnowledgeware.Base;
+using RapidKnowledgeware.Functions.MainWindowFunc;
 using RapidKnowledgeware.Models;
 using RapidKnowledgeware.ViewModels;
 using RapidKnowledgeware.Views;
@@ -15,6 +16,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -30,7 +32,8 @@ namespace RapidKnowledgeware
         private bool is_check = false;
         private static System.Windows.Threading.DispatcherTimer _statusTimer;
 
-
+        private bool _isExpanded = false;
+        private double _leftColWidth, _splitColWidth;
         public MainWindow()
         {
             InitializeComponent();
@@ -66,6 +69,10 @@ namespace RapidKnowledgeware
             this.Closing += MainWindow_Closing;
 
 
+            // 加载持久化的窗口布局状态
+            AppSettingsManager.LoadSettings(vm.MainModel);
+            ApplyInitialLayout();
+
             // 后台预热 RagService，避免首次调用时的冷启动延迟
             System.Threading.Tasks.Task.Run(() =>
             {
@@ -93,7 +100,9 @@ namespace RapidKnowledgeware
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
+            var vm = DataContext as MainWindowModel;
+            vm.MainModel.IsExpanded = _isExpanded;
+            AppSettingsManager.SaveSettings(vm.MainModel);
             AppSettingsManager.SaveSettings(KnowledgeBaseModel.Instance);
         }
 
@@ -234,6 +243,203 @@ namespace RapidKnowledgeware
                 // 空间参数视图可见时，立即关闭右键菜单
                 contextMenu.IsOpen = false;
                 e.Handled = true;
+            }
+        }
+
+
+
+        /// <summary>
+        /// 窗口展开/恢复按钮点击
+        /// </summary>
+        private void ExpandButton_Click(object sender, RoutedEventArgs e)
+        {
+            const double LeftColFixedWidth = 229;
+            double splitColWidth = SplitCol.ActualWidth;
+
+            if (!_isExpanded)
+            {
+                // ===== 展开 =====
+                // 切换头部
+                NormalHeader.Visibility = Visibility.Collapsed;
+                ExpandedHeader.Visibility = Visibility.Visible;
+
+                var storyboard = new Storyboard();
+
+                // 标题行（窗口顶部）缩到0
+                var titleAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(50, GridUnitType.Pixel),
+                    To = new GridLength(0, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(titleAnim, TitleRow);
+                Storyboard.SetTargetProperty(titleAnim, new PropertyPath("Height"));
+                storyboard.Children.Add(titleAnim);
+
+                // 信息行（窗口底部）缩到0
+                var infoAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(30, GridUnitType.Pixel),
+                    To = new GridLength(0, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(infoAnim, InfoRow);
+                Storyboard.SetTargetProperty(infoAnim, new PropertyPath("Height"));
+                storyboard.Children.Add(infoAnim);
+
+                // 左侧列缩到0
+                var leftAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(LeftColFixedWidth, GridUnitType.Pixel),
+                    To = new GridLength(0, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(leftAnim, LeftCol);
+                Storyboard.SetTargetProperty(leftAnim, new PropertyPath("Width"));
+                storyboard.Children.Add(leftAnim);
+
+                // 分隔条缩到0
+                var splitAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(splitColWidth, GridUnitType.Pixel),
+                    To = new GridLength(0, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(splitAnim, SplitCol);
+                Storyboard.SetTargetProperty(splitAnim, new PropertyPath("Width"));
+                storyboard.Children.Add(splitAnim);
+
+                // 右侧内容头部行从30变为50
+                var headerHeightAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(30, GridUnitType.Pixel),
+                    To = new GridLength(50, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(headerHeightAnim, ContentHeaderRow);
+                Storyboard.SetTargetProperty(headerHeightAnim, new PropertyPath("Height"));
+                storyboard.Children.Add(headerHeightAnim);
+
+                // 内容边框变为有圆角（展开状态）
+                var borderAnim = new ThicknessAnimation(new Thickness(5), TimeSpan.FromMilliseconds(300));
+                Storyboard.SetTarget(borderAnim, ContentBorder);
+                Storyboard.SetTargetProperty(borderAnim, new PropertyPath("BorderThickness"));
+                storyboard.Children.Add(borderAnim);
+
+                storyboard.Completed += (s, ev) =>
+                {
+                    ContentBorder.CornerRadius = new CornerRadius(5);
+                    // 无需再改按钮内容，因为ExpandedHeader里的按钮已经是展开图标
+                };
+                storyboard.Begin();
+            }
+            else
+            {
+                // ===== 恢复 =====
+                // 切换头部
+                ExpandedHeader.Visibility = Visibility.Collapsed;
+                NormalHeader.Visibility = Visibility.Visible;
+
+                var storyboard = new Storyboard();
+
+                var titleAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(0, GridUnitType.Pixel),
+                    To = new GridLength(50, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(titleAnim, TitleRow);
+                Storyboard.SetTargetProperty(titleAnim, new PropertyPath("Height"));
+                storyboard.Children.Add(titleAnim);
+
+                var infoAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(0, GridUnitType.Pixel),
+                    To = new GridLength(30, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(infoAnim, InfoRow);
+                Storyboard.SetTargetProperty(infoAnim, new PropertyPath("Height"));
+                storyboard.Children.Add(infoAnim);
+
+                var leftAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(0, GridUnitType.Pixel),
+                    To = new GridLength(LeftColFixedWidth, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(leftAnim, LeftCol);
+                Storyboard.SetTargetProperty(leftAnim, new PropertyPath("Width"));
+                storyboard.Children.Add(leftAnim);
+
+                var splitAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(0, GridUnitType.Pixel),
+                    To = new GridLength(splitColWidth, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(splitAnim, SplitCol);
+                Storyboard.SetTargetProperty(splitAnim, new PropertyPath("Width"));
+                storyboard.Children.Add(splitAnim);
+
+                // 右侧内容头部行从50变回30
+                var headerHeightAnim = new GridLengthAnimation
+                {
+                    From = new GridLength(50, GridUnitType.Pixel),
+                    To = new GridLength(30, GridUnitType.Pixel),
+                    Duration = TimeSpan.FromMilliseconds(300)
+                };
+                Storyboard.SetTarget(headerHeightAnim, ContentHeaderRow);
+                Storyboard.SetTargetProperty(headerHeightAnim, new PropertyPath("Height"));
+                storyboard.Children.Add(headerHeightAnim);
+
+                var borderAnim = new ThicknessAnimation(new Thickness(0), TimeSpan.FromMilliseconds(300));
+                Storyboard.SetTarget(borderAnim, ContentBorder);
+                Storyboard.SetTargetProperty(borderAnim, new PropertyPath("BorderThickness"));
+                storyboard.Children.Add(borderAnim);
+
+                storyboard.Completed += (s, ev) =>
+                {
+                    LeftCol.Width = new GridLength(LeftColFixedWidth, GridUnitType.Pixel);
+                    SplitCol.Width = GridLength.Auto;
+                    ContentHeaderRow.Height = new GridLength(30, GridUnitType.Pixel);
+                    ContentBorder.CornerRadius = new CornerRadius(0);
+                };
+                storyboard.Begin();
+            }
+            _isExpanded = !_isExpanded;
+            ((MainWindowModel)DataContext).MainModel.IsExpanded = _isExpanded;
+        }
+
+
+        private void ApplyInitialLayout()
+        {
+            var expanded = ((MainWindowModel)DataContext).MainModel.IsExpanded;
+            if (expanded)
+            {
+                TitleRow.Height = new GridLength(0);
+                InfoRow.Height = new GridLength(0);
+                LeftCol.Width = new GridLength(0);
+                SplitCol.Width = new GridLength(0);
+                ContentHeaderRow.Height = new GridLength(50);
+                ContentBorder.BorderThickness = new Thickness(5);
+                ContentBorder.CornerRadius = new CornerRadius(5);
+                NormalHeader.Visibility = Visibility.Collapsed;
+                ExpandedHeader.Visibility = Visibility.Visible;
+                _isExpanded = true;
+            }
+            else
+            {
+                TitleRow.Height = new GridLength(50);
+                InfoRow.Height = new GridLength(30);
+                LeftCol.Width = new GridLength(229);
+                SplitCol.Width = GridLength.Auto;
+                ContentHeaderRow.Height = new GridLength(30);
+                ContentBorder.BorderThickness = new Thickness(0);
+                ContentBorder.CornerRadius = new CornerRadius(0);
+                NormalHeader.Visibility = Visibility.Visible;
+                ExpandedHeader.Visibility = Visibility.Collapsed;
+                _isExpanded = false;
             }
         }
 

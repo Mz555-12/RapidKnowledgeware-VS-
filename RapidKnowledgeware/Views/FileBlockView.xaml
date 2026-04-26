@@ -28,13 +28,21 @@
             <Grid>
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="当前文件为:" VerticalAlignment="Center" Margin="10 0 0 0" FontWeight="Bold"/>
-                        <TextBlock  Text="{Binding KnowledgeBaseModel.CurrentFileName}" VerticalAlignment="Center" Margin="10 0 10 0" FontSize="14" MinWidth="50" MaxWidth="185"/>
+                        <Label Content="当前文件:" VerticalAlignment="Center" Margin="10 0 0 0" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock  Text="{Binding KnowledgeBaseModel.CurrentFileName}" VerticalAlignment="Center" Margin="0 0 5 0" FontSize="13" MinWidth="50" MaxWidth="185"/>
 
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="当前分块规则为:" VerticalAlignment="Center" Margin="10 0 0 0" FontWeight="Bold"/>
-                        <TextBlock  Text="{Binding KnowledgeBaseModel.CurrentFileBlockRule}" VerticalAlignment="Center" Margin="10 0 20 0" FontSize="14" MinWidth="50" MaxWidth="150"/>
+                        <Label Content="分块规则:" VerticalAlignment="Center" Margin="5 0 0 0" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock  Text="{Binding KnowledgeBaseModel.CurrentFileBlockRule}" VerticalAlignment="Center" Margin="0 0 5 0" FontSize="13" MinWidth="50" MaxWidth="150"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="总块:" VerticalAlignment="Center" Margin="5 0 0 0" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="{Binding TotalBlockCount}" VerticalAlignment="Center" Margin="0 0 5 0" FontSize="13" MinWidth="50" MaxWidth="100"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="总字数:" VerticalAlignment="Center" Margin="5 0 0 0" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="{Binding TotalWordCount}" VerticalAlignment="Center" Margin="0 0 5 0" FontSize="13" MinWidth="50" MaxWidth="100"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -67,10 +75,17 @@
                                 </Grid.RowDefinitions>
                                 <!-- 标题行：左侧序号，右侧删除按钮 -->
                                 <Grid Grid.Row="0">
-                                    <TextBlock Text="{Binding RelativeSource={RelativeSource TemplatedParent}, 
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding RelativeSource={RelativeSource TemplatedParent}, 
                                           Path=(ItemsControl.AlternationIndex), 
                                           StringFormat='块 {0}'}"
                            FontWeight="Bold" Foreground="#2C3E50" VerticalAlignment="Center"/>
+
+                                        <TextBlock VerticalAlignment="Center" Margin="50,0,0,0" FontSize="13"
+           Text="{Binding EffectiveCharCount, StringFormat='块字数：{0}'}"/>
+                                    </StackPanel>
+
+
                                     <!-- 删除按钮修改为 -->
                                     <Button Content="🗑️" Width="24" Height="24" HorizontalAlignment="Right"
                                         ToolTip="删除此块"
@@ -84,8 +99,8 @@
          IsReadOnly="True" BorderThickness="0" Background="Transparent" 
          Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
          IsReadOnlyCaretVisible="False" Cursor="Arrow"/>
-                                
-                                 </Grid>
+
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

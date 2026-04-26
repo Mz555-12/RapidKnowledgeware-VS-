@@ -1,5 +1,6 @@
 ﻿// KnowledgeBaseModel.cs
 using GalaSoft.MvvmLight;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -195,6 +196,18 @@ namespace RapidKnowledgeware.Models
         {
             get => _originalIndex;
             set { _originalIndex = value; RaisePropertyChanged(); }
+        }
+
+        public int EffectiveCharCount
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Content)) return 0;
+                string s = Content.Replace("\r\n", "\n").Replace("\r", "\n");
+                var lines = s.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                return lines.Sum(l => l.Length) + (lines.Length - 1) * 2;
+            }
+
         }
     }
 }

@@ -43,7 +43,11 @@
              Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" 
              Width="190" Height="30" Margin="5,0" 
              BorderThickness="0 0 0 1" Background="Transparent" 
-             VerticalContentAlignment="Center" Padding="25 2 5 0"/>
+             VerticalContentAlignment="Center" Padding="25 2 5 0">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                            </TextBox.InputBindings>
+                        </TextBox>
                         
                         
                         
@@ -57,6 +61,7 @@
                                    IsHitTestVisible="False"
                
                                    Margin="35,0,0,0">
+                                
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Collapsed"/>
