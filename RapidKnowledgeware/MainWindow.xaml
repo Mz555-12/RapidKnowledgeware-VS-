@@ -171,10 +171,9 @@ CommandParameter="{Binding}"/>
 
                         <!-- ========== 展开时的头部（标题栏样式） ========== -->
                         <Grid x:Name="ExpandedHeader" Visibility="Collapsed">
-                            <Border Style="{StaticResource TitleBarStyle}">
+                            <Border Style="{StaticResource TitleBarStyle}"  MouseLeftButtonDown="RowDefinition_MouseLeftButtonDown">
                                 <Grid>
-                                    <TextBlock FontSize="16" Margin="10 0 0 0" VerticalAlignment="Center" Foreground="Black"
-                               MouseLeftButtonDown="RowDefinition_MouseLeftButtonDown">
+                                    <TextBlock FontSize="16" Margin="10 0 0 0" VerticalAlignment="Center" Foreground="Black">
                                         <TextBlock.Text>
                                             <MultiBinding Converter="{StaticResource ModelDisplayConverter}">
                                                 <Binding Path="SelectedSession.SpaceParameters.ChatLLM"/>
