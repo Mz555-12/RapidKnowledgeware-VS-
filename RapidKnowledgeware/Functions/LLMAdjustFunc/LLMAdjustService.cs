@@ -101,7 +101,10 @@ namespace RapidKnowledgeware.Functions.LLMAdjustFunc
                 SystemPrompt = Current.Default_SystemPrompt,
                 QueryRefusalResponse = Current.Default_RefusalResponse,
                 DeepThinkingLLM = Current.Default_DeepThinkingLLM,
-                IsDeepThinking = false
+                IsDeepThinking = false,
+                // 从全局知识库模型读取默认值
+                SearchQuantity = KnowledgeBaseModel.Instance.Default_SearchQuantity,
+                IndexSimilarityThreshold = KnowledgeBaseModel.Instance.Default_IndexSimilarityThreshold
             };
         }
     }

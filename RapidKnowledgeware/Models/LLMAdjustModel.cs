@@ -77,7 +77,7 @@ namespace RapidKnowledgeware.Models
             set { _defaultRepeatPenalty = value; RaisePropertyChanged(); }
         }
 
-        private string _defaultSystemPrompt = "You are a helpful assistant \n\n 使用以下提供的上下文信息回答问题，请优先信赖和引用上下文中的相关描述。\n如果确实找不到任何相关信息，再明确告知无法回答。";
+        private string _defaultSystemPrompt = "你是一个助理，解决用户的疑难杂症，要灵活对话，别这么死板。 \n\n 使用以下提供的上下文信息回答问题，请优先信赖和引用上下文中的相关描述。\n如果确实找不到任何相关信息，请根据提示词和历史聊天记录以及你知道的知识点结合来回答问题。";
         /// <summary>
         /// 默认系统提示词
         /// </summary>
