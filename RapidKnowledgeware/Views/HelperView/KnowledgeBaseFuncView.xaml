@@ -39,7 +39,7 @@
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
-                        <Button Content="添加文件" Margin="10 0 20 0" Height="30" Width="100" HorizontalAlignment="Right"
+                        <Button Content="添加文件" Margin="20 0 0 0" Height="30" Width="100" HorizontalAlignment="Right" Template="{StaticResource ButtonTemplate2}"
 Command="{Binding AddKnowledgeCommand}"/>
                     </StackPanel>
 

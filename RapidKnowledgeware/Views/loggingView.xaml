@@ -8,7 +8,13 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Assets/Styles/MainWindowStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+        </ResourceDictionary>
+
     </UserControl.Resources>
     <Grid Background="White">
         <Grid.RowDefinitions>
@@ -17,35 +23,76 @@
         </Grid.RowDefinitions>
 
         <!-- 标题栏 -->
-        <Border Grid.Row="0" Background="#F0F0F0" BorderBrush="#DDD" BorderThickness="0 0 0 1">
+        <Border Grid.Row="0" Background="#f7fbff">
             <Grid>
                 <StackPanel Orientation="Horizontal" Margin="10,0,0,0" VerticalAlignment="Center">
                     <RadioButton Content="聊天记录" IsChecked="{Binding LogType, Converter={StaticResource StringToBoolConverter}, ConverterParameter=Chat}" 
-                                 Margin="0,0,15,0" GroupName="LogType"
+                                 Margin="0,0,15,0" GroupName="LogType" Template="{StaticResource SegmentRadioButtonTemplate}" FontSize="13"
                                  Command="{Binding SwitchLogTypeCommand}" CommandParameter="Chat"/>
                     <RadioButton Content="操作记录" IsChecked="{Binding LogType, Converter={StaticResource StringToBoolConverter}, ConverterParameter=Operations}" 
-                                 Margin="0,0,15,0" GroupName="LogType"
+                                 Margin="0,0,15,0" GroupName="LogType" Template="{StaticResource SegmentRadioButtonTemplate}" FontSize="13"
                                  Command="{Binding SwitchLogTypeCommand}" CommandParameter="Operations"/>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
-                    <ComboBox ItemsSource="{Binding AvailableDates}" SelectedItem="{Binding SelectedDate}" 
-          Width="115  " Margin="5,0" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
-                    <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" Width="180" Margin="5,0" 
-                             VerticalContentAlignment="Center" Padding="5,0"/>
-                    <Button Content="搜索" Width="60" Margin="5,0" Command="{Binding SearchCommand}"/>
-                    <Button Content="刷新" Width="60" Margin="5,0" Command="{Binding RefreshCommand}"/>
-                    <Button Content="导出" Width="60" Margin="5,0" Command="{Binding ExportCommand}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0" >
+                    <ComboBox ItemsSource="{Binding AvailableDates}" SelectedItem="{Binding SelectedDate}"   
+          Width="120  " Margin="0 0 50 0" VerticalAlignment="Center" HorizontalContentAlignment="Center" Style="{StaticResource ModernComboBoxStyle}"/>
+                    <Grid>
+                        <Label Margin="5 0 0 0" Content="&#xe602;" Foreground="#abadb3" FontFamily="{StaticResource iconfont}" VerticalAlignment="Center"/>
+                        <TextBox Name="SearchKeyword" 
+             Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" 
+             Width="190" Height="30" Margin="5,0" 
+             BorderThickness="0 0 0 1" Background="Transparent" 
+             VerticalContentAlignment="Center" Padding="25 2 5 0"/>
+                        
+                        
+                        
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            
+
+                            <TextBlock Text="搜索历史记录" 
+                                   FontSize="14" 
+                                   Foreground="#AAA" 
+                                   FontStyle="Italic"
+                                   IsHitTestVisible="False"
+               
+                                   Margin="35,0,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding ElementName=SearchKeyword, Path=IsKeyboardFocused}" Value="False"/>
+                                                    <Condition Binding="{Binding Text, ElementName=SearchKeyword}" Value=""/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                    </Grid>
+
+                    <Button Template="{StaticResource ButtonTemplate2}" Content="搜索" Width="60" Height="33" FontSize="14" Margin="5,0" Command="{Binding SearchCommand}"/>
+                    <Button Template="{StaticResource ButtonTemplate2}" Content="刷新" Width="60" Height="33" FontSize="14" Margin="5,0" Command="{Binding RefreshCommand}"/>
+                    <Button Template="{StaticResource ButtonTemplate2}" Content="导出" Width="60" Height="33" FontSize="14" Margin="5,0" Command="{Binding ExportCommand}"/>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- 日志列表 -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer.Resources>
+                <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimScrollBar}"/>
+            </ScrollViewer.Resources>
+
             <ItemsControl ItemsSource="{Binding LogEntries}" Margin="10">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" Margin="0,0,0,10" Padding="10" Background="#FAFAFA">
+                        <Border BorderBrush="#bfdbfe" BorderThickness="1" CornerRadius="4" Margin="0,0,0,10" Padding="10" Background="#07007DFA">
                             <StackPanel>
                                 <Grid>
                                     <TextBlock Text="{Binding Timestamp}" FontWeight="Bold" Foreground="#2C3E50" VerticalAlignment="Center"/>

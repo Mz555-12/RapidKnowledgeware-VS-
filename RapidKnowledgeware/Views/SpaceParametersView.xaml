@@ -29,7 +29,7 @@
 
             <!-- 左侧菜单 -->
             <Grid>
-                <StackPanel VerticalAlignment="Center" Margin="10 0 5 0">
+                <StackPanel VerticalAlignment="Center" Margin="20 0 15 0">
                     <RadioButton  Content="知识库"  IsChecked="True" Template="{StaticResource RadioButtonTemple}" Name="btn_startPanel" Margin="0 40"
                          Command="{Binding ViewChangedCommand}"
                          CommandParameter="KnowledgeBaseView"/>

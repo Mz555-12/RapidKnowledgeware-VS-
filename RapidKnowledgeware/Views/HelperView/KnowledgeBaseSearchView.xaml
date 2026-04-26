@@ -12,23 +12,25 @@
                 <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
                     <StackPanel>
                         <Grid  Margin="0,0,0,10">
-                            <TextBox x:Name="SearchInputBox" BorderThickness="0 0 0 1"
+                            <Label Content="&#xe602;" Margin="5 0 0 0" Foreground="#abadb3" FontFamily="{StaticResource iconfont}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            
+                            <TextBox x:Name="SearchInputBox" BorderThickness="0 0 0 1" Background="Transparent"
                                          
                                          Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
                                          Margin="0,0,90,0"
                                          VerticalContentAlignment="Center"
-                                         Padding="10,0">
+                                         Padding="35 0 10 0">
                                 <TextBox.InputBindings>
                                     <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
                                 </TextBox.InputBindings>
                             </TextBox>
-                            <TextBlock Text="Enter 发送" 
+                            <TextBlock Text="搜索相关文件" 
                                            FontSize="14" 
                                            Foreground="#AAA" 
                                            FontStyle="Italic"
                                            HorizontalAlignment="Left" 
                                            VerticalAlignment="Center"
-                                           Margin="12,0,0,0"
+                                           Margin="35 0 0 0"
                                            IsHitTestVisible="False">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -46,28 +48,26 @@
                                 </TextBlock.Style>
                             </TextBlock>
 
-                            <Button Content="搜索" Width="80" Height="30"
+                            <Button Content="搜索" Width="80" Height="30" Template="{StaticResource ButtonTemplate2}" 
                                    Command="{Binding SearchCommand}" HorizontalAlignment="Right"/>
                         </Grid>
 
 
                         <!-- 分页控件（仅搜索视图显示） -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,1,0,0">
-                            <Button Content="◀ 上一页" 
-                                    Width="70" 
-                                    Margin="0 0 0 0"
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="25" >
+                            <Button Content="◀ 上一页" Template="{StaticResource ButtonTemplate2}" FontSize="13.5"
+                                    Width="70"  Margin="0 1 0 0"
                                     Command="{Binding PreviousPageCommand}"
                                     IsEnabled="{Binding HasPreviousPage}"/>
-                            <TextBlock VerticalAlignment="Center" Margin="10,0">
+                            <TextBlock VerticalAlignment="Center" Margin="10,0" >
                                 <Run Text="第 "/>
                                 <Run Text="{Binding CurrentPage, Mode=OneWay}"/>
                                 <Run Text=" 页 / 共 "/>
                                 <Run Text="{Binding TotalPages, Mode=OneWay}"/>
                                 <Run Text=" 页"/>
                             </TextBlock>
-                            <Button Content="下一页 ▶" 
-                                    Width="70" 
-                                    Margin="0 0 0 0"
+                            <Button Content="下一页 ▶"  Template="{StaticResource ButtonTemplate2}"   FontSize="13.5"
+                                    Width="70"    Margin="0 1 0 0"
                                     Command="{Binding NextPageCommand}"
                                     IsEnabled="{Binding HasNextPage}"/>
                         </StackPanel>

@@ -7,7 +7,7 @@
         xmlns:views="clr-namespace:RapidKnowledgeware.Views"
         xmlns:converters="clr-namespace:RapidKnowledgeware.Converters"
         mc:Ignorable="d"
-        Title="RapidKnowledgeware" Height="700" Width="1000" ResizeMode="NoResize"  FontSize="13.5" FontWeight="Normal" FontFamily="Microsoft YaHei" Background="{x:Null}" WindowStyle="None" WindowStartupLocation="CenterScreen" AllowsTransparency="True">
+        Title="RapidKnowledgeware" Height="700" Width="1000" ResizeMode="NoResize"  FontSize="13.5" FontWeight="Normal" FontFamily="Microsoft YaHei" WindowStartupLocation="CenterScreen" Background="{x:Null}" WindowStyle="None" AllowsTransparency="True">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -18,56 +18,7 @@
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
             <FrameworkElement x:Key="WindowProxy" DataContext="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
 
-            <ControlTemplate TargetType="Button" x:Key="OpenDebugBtn_Template">
-                <Border
-                Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}" 
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="4">
-                    <ContentControl Content="{TemplateBinding Content}"   Name="text" 
-                          FontFamily="{StaticResource iconfont}"  
-                          VerticalAlignment="Center" 
-                          HorizontalAlignment="Center"
-                          Foreground="{StaticResource TextPrimary}"/>
-                </Border>
-                <ControlTemplate.Triggers>
-                    <Trigger Property="IsPressed" Value="True">
-                        <Setter Property="Foreground" Value="#D0E8FF" TargetName="text"/>
-                    </Trigger>
-                </ControlTemplate.Triggers>
-            </ControlTemplate>
 
-            <ControlTemplate TargetType="ToggleButton" x:Key="DeepThinkingTBtn_Template">
-                <Border Name="back" 
-                Background="{TemplateBinding Background}"
-                BorderBrush="{TemplateBinding BorderBrush}" 
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="10">
-                    <StackPanel Orientation="Horizontal" >
-                        <Label Content="&#xe639;" Name="lable" FontFamily="{StaticResource iconfont}" FontSize="12" Margin="1 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        <TextBlock Text="{TemplateBinding Content}" Name="text" FontSize="{TemplateBinding FontSize}" VerticalAlignment="Center"   Margin="0 0 6 0" Foreground="{StaticResource TextPrimary}" FontFamily="Microsoft YaHei"/>
-
-                    </StackPanel>
-
-                </Border>
-                <ControlTemplate.Triggers>
-                    <!-- 选中状态（优先级最高，放在最后） -->
-                    <Trigger Property="IsChecked" Value="True">
-                        <Setter Property="Background" Value="#edf3fe" TargetName="back"/>
-                        <Setter Property="Foreground" Value="#3964fe" TargetName="text"/>
-                        <Setter Property="BorderBrush" Value="#b7c8fe" TargetName="back"/>
-                        <Setter Property="Foreground" Value="#3964fe" TargetName="lable"/>
-                    </Trigger>
-                    <!-- 鼠标悬浮状态（仅当未选中时生效） -->
-                    <MultiTrigger>
-                        <MultiTrigger.Conditions>
-                            <Condition Property="IsMouseOver" Value="True"/>
-                            <Condition Property="IsChecked" Value="False"/>
-                        </MultiTrigger.Conditions>
-                        <Setter Property="Background" Value="#EEE" TargetName="back"/>
-                    </MultiTrigger>
-                </ControlTemplate.Triggers>
-            </ControlTemplate>
         </ResourceDictionary>
 
     </Window.Resources>
@@ -76,6 +27,7 @@
             <DropShadowEffect Color="Gray" BlurRadius="10" ShadowDepth="0" Opacity="0.5"/>
         </Border.Effect>
         <Grid >
+            
             <Grid.RowDefinitions>
                 <RowDefinition Height="50"/>
                 <RowDefinition />
@@ -106,20 +58,20 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- 置顶按钮） -->
-                        <ToggleButton Height="30" Width="40" Template="{StaticResource ToggleButtonTemplate}" Name="TopWindow_Btn" Content="&#xe67b;" FontWeight="Bold" FontSize="19" Click="TopWindow_Click" BorderThickness="0" Background="#55DAE3EA"/>
+                        <ToggleButton Height="30" Width="40" Template="{StaticResource ToggleButtonTemplate}" Name="TopWindow_Btn" Content="&#xe67b;" FontWeight="Bold" FontSize="19" Click="TopWindow_Click" />
                         <!-- 日志按钮 -->
-                        <ToggleButton Grid.Column="1" Height="30" Width="40" Template="{StaticResource ToggleButtonTemplate}" Name="OpenLoggingView_Btn" Content="&#xe60c;" Visibility="Visible" BorderThickness="0" FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"
+                        <ToggleButton Grid.Column="1" Height="30" Width="40" Template="{StaticResource ToggleButtonTemplate}" Name="OpenLoggingView_Btn" Content="&#xe60c;" Visibility="Visible" FontWeight="Bold" FontSize="19"   Margin="10,0"
                                       Click="LogViewButton_Click" Command="{Binding LogCommand}"/>
 
                         <!-- 空间参数按钮 -->
-                        <ToggleButton Grid.Column="2" Height="30" Width="40" Template="{StaticResource ToggleButtonTemplate}" Name="OpenSpaceParametersView_Btn" Content="&#xe62e;" Visibility="Visible" BorderThickness="0" FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"
+                        <ToggleButton Grid.Column="2" Height="30" Width="40" Template="{StaticResource ToggleButtonTemplate}" Name="OpenSpaceParametersView_Btn" Content="&#xe62e;" Visibility="Visible" FontWeight="Bold" FontSize="19"   Margin="10,0"
                                       Click="SpaceViewButton_Click" Command="{Binding OpenSpaceParametersViewCommand}"/>
 
                         <!-- 最小化按钮 -->
-                        <Button Grid.Column="3" Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="Minimum_Btn" Content="&#xe650;" Click="Minimum_Click" BorderThickness="0" FontWeight="Bold" FontSize="19" Background="#55DAE3EA" Margin="10,0"/>
+                        <Button Grid.Column="3" Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="Minimum_Btn" Content="&#xe650;" Click="Minimum_Click" FontWeight="Bold" FontSize="19"  Margin="10,0"/>
 
                         <!-- 关闭按钮 -->
-                        <Button Grid.Column="4" Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="CloseWindow_Btn" Content="&#xe601;" FontWeight="Bold" BorderThickness="0" Background="#55DAE3EA"
+                        <Button Grid.Column="4" Height="30" Width="40" Template="{StaticResource ButtonTemplate}" Name="CloseWindow_Btn" Content="&#xe601;" FontWeight="Bold" 
                                 Command="{Binding CloseMainWindowCommand}"
                                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
                     </Grid>
@@ -128,28 +80,30 @@
 
             <Grid Grid.Row="1" Margin="0 0 0 0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.7*"/>
+                    <ColumnDefinition Width="0.6*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
                 <!-- 分隔条 -->
-                <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Stretch" Background="#B4D6F1" ResizeBehavior="PreviousAndNext" ResizeDirection="Columns"/>
-
+                <GridSplitter Grid.Column="1" Width="1" HorizontalAlignment="Stretch" Background="#CCC" ResizeBehavior="PreviousAndNext" ResizeDirection="Columns"/>
+          
+           
 
 
                 <!--左侧导航栏-->
-                <Grid Background="#f9fafb">
+                <Grid Background="#fdfeff">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="60"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Button Content="开启新对话" Command="{Binding NewSessionCommand}" Template="{StaticResource NewDialogueBtnStyle}"/>
 
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="1"  VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+
                         <ItemsControl ItemsSource="{Binding Sessions}" >
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <RadioButton GroupName="ChatSessions"
+                                    <RadioButton GroupName="ChatSessions" 
              IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
              Content="{Binding DisplayName}"
              Style="{StaticResource SessionRadioButtonStyle}"
@@ -177,13 +131,13 @@ CommandParameter="{Binding}"/>
                 </Grid>
 
                 <!--右侧内容容器-->
-                <Grid Grid.Column="2" Background="#f9fafb">
+                <Grid Grid.Column="2" Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="25"/>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock FontSize="14" Margin="10 0 0 0" VerticalAlignment="Bottom" Foreground="#AAA">
+                    
+                               <TextBlock FontSize="14" Margin="10 0 0 0" VerticalAlignment="Bottom" Foreground="#AAA">
                         <TextBlock.Text>
                             <MultiBinding Converter="{StaticResource ModelDisplayConverter}">
                                 <Binding Path="SelectedSession.SpaceParameters.ChatLLM"/>
@@ -195,9 +149,23 @@ CommandParameter="{Binding}"/>
 
                     <TextBlock Text="{Binding SelectedSession.DisplayName, FallbackValue='未选择对话'}" FontSize="14" Margin="10 0 0 0" VerticalAlignment="Bottom" Foreground="#AAA" HorizontalAlignment="Center"/>
 
+
+
+                    <Grid Grid.Row="1"  Width="760">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+
+
                     <!--聊天窗口-->
-                    <ScrollViewer Grid.Row="1" x:Name="ChatScrollViewer" VerticalScrollBarVisibility="Auto"  Margin="0 10 0 0">
-                        <ItemsControl ItemsSource="{Binding CurrentMessages}">
+                    <ScrollViewer Grid.Row="0"  Margin="0 10 0 0" x:Name="ChatScrollViewer" VerticalScrollBarVisibility="Auto">
+
+                            <ScrollViewer.Resources>
+                                <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimScrollBar}"/>
+                            </ScrollViewer.Resources>
+
+                            <ItemsControl ItemsSource="{Binding CurrentMessages}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="20,5,20,5" Background="Transparent">
@@ -218,7 +186,7 @@ CommandParameter="{Binding}"/>
                                         </Border>
 
                                         <!-- AI消息（左侧） -->
-                                        <Border Background="#FFFFFF" 
+                                            <Border Background="#07007DFA" 
                                                 HorizontalAlignment="Left" 
                                                 CornerRadius="10" 
                                                 Margin="0,0,50,5"
@@ -238,6 +206,7 @@ CommandParameter="{Binding}"/>
                                                                  TextWrapping="Wrap" 
                                                                  IsReadOnly="True" 
                                                                  Foreground="#7597DB"
+                                                                  Background="Transparent"
                                                                  MaxWidth="390"  
                                                                  BorderBrush="Transparent" 
                                                                  BorderThickness="0"/>
@@ -246,6 +215,7 @@ CommandParameter="{Binding}"/>
                                                     <!-- 正式回答内容 -->
                                                     <TextBox Text="{Binding Content2}"  
                                                              Visibility="{Binding HasMainContent, Converter={StaticResource BoolToVis}}"
+                                                             Background="Transparent"
                                                              Margin="10,5,10,10"  
                                                              TextWrapping="Wrap" 
                                                              IsReadOnly="True" 
@@ -316,7 +286,7 @@ CommandParameter="{Binding}"/>
                     <!--发消息栏-->
                     <!-- 动态区域：覆盖 Grid.Row="1" 和 Grid.Row="2"，根据是否有消息切换布局 -->
                     <!-- 无消息时的居中布局（覆盖聊天区域） -->
-                    <Grid Grid.Row="1" Grid.RowSpan="2" Visibility="{Binding HasMessages, Converter={StaticResource InverseBoolToVis}}">
+                    <Grid Grid.Row="0" Grid.RowSpan="2" Visibility="{Binding HasMessages, Converter={StaticResource InverseBoolToVis}}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="auto"/>
@@ -461,9 +431,12 @@ CommandParameter="{Binding}"/>
                         </Border>
                     </Grid>
 
+                    </Grid>
+         
+
 
                     <!--SpaceAdjustView-->
-                    <Grid Grid.RowSpan="3" x:Name="SpaceAdjustOverlay" Visibility="{Binding IsSpaceAdjustVisible, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+                    <Grid Grid.RowSpan="2" x:Name="SpaceAdjustOverlay" Visibility="{Binding IsSpaceAdjustVisible, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
                         <views:SpaceAdjustView x:Name="SpaceAdjustViewControl" 
                                DataContext="{Binding SpaceAdjustVM}"
                                RenderTransformOrigin="0.5,0.5">
@@ -486,7 +459,7 @@ CommandParameter="{Binding}"/>
 
 
 
-            <Border Grid.Row="2" BorderBrush="#0078D7" BorderThickness="0 1 0 0">
+            <Border Grid.Row="2" BorderBrush="#bfdbfe" BorderThickness="0 1 0 0">
                 <TextBlock Text="{Binding MainModel.ViewInfo}" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="13.5" Foreground="#595959" Margin="0 0 10 0"/>
             </Border>
 

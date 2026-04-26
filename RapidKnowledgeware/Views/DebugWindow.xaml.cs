@@ -4,6 +4,7 @@ using System;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace RapidKnowledgeware.Views
 {
@@ -55,6 +56,19 @@ namespace RapidKnowledgeware.Views
                 }
                 e.Handled = true;
             };
+        }
+
+        private void Close_DebugView(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void RowDefinition_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                this.DragMove();
+            }
         }
     }
 }

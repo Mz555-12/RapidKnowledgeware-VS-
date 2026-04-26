@@ -6,7 +6,7 @@
             <Storyboard x:Key="StartAnimation">
                 <ColorAnimation Storyboard.TargetName="BackgroundBorder" 
                                 Storyboard.TargetProperty="Background.Color"
-                                To="Green" Duration="0:0:0.2"/>
+                                To="#8fa7fe" Duration="0:0:0.2"/>
                 <DoubleAnimation Storyboard.TargetName="DotTranslate" 
                                  Storyboard.TargetProperty="X"
                                  To="9" Duration="0:0:0.2"/>

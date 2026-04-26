@@ -4,30 +4,56 @@
         xmlns:converters="clr-namespace:RapidKnowledgeware.Converters"
         Title="调试窗口" Height="450" Width="700"
         WindowStartupLocation="Manual" Left="0" Top="0"
-        FontFamily="Consolas" FontSize="15">
+        FontFamily="Consolas" FontSize="15" Background="{x:Null}" WindowStyle="None" AllowsTransparency="True">
     <Window.Resources>
-        <!-- 日志级别颜色转换器 -->
-        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-        <converters:DebugLevelToColorConverter x:Key="LevelToColorConverter"/>
-        
-        
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Assets/Styles/MainWindowStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <!-- 日志级别颜色转换器 -->
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:DebugLevelToColorConverter x:Key="LevelToColorConverter"/>
+        </ResourceDictionary>
+
     </Window.Resources>
-    <Grid>
+
+    <Border Background="White" Margin="5" CornerRadius="10">
+        <Border.Effect>
+            <DropShadowEffect Color="Gray" BlurRadius="10" ShadowDepth="0" Opacity="0.5"/>
+        </Border.Effect>
+
+
+        <Grid >
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- 工具栏 -->
-        <Border Grid.Row="0" Background="#F0F0F0" BorderBrush="#CCC" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Margin="5,0">
-                <Button Content="清空日志" Width="80" Height="22" Command="{Binding ClearCommand}"/>
-                <CheckBox x:Name="AutoScrollCheck" Content="自动滚动" IsChecked="True" Margin="10,0,0,0" VerticalAlignment="Center"/>
-            </StackPanel>
+        <Border Grid.Row="0" CornerRadius="10 10 0 0"  Style="{StaticResource TitleBarStyle}" MouseLeftButtonDown="RowDefinition_MouseLeftButtonDown">
+
+            <Grid>
+                <StackPanel Orientation="Horizontal" Margin="15 0 0 0">
+                    <Button Content="清空日志" Width="80" Height="25" Command="{Binding ClearCommand}" Template="{StaticResource ButtonTemplate2}"/>
+                    <CheckBox x:Name="AutoScrollCheck" Content="自动滚动" IsChecked="True" Margin="10,3,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" 
+                    Content="&#xe601;" FontWeight="Bold" BorderThickness="0" 
+                    Background="#55DAE3EA" 
+                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
+                    Click="Close_DebugView"/>
+            </Grid>
         </Border>
 
         <!-- 日志列表 -->
         <ScrollViewer Grid.Row="1" x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto">
+
+            <ScrollViewer.Resources>
+                <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimScrollBar}"/>
+            </ScrollViewer.Resources>
+
             <ListBox ItemsSource="{Binding DebugModel.LogEntries}" AlternationCount="2" 
          Background="Transparent" BorderThickness="0" 
          HorizontalContentAlignment="Stretch"
@@ -95,5 +121,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </ScrollViewer>
-    </Grid>
+    </Grid> 
+    </Border>
+  
 </Window>

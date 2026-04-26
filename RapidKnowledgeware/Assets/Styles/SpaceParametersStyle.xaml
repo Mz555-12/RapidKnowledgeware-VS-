@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ControlTemplate TargetType="RadioButton" x:Key="RadioButtonTemple">
         <Grid>
-            <Border Background="#00FFFFFF" CornerRadius="5" Name="back" Height="40" Width="174"  BorderThickness="0.5" BorderBrush="#0a59f7"/>
+            <Border Background="#00FFFFFF" CornerRadius="5" Name="back" Height="40" Width="154"  BorderThickness="0.5" BorderBrush="#0a59f7"/>
                
             <TextBlock Text="{TemplateBinding Content}"  FontSize="17"  Name="text" VerticalAlignment="Center"  FontFamily="Microsoft YaHei"  HorizontalAlignment="Center" />
         </Grid>

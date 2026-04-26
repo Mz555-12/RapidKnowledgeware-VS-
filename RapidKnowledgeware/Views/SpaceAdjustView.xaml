@@ -21,7 +21,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#F0F0F0" BorderBrush="#DDD" BorderThickness="0 0 0 1">
+        <Border Grid.Row="0" Background="#f7fbff"  >
             <Grid>
                 <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" 
                         Content="&#xe601;" FontWeight="Bold" BorderThickness="0" 
@@ -35,7 +35,9 @@
         </Border>
 
         <ScrollViewer  Grid.Row="1" Margin="0 0 5 0" VerticalScrollBarVisibility="Auto">
-
+            <ScrollViewer.Resources>
+                <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimScrollBar}"/>
+            </ScrollViewer.Resources>
 
             <Grid Margin="0 0 30 0">
                 <Grid.RowDefinitions>

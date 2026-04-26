@@ -24,7 +24,7 @@
         </Grid.RowDefinitions>
 
         <!-- 标题栏，右侧关闭按钮 -->
-        <Border Grid.Row="0" Background="#F0F0F0" BorderBrush="#DDD" BorderThickness="0 0 0 1">
+        <Border Grid.Row="0" Background="#f7fbff" >
             <Grid>
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal">
@@ -49,12 +49,17 @@
 
         <!-- 分块列表 -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+
+            <ScrollViewer.Resources>
+                <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimScrollBar}"/>
+            </ScrollViewer.Resources>
+
             <ItemsControl ItemsSource="{Binding KnowledgeBaseModel.FileBlocks}" 
               AlternationCount="1000" Margin="5">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" 
-            Margin="0 0 0 10" Padding="8" Background="#FAFAFA">
+                        <Border BorderBrush="#bfdbfe" BorderThickness="1" CornerRadius="4" 
+            Margin="0 0 0 10" Padding="8" Background="#07007DFA">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>

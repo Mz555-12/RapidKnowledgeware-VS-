@@ -191,7 +191,6 @@ namespace RapidKnowledgeware
             if (sender is ToggleButton btn)
             {
                 is_check = !is_check;
-                this.OpenLoggingView_Btn.BorderThickness = is_check ? new Thickness(0, 0, 0, 2) : new Thickness(0);
             }
         }
 
@@ -200,7 +199,6 @@ namespace RapidKnowledgeware
             if (sender is ToggleButton btn)
             {
                 is_check = !is_check;
-                this.OpenSpaceParametersView_Btn.BorderThickness = is_check ? new Thickness(0, 0, 0, 2) : new Thickness(0);
             }
         }
 
@@ -208,7 +206,6 @@ namespace RapidKnowledgeware
         {
             is_top = !is_top;
             this.Topmost = is_top;
-            this.TopWindow_Btn.BorderThickness = is_top ? new Thickness(0, 0, 0, 2) : new Thickness(0);
 
             if (sender is ToggleButton btn)
             {

@@ -4,6 +4,71 @@
              xmlns:local="clr-namespace:RapidKnowledgeware"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+
+        <SolidColorBrush x:Key="PrimaryBlue" Color="#0078D7"/>
+        <SolidColorBrush x:Key="LightBlue" Color="#E6F2FA"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#262626"/>
+
+
+        <FontFamily x:Key="iconfont">
+            pack://application:,,,/RapidKnowledgeware;component/Assets/Fonts/#iconfont
+        </FontFamily>
+
+        <!-- 科技感按钮样式 -->
+        <ControlTemplate TargetType="Button" x:Key="ButtonTemplate">
+            <Border Name="back" 
+                Background="#55DAE3EA"
+                BorderBrush="{TemplateBinding BorderBrush}" 
+                BorderThickness="0" 
+                CornerRadius="4">
+                <ContentControl Content="{TemplateBinding Content}" 
+                          FontFamily="{StaticResource iconfont}"  
+                          VerticalAlignment="Center" 
+                          HorizontalAlignment="Center"
+                          Foreground="{StaticResource TextPrimary}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource LightBlue}" TargetName="back"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlue}" TargetName="back"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#D0E8FF" TargetName="back"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <!-- 科技感按钮样式2 -->
+        <ControlTemplate TargetType="Button" x:Key="ButtonTemplate2">
+            <Border Name="back" 
+                Background="Transparent"
+                BorderBrush="#66007dfa" 
+                BorderThickness="1" 
+                CornerRadius="4">
+                <ContentControl Content="{TemplateBinding Content}" FontWeight="Black"
+                          FontFamily="{StaticResource iconfont}"  
+                          VerticalAlignment="Center" 
+                          HorizontalAlignment="Center"
+                          Foreground="{StaticResource TextPrimary}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource LightBlue}" TargetName="back"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBlue}" TargetName="back"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#55DAE3EA" TargetName="back"/>
+                </Trigger>
+                <!-- 禁用状态 -->
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="back" Property="BorderThickness" Value="0"/>
+                </Trigger>
+
+
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+
+
     </Application.Resources>
 </Application>
