@@ -1,12 +1,13 @@
 ﻿using RapidKnowledgeware.Base;
+using RapidKnowledgeware.Functions.KnowledgeBaseFunc;
+using RapidKnowledgeware.Functions.LLMAdjustFunc;
+using RapidKnowledgeware.Functions.MainWindowFunc;
 using RapidKnowledgeware.Functions.SpaceParametersFunc;
 using RapidKnowledgeware.Models;
-using RapidKnowledgeware.Functions.MainWindowFunc;
-using RapidKnowledgeware.Functions.LLMAdjustFunc;
-using RapidKnowledgeware.Functions.KnowledgeBaseFunc;
 using System;
-using System.Windows.Controls;
 using System.Diagnostics;
+using System.Windows;
+using System.Windows.Controls;
 
 
 namespace RapidKnowledgeware.ViewModels

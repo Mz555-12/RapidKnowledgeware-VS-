@@ -161,8 +161,10 @@
     </ApplicationDefinition>
     <Compile Include="Base\CommandBase.cs" />
     <Compile Include="Base\GridLengthAnimation.cs" />
+    <Compile Include="Base\MessageBlockTemplateSelector.cs" />
     <Compile Include="Converters\DebugLevelToColorConverter.cs" />
     <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\MessageContentConverter.cs" />
     <Compile Include="Converters\ModelDisplayConverter.cs" />
     <Compile Include="Converters\StringToBoolConverter.cs" />
     <Compile Include="Functions\ChatFunc\ChatService.cs" />
@@ -188,6 +190,7 @@
     <Compile Include="Models\KnowledgeBaseModel.cs" />
     <Compile Include="Models\MainModel.cs" />
     <Compile Include="Models\LLMAdjustModel.cs" />
+    <Compile Include="Models\MessageBlock.cs" />
     <Compile Include="Models\OperationsLog.cs" />
     <Compile Include="Models\SpaceAdjustModel.cs" />
     <Compile Include="ViewModels\DebugWindowModel.cs" />

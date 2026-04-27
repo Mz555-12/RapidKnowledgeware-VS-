@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:RapidKnowledgeware"
         xmlns:views="clr-namespace:RapidKnowledgeware.Views"
         xmlns:converters="clr-namespace:RapidKnowledgeware.Converters"
+        xmlns:base="clr-namespace:RapidKnowledgeware.Base"
         mc:Ignorable="d"
         Title="RapidKnowledgeware" Height="700" Width="1000" ResizeMode="NoResize"  FontSize="13.5" FontWeight="Normal" FontFamily="Microsoft YaHei" WindowStartupLocation="CenterScreen" Background="{x:Null}" WindowStyle="None" AllowsTransparency="True">
     <Window.Resources>
@@ -15,9 +16,24 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
             <converters:ModelDisplayConverter x:Key="ModelDisplayConverter"/>
+            <converters:MessageContentConverter x:Key="MessageContentConverter"/>
             <BooleanToVisibilityConverter x:Key="BoolToVis"/>
             <FrameworkElement x:Key="WindowProxy" DataContext="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+            <ControlTemplate TargetType="Button" x:Key="CopyBtn_Template">
+                <Border Name="back"   Background="Transparent"  CornerRadius="10"   Width="60" Height="25" Margin="0 0 0 0">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"  Orientation="Horizontal">
 
+                        <Label Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" Background="Transparent"  Foreground="Black" FontFamily="{StaticResource iconfont}" Width="24" />
+                        <TextBlock Text="复制"  HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12"  Foreground="Black" Background="Transparent" Padding="0 0 6 0" />
+
+                    </StackPanel>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#90DDDDDD" TargetName="back"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
 
         </ResourceDictionary>
 
@@ -158,9 +174,9 @@ CommandParameter="{Binding}"/>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
                                 <Button Content="&#xe6cc;" Margin="0 0 20 0" Template="{StaticResource ButtonTemplate}"
                         FontSize="17" Foreground="#AAA" x:Name="ExpandButton" Click="ExpandButton_Click"/>
-                                
-                                
-                                
+
+
+
                                 <Button Template="{StaticResource ButtonTemplate}" Content="&#xe601;" FontWeight="Bold"
                         Visibility="Collapsed" x:Name="CloseBtn_Chat"
                         Command="{Binding CloseMainWindowCommand}" Margin="0 0 20 0"
@@ -224,26 +240,25 @@ CommandParameter="{Binding}"/>
                                         <DataTemplate>
                                             <Grid Margin="20,5,20,5" Background="Transparent">
                                                 <!-- 用户消息（右侧） -->
-                                                <Border Background="#95EC69" 
+                                                <Border Background="#09007DFA" 
                                 HorizontalAlignment="Right" 
-                                CornerRadius="5" 
+                                CornerRadius="20" 
                                 Margin="50,0,0,5"
                                 Visibility="{Binding IsUserMessage, Converter={StaticResource BoolToVis}}">
                                                     <TextBox Text="{Binding UserContent}" 
-                                     Margin="10" 
+                                     Padding="15"
                                      TextWrapping="Wrap" 
                                      IsReadOnly="True" 
-                                     MaxWidth="370"
                                      Background="Transparent" 
                                      BorderBrush="Transparent" 
                                      BorderThickness="0"/>
                                                 </Border>
 
                                                 <!-- AI消息（左侧） -->
-                                                <Border Background="#07007DFA" 
+                                                <Border Background="White" 
                                 HorizontalAlignment="Left" 
                                 CornerRadius="10" 
-                                Margin="0,0,50,5"
+                                Margin="0,0,0,5"
                                 Visibility="{Binding IsUserMessage, Converter={StaticResource InverseBoolToVis}}" Padding="10">
                                                     <Grid>
                                                         <StackPanel>
@@ -251,29 +266,80 @@ CommandParameter="{Binding}"/>
                                               Header="思考过程" 
                                               IsExpanded="{Binding IsThinkingExpanded}"
                                               Margin="10,5,10,5" 
-                                              Foreground="#7597DB" 
+                                              Foreground="#61666b" 
                                               Background="Transparent"
                                               Visibility="{Binding HasThinkContent, Converter={StaticResource BoolToVis}}">
                                                                 <TextBox Text="{Binding ThinkingContent}" 
                                                  Margin="0,5,0,0"
                                                  TextWrapping="Wrap" 
                                                  IsReadOnly="True" 
-                                                 Foreground="#7597DB"
+                                                 Foreground="#61666b"
                                                  Background="Transparent"
-                                                 MaxWidth="390"  
                                                  BorderBrush="Transparent" 
                                                  BorderThickness="0"/>
                                                             </Expander>
 
-                                                            <TextBox Text="{Binding Content2}"  
-                                             Visibility="{Binding HasMainContent, Converter={StaticResource BoolToVis}}"
-                                             Background="Transparent"
-                                             Margin="10,5,10,10"  
-                                             TextWrapping="Wrap" 
-                                             IsReadOnly="True" 
-                                             MaxWidth="390"  
-                                             BorderBrush="Transparent" 
-                                             BorderThickness="0"/>
+                                                            <!-- 正式回答内容：支持代码块解析 -->
+                                                            <ItemsControl ItemsSource="{Binding Content2, Converter={StaticResource MessageContentConverter}}"
+                                                                      Margin="10,5,10,10">
+                                                                <ItemsControl.Resources>
+                                                                    <!-- 普通文本模板 -->
+                                                                    <DataTemplate x:Key="TextTemplate">
+                                                                        <TextBox Text="{Binding Content}" 
+                                                                             TextWrapping="Wrap" 
+                                                                             IsReadOnly="True" 
+                                                                             Background="Transparent"
+                                                                             BorderBrush="Transparent" 
+                                                                             BorderThickness="0"/>
+                                                                    </DataTemplate>
+
+                                                                    <!-- 代码块模板（带标题栏和复制按钮） -->
+                                                                    <DataTemplate x:Key="CodeTemplate">
+                                                                        <Border Background="#f9fafb"  CornerRadius="15" Padding="15 5 10 15"
+                                                                            Margin="0,5,0,5">
+                                                                            <Grid>
+                                                                                <Grid.RowDefinitions>
+                                                                                    <RowDefinition Height="Auto"/>
+                                                                                    <RowDefinition Height="*"/>
+                                                                                </Grid.RowDefinitions>
+                                                                                <!-- 标题栏 -->
+                                                                                <Border Background="Transparent" Margin="0 0 0 20">
+                                                                                    <Grid>
+                                                                                        <TextBlock Text="rapid" 
+                                                                                               FontSize="12" 
+                                                                                               Foreground="#1f2937"
+                                                                                               VerticalAlignment="Center"/>
+                                                                                        <Button Content="&#xe66c;" Name="Copy_Btn"
+                                                                                           HorizontalAlignment="Right"
+                                                                                            Template="{StaticResource CopyBtn_Template}" Click="CopyButton_Click"
+                                                                                            Command="{Binding DataContext.CopyCodeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                                            CommandParameter="{Binding Content}"/>
+                                                                                    </Grid>
+                                                                                </Border>
+                                                                                <!-- 代码内容 -->
+                                                                                <TextBox Grid.Row="1" Text="{Binding Content}" 
+                                                                                     FontFamily="Consolas" 
+                                                                                     FontSize="12" 
+                                                                                     TextWrapping="Wrap" 
+                                                                                     IsReadOnly="True"
+                                                                                     Background="Transparent"
+                                                                                     BorderThickness="0"
+                                                                                     />
+                                                                            </Grid>
+                                                                        </Border>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.Resources>
+
+                                                                <ItemsControl.ItemTemplateSelector>
+                                                                    <!-- 模板选择器 -->
+                                                                    <base:MessageBlockTemplateSelector 
+                        TextTemplate="{StaticResource TextTemplate}"
+                        CodeTemplate="{StaticResource CodeTemplate}"/>
+                                                                </ItemsControl.ItemTemplateSelector>
+                                                            </ItemsControl>
+
+
+
                                                         </StackPanel>
 
                                                         <!-- 加载动画 -->
@@ -283,12 +349,12 @@ CommandParameter="{Binding}"/>
                                       VerticalAlignment="Top"
                                       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
                                                             <TextBlock x:Name="scanText" 
-                                               Text="正在思考 (๑•ㅂ•)و✧" 
+                                               Text="正在分析资料 (๑•ㅂ•)و✧" 
                                                Foreground="Gray" 
                                                FontSize="14" 
                                                HorizontalAlignment="Left" 
                                                VerticalAlignment="Center"/>
-                                                            <TextBlock Text="正在思考 (๑" 
+                                                            <TextBlock Text="正在分析资料 (๑" 
                                                FontSize="14"  
                                                HorizontalAlignment="Left" 
                                                VerticalAlignment="Center">

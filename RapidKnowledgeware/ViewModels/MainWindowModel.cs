@@ -470,6 +470,34 @@ namespace RapidKnowledgeware.ViewModels
 
 
 
+        private CommandBase _copyCodeCommand;
+        /// <summary>
+        /// 复制代码块内容到剪贴板命令
+        /// </summary>
+        public CommandBase CopyCodeCommand
+        {
+            get
+            {
+                if (_copyCodeCommand == null)
+                {
+                    _copyCodeCommand = new CommandBase();
+                    _copyCodeCommand.DoExecute = new Action<object>(param =>
+                    {
+                        if (param is string code)
+                        {
+                            try { Clipboard.SetText(code); }
+                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"复制失败: {ex.Message}"); }
+                        }
+                    });
+                }
+                return _copyCodeCommand;
+            }
+        }
+
+
+
+
+
         /// <summary>
         /// 设置 SpaceAdjustView 的视图引用（由 MainWindow 调用）
         /// </summary>

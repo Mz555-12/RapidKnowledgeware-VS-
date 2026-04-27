@@ -411,6 +411,31 @@ namespace RapidKnowledgeware
             ((MainWindowModel)DataContext).MainModel.IsExpanded = _isExpanded;
         }
 
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn == null) return;
+
+            var code = btn.CommandParameter as string;
+            if (!string.IsNullOrEmpty(code))
+            {
+                try { Clipboard.SetText(code); }
+                catch (Exception ex) { Debug.WriteLine($"复制失败: {ex.Message}"); }
+            }
+
+            // 保存原始图标，切换到 ✓
+            object originalContent = btn.Content;
+            btn.Content = "✓";
+
+            // 2秒后恢复
+            var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+            timer.Tick += (s, args) =>
+            {
+                btn.Content = originalContent;
+                timer.Stop();
+            };
+            timer.Start();
+        }
 
         private void ApplyInitialLayout()
         {
