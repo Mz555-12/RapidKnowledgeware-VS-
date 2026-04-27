@@ -75,6 +75,27 @@ namespace RapidKnowledgeware.ViewModels
             }
         }
 
+        private CommandBase _saveAsDefaultCommand;
+        /// <summary>
+        /// 将当前会话参数设为全局默认命令
+        /// </summary>
+        public CommandBase SaveAsDefaultCommand
+        {
+            get
+            {
+                if (_saveAsDefaultCommand == null)
+                {
+                    _saveAsDefaultCommand = new CommandBase();
+                    _saveAsDefaultCommand.DoExecute = new Action<object>(_ =>
+                    {
+                        SpaceAdjustService.SaveAsDefault(SpaceAdjustModel);
+                        MainWindow.SetStatusMessage("当前参数已设为全局默认");
+                    });
+                }
+                return _saveAsDefaultCommand;
+            }
+        }
+
         /// <summary>
         /// 初始化空间参数视图模型
         /// </summary>

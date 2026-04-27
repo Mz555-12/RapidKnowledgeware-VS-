@@ -23,11 +23,19 @@
 
         <Border Grid.Row="0" Background="#f7fbff"  >
             <Grid>
-                <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" 
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Template="{StaticResource ButtonTemplate2}" Content="设为默认" Width="75" Height="30" FontSize="14" Margin="0 0 50 0" 
+                            Command="{Binding SaveAsDefaultCommand}"/>
+
+                    <Button Height="30" Width="40" Template="{StaticResource ButtonTemplate}" 
                         Content="&#xe601;" FontWeight="Bold" BorderThickness="0" 
                         Background="#55DAE3EA" 
-                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0"
+                         Margin="0,0,10,0"
                         Command="{Binding CloseCommand}"/>
+
+
+                </StackPanel>
+
 
                 <TextBlock Text="空间参数设置" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 0 0" FontWeight="Bold" FontSize="16"/>
                 <TextBlock Text="{Binding Session.DisplayName}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10 0 0 0" FontWeight="Bold" FontSize="16"/>
