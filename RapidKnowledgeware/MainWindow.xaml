@@ -240,7 +240,7 @@ CommandParameter="{Binding}"/>
                                         <DataTemplate>
                                             <Grid Margin="20,5,20,5" Background="Transparent">
                                                 <!-- 用户消息（右侧） -->
-                                                <Border Background="#09007DFA" 
+                                                <Border Background="#edf3fe" 
                                 HorizontalAlignment="Right" 
                                 CornerRadius="20" 
                                 Margin="50,0,0,5"
@@ -256,10 +256,10 @@ CommandParameter="{Binding}"/>
 
                                                 <!-- AI消息（左侧） -->
                                                 <Border Background="White" 
-                                HorizontalAlignment="Left" 
-                                CornerRadius="10" 
-                                Margin="0,0,0,5"
-                                Visibility="{Binding IsUserMessage, Converter={StaticResource InverseBoolToVis}}" Padding="10">
+                                                    HorizontalAlignment="Stretch" 
+                                                    CornerRadius="10" 
+                                                    Margin="0,0,0,5"
+                                                    Visibility="{Binding IsUserMessage, Converter={StaticResource InverseBoolToVis}}" Padding="10">
                                                     <Grid>
                                                         <StackPanel>
                                                             <Expander x:Name="ThinkExpander"
@@ -281,60 +281,51 @@ CommandParameter="{Binding}"/>
 
                                                             <!-- 正式回答内容：支持代码块解析 -->
                                                             <ItemsControl ItemsSource="{Binding Content2, Converter={StaticResource MessageContentConverter}}"
-                                                                      Margin="10,5,10,10">
+              Margin="10,5,10,10" HorizontalContentAlignment="Stretch">
+                                                                <ItemsControl.ItemContainerStyle>
+                                                                    <Style TargetType="ContentPresenter">
+                                                                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                                                        <!-- 强制宽度与 ItemsControl 内容区一致 -->
+                                                                        <Setter Property="Width" Value="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                                                                        <Setter Property="Margin" Value="0,0,0,8"/>
+                                                                    </Style>
+                                                                </ItemsControl.ItemContainerStyle>
                                                                 <ItemsControl.Resources>
-                                                                    <!-- 普通文本模板 -->
+                                                                    <!-- 文本模板 -->
                                                                     <DataTemplate x:Key="TextTemplate">
-                                                                        <TextBox Text="{Binding Content}" 
-                                                                             TextWrapping="Wrap" 
-                                                                             IsReadOnly="True" 
-                                                                             Background="Transparent"
-                                                                             BorderBrush="Transparent" 
-                                                                             BorderThickness="0"/>
+                                                                        <TextBox Text="{Binding Content}" HorizontalAlignment="Stretch"
+                     TextWrapping="Wrap" IsReadOnly="True"
+                     Background="Transparent" BorderBrush="Transparent" BorderThickness="0"/>
                                                                     </DataTemplate>
-
-                                                                    <!-- 代码块模板（带标题栏和复制按钮） -->
+                                                                    <!-- 代码块模板 -->
                                                                     <DataTemplate x:Key="CodeTemplate">
-                                                                        <Border Background="#f9fafb"  CornerRadius="15" Padding="15 5 10 15"
-                                                                            Margin="0,5,0,5">
+                                                                        <Border Background="#f9fafb" CornerRadius="15" Padding="15 5 10 15"
+                    Margin="0,5,0,5" HorizontalAlignment="Stretch">
                                                                             <Grid>
                                                                                 <Grid.RowDefinitions>
                                                                                     <RowDefinition Height="Auto"/>
                                                                                     <RowDefinition Height="*"/>
                                                                                 </Grid.RowDefinitions>
-                                                                                <!-- 标题栏 -->
                                                                                 <Border Background="Transparent" Margin="0 0 0 20">
                                                                                     <Grid>
-                                                                                        <TextBlock Text="rapid" 
-                                                                                               FontSize="12" 
-                                                                                               Foreground="#1f2937"
-                                                                                               VerticalAlignment="Center"/>
-                                                                                        <Button Content="&#xe66c;" Name="Copy_Btn"
-                                                                                           HorizontalAlignment="Right"
-                                                                                            Template="{StaticResource CopyBtn_Template}" Click="CopyButton_Click"
-                                                                                            Command="{Binding DataContext.CopyCodeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                                            CommandParameter="{Binding Content}"/>
+                                                                                        <TextBlock Text="rapid" FontSize="12" Foreground="#1f2937" VerticalAlignment="Center"/>
+                                                                                        <Button Content="&#xe66c;" Name="Copy_Btn" HorizontalAlignment="Right"
+                                    Template="{StaticResource CopyBtn_Template}" Click="CopyButton_Click"
+                                    Command="{Binding DataContext.CopyCodeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding Content}"/>
                                                                                     </Grid>
                                                                                 </Border>
-                                                                                <!-- 代码内容 -->
-                                                                                <TextBox Grid.Row="1" Text="{Binding Content}" 
-                                                                                     FontFamily="Consolas" 
-                                                                                     FontSize="12" 
-                                                                                     TextWrapping="Wrap" 
-                                                                                     IsReadOnly="True"
-                                                                                     Background="Transparent"
-                                                                                     BorderThickness="0"
-                                                                                     />
+                                                                                <TextBox Grid.Row="1" Text="{Binding Content}" HorizontalAlignment="Stretch"
+                             FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" IsReadOnly="True"
+                             Background="Transparent" BorderThickness="0"/>
                                                                             </Grid>
                                                                         </Border>
                                                                     </DataTemplate>
                                                                 </ItemsControl.Resources>
-
                                                                 <ItemsControl.ItemTemplateSelector>
-                                                                    <!-- 模板选择器 -->
                                                                     <base:MessageBlockTemplateSelector 
-                        TextTemplate="{StaticResource TextTemplate}"
-                        CodeTemplate="{StaticResource CodeTemplate}"/>
+            TextTemplate="{StaticResource TextTemplate}"
+            CodeTemplate="{StaticResource CodeTemplate}"/>
                                                                 </ItemsControl.ItemTemplateSelector>
                                                             </ItemsControl>
 
