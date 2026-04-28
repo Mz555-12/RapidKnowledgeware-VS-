@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -466,6 +467,182 @@ namespace RapidKnowledgeware
                 ExpandedHeader.Visibility = Visibility.Collapsed;
                 _isExpanded = false;
             }
+        }
+
+        private void CodeBlock_Loaded(object sender, RoutedEventArgs e)
+        {
+            var rtb = sender as RichTextBox;
+            var block = rtb?.DataContext as MessageBlock;
+            if (block == null) return;
+
+            string text = block.Content;
+
+            // 色彩定义
+            var keywordBrush = new SolidColorBrush(Color.FromRgb(0x8B, 0x00, 0xB4)); // 关键字 紫色
+            var typeBrush = new SolidColorBrush(Color.FromRgb(0x2B, 0x8B, 0x57)); // 类型 青绿
+            var builtinBrush = new SolidColorBrush(Color.FromRgb(0x00, 0x66, 0xCC)); // 内置函数/系统过程 亮蓝
+            var commentBrush = new SolidColorBrush(Color.FromRgb(0x6B, 0x72, 0x80)); // 注释 灰色
+            var stringBrush = new SolidColorBrush(Color.FromRgb(0x1A, 0x7F, 0x3A)); // 字符串 绿色
+            var numberBrush = new SolidColorBrush(Color.FromRgb(0x8B, 0x00, 0xB4)); // 数字 紫色
+            var operatorBrush = new SolidColorBrush(Color.FromRgb(0x3B, 0x3B, 0x3B)); // 操作符/标点 深灰
+            var plainBrush = new SolidColorBrush(Color.FromRgb(0x1F, 0x29, 0x37)); // 普通标识符 近黑
+
+            // 新增专属颜色
+            var speedBrush = new SolidColorBrush(Color.FromRgb(0xC0, 0x5B, 0x0F)); // 速度 橙棕色
+            var zoneBrush = new SolidColorBrush(Color.FromRgb(0xA0, 0x52, 0xCF)); // 转弯区 紫罗兰
+            var toolBrush = new SolidColorBrush(Color.FromRgb(0x00, 0x7B, 0xA0)); // 工具/工件 蓝绿色
+
+            // 关键字集
+            var keywords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "MODULE", "ENDMODULE", "PROC", "ENDPROC", "FUNC", "ENDFUNC",
+        "IF", "THEN", "ELSE", "ELSEIF", "ENDIF",
+        "FOR", "ENDFOR", "WHILE", "ENDWHILE", "DO", "ENDDO",
+        "TEST", "ENDTEST", "CASE", "DEFAULT",
+        "RETURN", "EXIT", "GOTO", "RETRY",
+        "VAR", "CONST", "PERS", "LOCAL", "AND", "OR", "NOT",
+        "TRUE", "FALSE",
+        "MoveJ", "MoveL", "MoveC", "WaitTime", "SetDO", "SetAO", "WaitDI", "PulseDO",
+        "FROM", "TO", "DOWNTO", "BY", "MOD"
+    };
+
+            // 数据类型
+            var types = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "num", "bool", "string", "robtarget", "speeddata", "zonedata",
+        "tooldata", "wobjdata"
+    };
+
+            // 内置函数
+            var builtins = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Offs", "RelTool", "Sin", "Cos", "ATan2", "Sqrt", "Abs",
+        "NumToStr", "BoolToStr", "TPWrite", "SetGO"
+    };
+
+            var paragraph = new Paragraph();
+            int len = text.Length;
+            int pos = 0;
+
+            while (pos < len)
+            {
+                char c = text[pos];
+
+                // 换行
+                if (c == '\r' || c == '\n')
+                {
+                    if (c == '\r' && pos + 1 < len && text[pos + 1] == '\n') pos++;
+                    paragraph.Inlines.Add(new LineBreak());
+                    pos++;
+                    continue;
+                }
+
+                // 注释
+                if (c == '!')
+                {
+                    int start = pos;
+                    while (pos < len && text[pos] != '\r' && text[pos] != '\n') pos++;
+                    paragraph.Inlines.Add(new Run(text.Substring(start, pos - start))
+                    {
+                        Foreground = commentBrush,
+                        FontStyle = FontStyles.Italic
+                    });
+                    continue;
+                }
+
+                // 字符串
+                if (c == '"')
+                {
+                    int start = pos;
+                    pos++;
+                    while (pos < len && text[pos] != '"')
+                    {
+                        if (text[pos] == '\\') pos++;
+                        if (pos < len) pos++;
+                    }
+                    if (pos < len) pos++;
+                    paragraph.Inlines.Add(new Run(text.Substring(start, pos - start)) { Foreground = stringBrush });
+                    continue;
+                }
+
+                // 数字（增强科学计数法识别）
+                if (char.IsDigit(c))
+                {
+                    int start = pos;
+                    while (pos < len && (char.IsDigit(text[pos]) || text[pos] == '.')) pos++;
+                    // 检测科学计数法后缀：E/e [+-]? 数字
+                    if (pos < len && (text[pos] == 'E' || text[pos] == 'e'))
+                    {
+                        pos++;
+                        if (pos < len && (text[pos] == '+' || text[pos] == '-')) pos++;
+                        while (pos < len && char.IsDigit(text[pos])) pos++;
+                    }
+                    paragraph.Inlines.Add(new Run(text.Substring(start, pos - start)) { Foreground = numberBrush });
+                    continue;
+                }
+
+                // 操作符/标点
+                if ("+-*/=:;,()[]{}<>@#".Contains(c))
+                {
+                    paragraph.Inlines.Add(new Run(c.ToString()) { Foreground = operatorBrush });
+                    pos++;
+                    continue;
+                }
+
+                // 标识符（单词）
+                if (char.IsLetter(c) || c == '_')
+                {
+                    int start = pos;
+                    while (pos < len && (char.IsLetterOrDigit(text[pos]) || text[pos] == '_')) pos++;
+                    string word = text.Substring(start, pos - start);
+                    var run = new Run(word);
+
+                    // 匹配专用模式（优先于关键字/类型）
+                    if (Regex.IsMatch(word, @"^v\d+$", RegexOptions.IgnoreCase))          // 速度 v500
+                    {
+                        run.Foreground = speedBrush;
+                    }
+                    else if (Regex.IsMatch(word, @"^z\d+$", RegexOptions.IgnoreCase) ||   // 转弯区 z50 / fine
+                             word.Equals("fine", StringComparison.OrdinalIgnoreCase))
+                    {
+                        run.Foreground = zoneBrush;
+                    }
+                    else if (Regex.IsMatch(word, @"^(tool|wobj)\w*$", RegexOptions.IgnoreCase))  // 工具/工件
+                    {
+                        run.Foreground = toolBrush;
+                    }
+                    else if (keywords.Contains(word))
+                    {
+                        run.Foreground = keywordBrush;
+                        run.FontWeight = FontWeights.Bold;
+                    }
+                    else if (types.Contains(word))
+                    {
+                        run.Foreground = typeBrush;
+                    }
+                    else if (builtins.Contains(word))
+                    {
+                        run.Foreground = builtinBrush;
+                    }
+                    else
+                    {
+                        run.Foreground = plainBrush;
+                    }
+                    paragraph.Inlines.Add(run);
+                    continue;
+                }
+
+                // 其他字符
+                paragraph.Inlines.Add(new Run(c.ToString()) { Foreground = plainBrush });
+                pos++;
+            }
+
+            rtb.Document = new FlowDocument(paragraph)
+            {
+                PagePadding = new Thickness(0),
+                LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
+                LineHeight = 18
+            };
         }
 
     }
