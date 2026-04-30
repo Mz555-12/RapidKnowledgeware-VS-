@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RapidKnowledgeware.Views"
+             xmlns:converters="clr-namespace:RapidKnowledgeware.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="744" FontSize="15">
 
@@ -13,6 +14,7 @@
                 <ResourceDictionary Source="../Assets/Styles/MainWindowStyle.xaml"/>
                 <ResourceDictionary Source="../Assets/Styles/SpaceAdjustStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <converters:NotNullToVisibilityConverter x:Key="NotNullToVis"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Background="White">
@@ -97,11 +99,31 @@ VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                         <Label Content="ChatLLM："/>
-                                        <TextBox Text="{Binding SpaceAdjustModel.ChatLLM}"   Margin="0 0 30 0" Width="120"  BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        <Grid>
+                                            <ComboBox x:Name="SpaceChatCombo" MinWidth="150" MaxWidth="170"
+                                                  ItemsSource="{Binding ChatModels}"
+                                                  SelectedItem="{Binding SpaceAdjustModel.ChatLLM, Mode=TwoWay}"
+                                                   Margin="0 0 20 0" VerticalAlignment="Center"
+                                                  Style="{StaticResource ModernComboBoxStyle}"/>
+                                            <TextBlock Text="{Binding ChatModelHint}"
+                                                   IsHitTestVisible="False" VerticalAlignment="Center" Margin="8,0,0,0"
+                                                   Foreground="Gray"
+                                                   Visibility="{Binding ElementName=SpaceChatCombo, Path=SelectedItem, Converter={StaticResource NotNullToVis}}"/>
+                                        </Grid>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                         <Label Content="DeepThinkingLLM："/>
-                                        <TextBox Text="{Binding SpaceAdjustModel.DeepThinkingLLM}"   Margin="0 0 30 0" Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                        <Grid>
+                                            <ComboBox x:Name="SpaceDeepThinkingCombo" MinWidth="150" MaxWidth="170"
+                                              ItemsSource="{Binding ChatModels}"
+                                              SelectedItem="{Binding SpaceAdjustModel.DeepThinkingLLM, Mode=TwoWay}"
+                                              Margin="0 0 20 0" VerticalAlignment="Center"
+                                              Style="{StaticResource ModernComboBoxStyle}"/>
+                                            <TextBlock Text="{Binding ChatModelHint}"
+                                               IsHitTestVisible="False" VerticalAlignment="Center" Margin="8,0,0,0"
+                                               Foreground="Gray"
+                                               Visibility="{Binding ElementName=SpaceDeepThinkingCombo, Path=SelectedItem, Converter={StaticResource NotNullToVis}}"/>
+                                        </Grid>
                                     </StackPanel>
                                 </StackPanel>
 

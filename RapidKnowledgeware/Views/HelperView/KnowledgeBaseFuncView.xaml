@@ -4,8 +4,20 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RapidKnowledgeware.Views.HelperView"
+             xmlns:converters="clr-namespace:RapidKnowledgeware.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="110" d:DesignWidth="748">
+
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../../Assets/Styles/MainWindowStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <converters:NotNullToVisibilityConverter x:Key="NotNullToVis"/>
+        </ResourceDictionary> 
+
+    </UserControl.Resources>
     <Grid Background="White">
         <StackPanel Grid.Row="1" Margin="0 0 10 0" >
 
@@ -16,7 +28,17 @@
                             <StackPanel Orientation="Horizontal">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <Label Content="当前嵌入模型："/>
-                                    <TextBox Text="{Binding KnowledgeBaseModel.Default_CurrentEmbeddingName, UpdateSourceTrigger=PropertyChanged}"  Margin="0 0 30 0" Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                    <Grid>
+                                        <ComboBox x:Name="EmbedModelCombo"  MinWidth="150" MaxWidth="170"
+                                          ItemsSource="{Binding EmbeddingModels}"
+                                          SelectedItem="{Binding KnowledgeBaseModel.Default_CurrentEmbeddingName, Mode=TwoWay}"
+                                         Margin="0 0 20 0" VerticalAlignment="Center"
+                                          Style="{StaticResource ModernComboBoxStyle}"/>
+                                        <TextBlock Text="{Binding EmbeddingModelHint}"
+                                           IsHitTestVisible="False" VerticalAlignment="Center" Margin="8,0,0,0"
+                                           Foreground="Gray"
+                                           Visibility="{Binding ElementName=EmbedModelCombo, Path=SelectedItem, Converter={StaticResource NotNullToVis}}"/>
+                                    </Grid>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                     <Label Content="相似度阈值："/>

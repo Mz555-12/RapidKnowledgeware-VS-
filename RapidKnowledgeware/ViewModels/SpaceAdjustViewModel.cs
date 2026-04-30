@@ -1,8 +1,10 @@
 ﻿using GalaSoft.MvvmLight;
 using RapidKnowledgeware.Base;
+using RapidKnowledgeware.Functions.LLMAdjustFunc;
 using RapidKnowledgeware.Functions.SpaceAdjustFunc;
 using RapidKnowledgeware.Models;
 using System;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
@@ -18,6 +20,22 @@ namespace RapidKnowledgeware.ViewModels
         /// 空间参数数据模型
         /// </summary>
         public SpaceAdjustModel SpaceAdjustModel { get; }
+
+        /// <summary>
+        /// 可用的聊天模型列表
+        /// </summary>
+        public ObservableCollection<string> ChatModels => OllamaModelService.ChatModels;
+
+        private string _chatModelHint = "正在检查模型...";
+        /// <summary>
+        /// 聊天模型提示信息
+        /// </summary>
+        public string ChatModelHint
+        {
+            get => _chatModelHint;
+            set { _chatModelHint = value; RaisePropertyChanged(); }
+        }
+
 
         /// <summary>
         /// 重置为默认参数命令
@@ -96,6 +114,8 @@ namespace RapidKnowledgeware.ViewModels
             }
         }
 
+ 
+
         /// <summary>
         /// 初始化空间参数视图模型
         /// </summary>
@@ -110,8 +130,20 @@ namespace RapidKnowledgeware.ViewModels
 
             // 捕获原始快照，用于关闭时对比变更
             Functions.MainWindowFunc.SettingsChangeTracker.CaptureSnapshot(SpaceAdjustModel);
+
+            UpdateHint();
+            OllamaModelService.ModelsLoaded += UpdateHint;
+            OllamaModelService.LoadFailed += UpdateHint;
+        }
+        private void UpdateHint()
+        {
+            if (!OllamaModelService.IsOllamaAvailable)
+                ChatModelHint = "Ollama未部署";
+            else if (OllamaModelService.ChatModels.Count == 0)
+                ChatModelHint = "请下载大模型";
+            else
+                ChatModelHint = "";
         }
 
-  
     }
 }

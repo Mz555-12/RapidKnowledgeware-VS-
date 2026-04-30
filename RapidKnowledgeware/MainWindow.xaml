@@ -147,7 +147,7 @@ CommandParameter="{Binding}"/>
                 </Border>
 
                 <!--右侧内容容器-->
-                <Border Grid.Column="2" Background="Transparent" x:Name="ContentBorder">
+                <Border Grid.Column="2"  x:Name="ContentBorder">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="30" x:Name="ContentHeaderRow"/>
@@ -187,7 +187,7 @@ CommandParameter="{Binding}"/>
 
                         <!-- ========== 展开时的头部（标题栏样式） ========== -->
                         <Grid x:Name="ExpandedHeader" Visibility="Collapsed">
-                            <Border Style="{StaticResource TitleBarStyle}"  MouseLeftButtonDown="RowDefinition_MouseLeftButtonDown">
+                            <Border Style="{StaticResource TitleBarStyle}"  MouseLeftButtonDown="RowDefinition_MouseLeftButtonDown" Margin="0 0 0 0" CornerRadius="10 10 0 0">
                                 <Grid>
                                     <TextBlock FontSize="16" Margin="10 0 0 0" VerticalAlignment="Center" Foreground="Black">
                                         <TextBlock.Text>

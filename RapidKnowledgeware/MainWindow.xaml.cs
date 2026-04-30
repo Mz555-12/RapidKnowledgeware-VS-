@@ -1,4 +1,5 @@
 ﻿using RapidKnowledgeware.Base;
+using RapidKnowledgeware.Functions.LLMAdjustFunc;
 using RapidKnowledgeware.Functions.MainWindowFunc;
 using RapidKnowledgeware.Models;
 using RapidKnowledgeware.ViewModels;
@@ -80,6 +81,10 @@ namespace RapidKnowledgeware
                 var instance = RapidKnowledgeware.Functions.KnowledgeBaseFunc.KnowledgeBaseService.RagServiceInstance;
                 Debug.WriteLine($"[MainWindow] RagService 预热完成，索引块数: {instance.IndexedChunkCount}");
             });
+
+
+            // 后台加载 Ollama 模型列表
+            _ = OllamaModelService.LoadModelsAsync();
 
 
         }
@@ -322,7 +327,7 @@ namespace RapidKnowledgeware
                 storyboard.Children.Add(headerHeightAnim);
 
                 // 内容边框变为有圆角（展开状态）
-                var borderAnim = new ThicknessAnimation(new Thickness(5), TimeSpan.FromMilliseconds(300));
+                var borderAnim = new ThicknessAnimation(new Thickness(0), TimeSpan.FromMilliseconds(300));
                 Storyboard.SetTarget(borderAnim, ContentBorder);
                 Storyboard.SetTargetProperty(borderAnim, new PropertyPath("BorderThickness"));
                 storyboard.Children.Add(borderAnim);
@@ -447,7 +452,7 @@ namespace RapidKnowledgeware
                 InfoRow.Height = new GridLength(0);
                 LeftCol.Width = new GridLength(0);
                 SplitCol.Width = new GridLength(0);
-                ContentHeaderRow.Height = new GridLength(50);
+                ContentHeaderRow.Height = new GridLength(40);
                 ContentBorder.BorderThickness = new Thickness(5);
                 ContentBorder.CornerRadius = new CornerRadius(5);
                 NormalHeader.Visibility = Visibility.Collapsed;
@@ -614,7 +619,6 @@ namespace RapidKnowledgeware
                     else if (keywords.Contains(word))
                     {
                         run.Foreground = keywordBrush;
-                        run.FontWeight = FontWeights.Bold;
                     }
                     else if (types.Contains(word))
                     {

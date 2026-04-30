@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RapidKnowledgeware.Views"
+             xmlns:converters="clr-namespace:RapidKnowledgeware.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="748"  FontSize="14">
 
@@ -12,6 +13,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../Assets/Styles/MainWindowStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <converters:NotNullToVisibilityConverter x:Key="NotNullToVis"/>
         </ResourceDictionary>
 
     </UserControl.Resources>
@@ -37,113 +40,134 @@
                 </ScrollViewer.Resources>
 
                 <Grid Margin="0 0 30 0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <Grid Margin="10 20 10 10">
-                    <StackPanel>
+                    <Grid Margin="10 20 10 10">
+                        <StackPanel>
 
 
-                        <Grid >
-                            <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                            <Label Content="ChatLLM："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_ChatLLM}"   Margin="0 0 30 0" Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                            <Grid >
+                                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+
+                                                <Label Content="ChatLLM："/>
+                                                <Grid >
+                                                    <ComboBox x:Name="ChatLLMCombo" MinWidth="150" MaxWidth="170"
+                                                      ItemsSource="{Binding ChatModels}"
+                                                      SelectedItem="{Binding LLMAdjustModel.Default_ChatLLM, Mode=TwoWay}"
+                                                      Margin="0 0 20 0" VerticalAlignment="Center" 
+                                                      Style="{StaticResource ModernComboBoxStyle}"/>
+                                                    <TextBlock Text="{Binding ChatModelHint}"
+                                                       IsHitTestVisible="False" VerticalAlignment="Center" Margin="8,0,0,0"
+                                                       Foreground="Gray"
+                                                       Visibility="{Binding ElementName=ChatLLMCombo, Path=SelectedItem, Converter={StaticResource NotNullToVis}}"/>
+                                                </Grid>
+
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                <Label Content="DeepThinkingLLM："/>
+                                                <Grid>
+                                                    <ComboBox x:Name="DeepThinkingCombo"  MinWidth="150" MaxWidth="170"
+                                                          ItemsSource="{Binding ChatModels}"
+                                                          SelectedItem="{Binding LLMAdjustModel.Default_DeepThinkingLLM, Mode=TwoWay}"
+                                                           Margin="0 0 20 0" VerticalAlignment="Center"
+                                                          Style="{StaticResource ModernComboBoxStyle}"/>
+                                                    <TextBlock Text="{Binding ChatModelHint}"
+                                                       IsHitTestVisible="False" VerticalAlignment="Center" Margin="8,0,0,0"
+                                                       Foreground="Gray"
+                                                       Visibility="{Binding ElementName=DeepThinkingCombo, Path=SelectedItem, Converter={StaticResource NotNullToVis}}"/>
+                                                </Grid>
+                                            </StackPanel>
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                            <Label Content="DeepThinkingLLM："/>
-                                                <TextBox Text="{Binding LLMAdjustModel.Default_DeepThinkingLLM}"   Margin="0 0 30 0"  Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-                                        </StackPanel>
-                                        
-                                    </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal">
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                                 <Label Content="BaseURL："/>
                                                 <TextBox Text="{Binding LLMAdjustModel.Default_BaseURL}"   Margin="0 0 30 0" MinWidth="150" MaxWidth="350" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                            <Label Content="ContextSize："/>
+                                                <Label Content="ContextSize："/>
                                                 <TextBox Text="{Binding LLMAdjustModel.Default_ContextSize}"   Margin="0 0 30 0"  Width="150" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </Border>
-                            <Label Content="默认基础参数" Margin="20 -10 0 0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="15 0" Background="White"  Foreground="#666"/>
+                                </Border>
+                                <Label Content="默认基础参数" Margin="20 -10 0 0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="15 0" Background="White"  Foreground="#666"/>
 
 
-                        </Grid>
+                            </Grid>
 
-                        <Grid  Margin="0 30 0 0">
-                            <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                            <Label Content="Temperature："/>
+                            <Grid  Margin="0 30 0 0">
+                                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="10" Padding="10">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                <Label Content="Temperature："/>
                                                 <TextBox Text="{Binding LLMAdjustModel.Default_Temperature}"   Margin="0 0 15 0" Width="110"  BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                            <Label Content="Top-P："/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                <Label Content="Top-P："/>
                                                 <TextBox Text="{Binding LLMAdjustModel.Default_TopP}"   Margin="0 0 15 0" Width="110" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                            <Label Content="RepeatPenalty："/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                <Label Content="RepeatPenalty："/>
                                                 <TextBox Text="{Binding LLMAdjustModel.Default_RepeatPenalty}"   Margin="0 0 30 0" Width="110" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                            </StackPanel>
+
                                         </StackPanel>
-                                        
-                                    </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal">
 
-                                        
 
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                                 <Label Content="ChatHistoryPercentage ："/>
                                                 <TextBox Text="{Binding LLMAdjustModel.Default_ChatHistoryPercentage}"   Margin="0 0 30 0" MinWidth="120" MaxWidth="120" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-                                        </StackPanel>
-                                        
+                                            </StackPanel>
 
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
+
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Left">
                                                 <Label Content="ChatHistoryMemory："/>
                                                 <TextBox Text="{Binding LLMAdjustModel.Default_ChatHistoryMemory}"   Margin="0 0 30 0" Width="120" BorderThickness="0 0 0 1" Padding="10 0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </Border>
-                            <Label Content="默认生成参数" Margin="20 -10 0 0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="15 0" Background="White"  Foreground="#666"/>
+                                </Border>
+                                <Label Content="默认生成参数" Margin="20 -10 0 0" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" Padding="15 0" Background="White"  Foreground="#666"/>
 
-                        </Grid>
+                            </Grid>
 
-                    </StackPanel>
-                </Grid>
-                
-                <Grid Grid.Row="1">
-                    <StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <StackPanel>
                             <Label Content="查询模式默认拒绝响应:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
-                        <Border  MinHeight="70"  Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray">
+                            <Border  MinHeight="70"  Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray">
                                 <TextBox Text="{Binding LLMAdjustModel.Default_RefusalResponse}" BorderThickness="0" Padding="5" Background="Transparent"  Margin="0 5"
                          VerticalContentAlignment="Top" HorizontalContentAlignment="Left" TextWrapping="Wrap" AcceptsReturn="True"/>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-                
-                <Grid Grid.Row="2" >
-                    <StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="2" >
+                        <StackPanel>
                             <Label Content="系统默认提示词:" Margin="10 10 10 0" FontSize="14" Foreground="#666"/>
-                        <Border   Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray">
+                            <Border   Margin="10" CornerRadius="10" BorderThickness="1" BorderBrush="Gray">
                                 <TextBox Text="{Binding LLMAdjustModel.Default_SystemPrompt}" BorderThickness="0" Padding="5" Background="Transparent" Margin="0 5"
                          TextWrapping="Wrap" MinHeight="150" AcceptsReturn="True"/>
-                        </Border>
-                    </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
-            </Grid>
             </ScrollViewer>
-           
+
 
 
 

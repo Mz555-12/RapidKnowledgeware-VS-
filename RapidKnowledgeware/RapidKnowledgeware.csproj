@@ -166,6 +166,7 @@
     <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\MessageContentConverter.cs" />
     <Compile Include="Converters\ModelDisplayConverter.cs" />
+    <Compile Include="Converters\NotNullToVisibilityConverter.cs" />
     <Compile Include="Converters\StringToBoolConverter.cs" />
     <Compile Include="Functions\ChatFunc\ChatService.cs" />
     <Compile Include="Functions\ChatFunc\PromptTruncationService.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseService.cs" />
     <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseUIService.cs" />
     <Compile Include="Functions\LLMAdjustFunc\LLMAdjustService.cs" />
+    <Compile Include="Functions\LLMAdjustFunc\OllamaModelService.cs" />
     <Compile Include="Functions\LoggingFunc\LoggingService.cs" />
     <Compile Include="Functions\LoggingFunc\LoggingUIService.cs" />
     <Compile Include="Functions\MainWindowFunc\AppSettingsManager.cs" />

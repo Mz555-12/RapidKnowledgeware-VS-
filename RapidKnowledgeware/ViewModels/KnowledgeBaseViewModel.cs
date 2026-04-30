@@ -1,6 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
 using RapidKnowledgeware.Base;
 using RapidKnowledgeware.Functions.KnowledgeBaseFunc;
+using RapidKnowledgeware.Functions.LLMAdjustFunc;
 using RapidKnowledgeware.Functions.MainWindowFunc;
 using RapidKnowledgeware.Models;
 using RapidKnowledgeware.Views;
@@ -21,6 +22,24 @@ namespace RapidKnowledgeware.ViewModels
 
         private static KnowledgeBaseViewModel _instance;
         public static KnowledgeBaseViewModel Instance => _instance ?? (_instance = new KnowledgeBaseViewModel());
+
+
+
+
+        /// <summary>
+        /// 可用的嵌入模型列表
+        /// </summary>
+        public ObservableCollection<string> EmbeddingModels => OllamaModelService.EmbeddingModels;
+
+        private string _embeddingModelHint = "正在检查模型...";
+        /// <summary>
+        /// 嵌入模型提示信息
+        /// </summary>
+        public string EmbeddingModelHint
+        {
+            get => _embeddingModelHint;
+            set { _embeddingModelHint = value; RaisePropertyChanged(); }
+        }
 
         private bool _isAnimating = false;
 
@@ -69,7 +88,15 @@ namespace RapidKnowledgeware.ViewModels
             set { _isSearchViewVisible = value; RaisePropertyChanged(); RaisePropertyChanged(nameof(SwitchViewButtonText)); }
         }
 
-
+        private void UpdateEmbeddingHint()
+        {
+            if (!OllamaModelService.IsOllamaAvailable)
+                EmbeddingModelHint = "Ollama未部署";
+            else if (OllamaModelService.EmbeddingModels.Count == 0)
+                EmbeddingModelHint = "请下载嵌入模型";
+            else
+                EmbeddingModelHint = "";
+        }
 
 
         /// <summary>
