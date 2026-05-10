@@ -13,5 +13,6 @@ namespace RapidKnowledgeware
     /// </summary>
     public partial class App : Application
     {
+        //IOC初始化
     }
 }
