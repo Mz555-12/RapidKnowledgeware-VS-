@@ -59,7 +59,16 @@
          HorizontalContentAlignment="Stretch"
          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
          ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                <!-- 禁用内置垂直滚动，交给外层 ScrollViewer -->
+
+                    <ListBox.Resources>
+                        <!-- 消除 ContentPresenter 对 ItemsControl 的隐式宽度绑定 -->
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Width" Value="NaN"/>
+                            <!-- 或 Value="Auto" -->
+                        </Style>
+                    </ListBox.Resources>
+
+                    <!-- 禁用内置垂直滚动，交给外层 ScrollViewer -->
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Background" Value="White"/>

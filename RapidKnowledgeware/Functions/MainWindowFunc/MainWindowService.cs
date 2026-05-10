@@ -44,6 +44,33 @@ namespace RapidKnowledgeware.Functions.MainWindowFunc
             _mainModel = mainModel;
         }
 
+        public void ForceStopAndFinalizeAllSessions()
+        {
+            // 1. 停止当前生成
+            StopMessage();
+
+            // 2. 遍历所有会话，清理加载状态
+            foreach (var session in _viewModel.Sessions)
+            {
+                if (session.Messages == null) continue;
+
+                var lastAIMessage = session.Messages.LastOrDefault(m => !m.IsUserMessage);
+                if (lastAIMessage != null && lastAIMessage.IsLoading)
+                {
+                    // 如果还在加载，强制结束，并添加中断提示
+                    lastAIMessage.IsLoading = false;
+                    if (string.IsNullOrEmpty(lastAIMessage.Content2))
+                    {
+                        lastAIMessage.Content2 = "[生成被中断]";
+                    }
+                    else
+                    {
+                        lastAIMessage.Content2 += "\n[生成被中断]";
+                    }
+                }
+            }
+        }
+
         #region 会话管理
 
         /// <summary>

@@ -511,6 +511,10 @@ namespace RapidKnowledgeware.ViewModels
         /// </summary>
         public void OnWindowClosing()
         {
+            // 先停止所有任务并清理状态
+            _service.ForceStopAndFinalizeAllSessions();
+
+            // 再保存设置（包括被清理后的会话）
             _service.SaveAllSettings();
         }
 

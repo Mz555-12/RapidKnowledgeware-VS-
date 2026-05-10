@@ -107,6 +107,10 @@ namespace RapidKnowledgeware
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             var vm = DataContext as MainWindowModel;
+            if (vm == null) return;
+
+            vm.OnWindowClosing();
+
             vm.MainModel.IsExpanded = _isExpanded;
             AppSettingsManager.SaveSettings(vm.MainModel);
             AppSettingsManager.SaveSettings(KnowledgeBaseModel.Instance);
