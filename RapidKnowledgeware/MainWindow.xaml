@@ -1,4 +1,4 @@
-﻿<Window x:Class="RapidKnowledgeware.MainWindow"
+<Window x:Class="RapidKnowledgeware.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -285,8 +285,6 @@ CommandParameter="{Binding}"/>
                                                                 <ItemsControl.ItemContainerStyle>
                                                                     <Style TargetType="ContentPresenter">
                                                                         <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                                                                        <!-- 强制宽度与 ItemsControl 内容区一致 -->
-                                                                        <Setter Property="Width" Value="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
                                                                         <Setter Property="Margin" Value="0,0,0,8"/>
                                                                     </Style>
                                                                 </ItemsControl.ItemContainerStyle>

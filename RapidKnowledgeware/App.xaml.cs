@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IOC;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -8,11 +9,17 @@ using System.Windows;
 
 namespace RapidKnowledgeware
 {
-    /// <summary>
-    /// App.xaml 的交互逻辑
-    /// </summary>
     public partial class App : Application
     {
-        //IOC初始化
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            ServiceConfigurator.ConfigureServices(
+                System.Reflection.Assembly.GetExecutingAssembly());
+
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+        }
     }
 }

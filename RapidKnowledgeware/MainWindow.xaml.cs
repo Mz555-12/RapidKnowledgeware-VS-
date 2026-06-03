@@ -1,8 +1,10 @@
-﻿using RapidKnowledgeware.Base;
-using RapidKnowledgeware.Functions.LLMAdjustFunc;
-using RapidKnowledgeware.Functions.MainWindowFunc;
+using IOC;
+using RapidKnowledgeware.Base;
 using RapidKnowledgeware.Models;
+using RapidKnowledgeware.DAO;
+using RapidKnowledgeware.Services;
 using RapidKnowledgeware.ViewModels;
+using RapidKnowledgeware.ViewModels.Impl;
 using RapidKnowledgeware.Views;
 using System;
 using System.Collections.Generic;
@@ -47,7 +49,7 @@ namespace RapidKnowledgeware
             MainModel.OpenLoggingView_Btn = this.OpenLoggingView_Btn;
 
 
-            var vm = new MainWindowModel();
+            var vm = BeanFactory.GetBean<IMainWindowModel>();
             this.DataContext = vm;
 
             this.Tag = vm;   // 将 ViewModel 存入 Tag，供菜单绑定使用
@@ -56,7 +58,7 @@ namespace RapidKnowledgeware
             vm.SetSpaceAdjustViewReferences(this.SpaceAdjustOverlay, this.SpaceAdjustViewControl);
 
             // 加载设置到 KnowledgeBaseModel
-            AppSettingsManager.LoadSettings(KnowledgeBaseModel.Instance);
+            BeanFactory.GetBean<IAppSettingsRepository>().LoadSettings(KnowledgeBaseModel.Instance);
             foreach (var item in KnowledgeBaseModel.Instance.FileItems)
             {
                 if (string.IsNullOrEmpty(item.ImportBlockRule))
@@ -64,27 +66,25 @@ namespace RapidKnowledgeware
             }
 
 
-            // === 捕获全局模型的初始快照 ===
-            Functions.MainWindowFunc.SettingsChangeTracker.CaptureSnapshot(KnowledgeBaseModel.Instance);
-            Functions.MainWindowFunc.SettingsChangeTracker.CaptureSnapshot(Functions.LLMAdjustFunc.LLMAdjustService.Current);
+            var settingsChangeTracker = BeanFactory.GetBean<ISettingsChangeTracker>();
+            var llmAdjustService = BeanFactory.GetBean<ILLMAdjustService>();
+            settingsChangeTracker.CaptureSnapshot(KnowledgeBaseModel.Instance);
+            settingsChangeTracker.CaptureSnapshot(llmAdjustService.Current);
 
             this.Closing += MainWindow_Closing;
 
 
-            // 加载持久化的窗口布局状态
-            AppSettingsManager.LoadSettings(vm.MainModel);
+            BeanFactory.GetBean<IAppSettingsRepository>().LoadSettings(vm.MainModel);
             ApplyInitialLayout();
 
-            // 后台预热 RagService，避免首次调用时的冷启动延迟
             System.Threading.Tasks.Task.Run(() =>
             {
-                var instance = RapidKnowledgeware.Functions.KnowledgeBaseFunc.KnowledgeBaseService.RagServiceInstance;
-                Debug.WriteLine($"[MainWindow] RagService 预热完成，索引块数: {instance.IndexedChunkCount}");
+                var instance = BeanFactory.GetBean<IKnowledgeBaseService>().RagServiceInstance;
+                Debug.WriteLine($"[MainWindow] RagService 预热完成，索引块数 {instance.IndexedChunkCount}");
             });
 
 
-            // 后台加载 Ollama 模型列表
-            _ = OllamaModelService.LoadModelsAsync();
+            _ = BeanFactory.GetBean<IOllamaModelService>().LoadModelsAsync();
 
 
         }
@@ -112,8 +112,8 @@ namespace RapidKnowledgeware
             vm.OnWindowClosing();
 
             vm.MainModel.IsExpanded = _isExpanded;
-            AppSettingsManager.SaveSettings(vm.MainModel);
-            AppSettingsManager.SaveSettings(KnowledgeBaseModel.Instance);
+            BeanFactory.GetBean<IAppSettingsRepository>().SaveSettings(vm.MainModel);
+            BeanFactory.GetBean<IAppSettingsRepository>().SaveSettings(KnowledgeBaseModel.Instance);
         }
 
         // 提供静态方法设置状态栏信息
@@ -175,7 +175,7 @@ namespace RapidKnowledgeware
             var textBox = sender as TextBox;
             if (textBox == null) return;
 
-            // 向上查找父 Border
+            // 向上查找 Border
             DependencyObject parent = VisualTreeHelper.GetParent(textBox);
             while (parent != null && !(parent is Border))
             {
@@ -233,7 +233,7 @@ namespace RapidKnowledgeware
         }
 
         /// <summary>
-        /// 会话项右键菜单打开时检查：若空间参数视图处于显示状态，则阻止菜单弹出。
+        /// 会话项右键菜单打开时检查：若空间参数视图处于显示状态，则阻止菜单弹出）
         /// </summary>
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)
         {
@@ -275,7 +275,7 @@ namespace RapidKnowledgeware
 
                 var storyboard = new Storyboard();
 
-                // 标题行（窗口顶部）缩到0
+                // 标题行（窗口顶部）缩减
                 var titleAnim = new GridLengthAnimation
                 {
                     From = new GridLength(50, GridUnitType.Pixel),
@@ -286,7 +286,7 @@ namespace RapidKnowledgeware
                 Storyboard.SetTargetProperty(titleAnim, new PropertyPath("Height"));
                 storyboard.Children.Add(titleAnim);
 
-                // 信息行（窗口底部）缩到0
+                // 信息行（窗口底部）缩减
                 var infoAnim = new GridLengthAnimation
                 {
                     From = new GridLength(30, GridUnitType.Pixel),
@@ -297,7 +297,7 @@ namespace RapidKnowledgeware
                 Storyboard.SetTargetProperty(infoAnim, new PropertyPath("Height"));
                 storyboard.Children.Add(infoAnim);
 
-                // 左侧列缩到0
+                // 左侧列缩减
                 var leftAnim = new GridLengthAnimation
                 {
                     From = new GridLength(LeftColFixedWidth, GridUnitType.Pixel),
@@ -308,7 +308,7 @@ namespace RapidKnowledgeware
                 Storyboard.SetTargetProperty(leftAnim, new PropertyPath("Width"));
                 storyboard.Children.Add(leftAnim);
 
-                // 分隔条缩到0
+                // 分隔条缩减
                 var splitAnim = new GridLengthAnimation
                 {
                     From = new GridLength(splitColWidth, GridUnitType.Pixel),
@@ -498,7 +498,7 @@ namespace RapidKnowledgeware
 
             // 新增专属颜色
             var speedBrush = new SolidColorBrush(Color.FromRgb(0xC0, 0x5B, 0x0F)); // 速度 橙棕色
-            var zoneBrush = new SolidColorBrush(Color.FromRgb(0xA0, 0x52, 0xCF)); // 转弯区 紫罗兰
+            var zoneBrush = new SolidColorBrush(Color.FromRgb(0xA0, 0x52, 0xCF)); // 转弯量 紫罗兰
             var toolBrush = new SolidColorBrush(Color.FromRgb(0x00, 0x7B, 0xA0)); // 工具/工件 蓝绿色
 
             // 关键字集
@@ -611,7 +611,7 @@ namespace RapidKnowledgeware
                     {
                         run.Foreground = speedBrush;
                     }
-                    else if (Regex.IsMatch(word, @"^z\d+$", RegexOptions.IgnoreCase) ||   // 转弯区 z50 / fine
+                    else if (Regex.IsMatch(word, @"^z\d+$", RegexOptions.IgnoreCase) ||   // 转弯量 z50 / fine
                              word.Equals("fine", StringComparison.OrdinalIgnoreCase))
                     {
                         run.Foreground = zoneBrush;

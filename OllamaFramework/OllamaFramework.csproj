@@ -82,14 +82,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Embedding\AnalysesFile.cs" />
-    <Compile Include="LLM\ContentOut.cs" />
+    <Compile Include="Embedding\IAnalysesFile.cs" />
+    <Compile Include="Embedding\Impl\AnalysesFile.cs" />
+    <Compile Include="LLM\IContentOut.cs" />
+    <Compile Include="LLM\Impl\ContentOut.cs" />
+    <Compile Include="Models\DocumentChunk.cs" />
     <Compile Include="Models\EmbeddingModel.cs" />
     <Compile Include="Models\LLMModel.cs" />
+    <Compile Include="Models\RagResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rag\DocumentChunk.cs" />
-    <Compile Include="Rag\RagResponse.cs" />
-    <Compile Include="Rag\RagService.cs" />
+    <Compile Include="Rag\IRagService.cs" />
+    <Compile Include="Rag\Impl\RagService.cs" />
     <Compile Include="Models\Serializable.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -56,8 +56,14 @@
     <Reference Include="GalaSoft.MvvmLight.Platform, Version=5.4.1.0, Culture=neutral, PublicKeyToken=5f873c45e98af8a1, processorArchitecture=MSIL">
       <HintPath>packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=10.0.0.5, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.10.0.5\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=10.0.0.8, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.10.0.8\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection, Version=10.0.0.8, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.DependencyInjection.10.0.8\lib\net462\Microsoft.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=10.0.0.8, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Extensions.DependencyInjection.Abstractions.10.0.8\lib\net462\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.AI.Abstractions, Version=10.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Extensions.AI.Abstractions.10.4.1\lib\net462\Microsoft.Extensions.AI.Abstractions.dll</HintPath>
@@ -168,23 +174,9 @@
     <Compile Include="Converters\ModelDisplayConverter.cs" />
     <Compile Include="Converters\NotNullToVisibilityConverter.cs" />
     <Compile Include="Converters\StringToBoolConverter.cs" />
-    <Compile Include="Functions\ChatFunc\ChatService.cs" />
-    <Compile Include="Functions\ChatFunc\PromptTruncationService.cs" />
-    <Compile Include="Functions\DebugFunc\DebugService.cs" />
-    <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseSearchService.cs" />
-    <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseService.cs" />
-    <Compile Include="Functions\KnowledgeBaseFunc\KnowledgeBaseUIService.cs" />
-    <Compile Include="Functions\LLMAdjustFunc\LLMAdjustService.cs" />
-    <Compile Include="Functions\LLMAdjustFunc\OllamaModelService.cs" />
-    <Compile Include="Functions\LoggingFunc\LoggingService.cs" />
-    <Compile Include="Functions\LoggingFunc\LoggingUIService.cs" />
-    <Compile Include="Functions\MainWindowFunc\AppSettingsManager.cs" />
-    <Compile Include="Functions\MainWindowFunc\MainWindowService.cs" />
-    <Compile Include="Functions\MainWindowFunc\SettingsChangeTracker.cs" />
-    <Compile Include="Functions\MainWindowFunc\WindowControls.cs" />
-    <Compile Include="Functions\MainWindowFunc\SlidingView.cs" />
-    <Compile Include="Functions\SpaceAdjusFunc\SpaceAdjustService.cs" />
-    <Compile Include="Functions\SpaceParametersFunc\ViewSwitcher.cs" />
+    <Compile Include="Helpers\SlidingView.cs" />
+    <Compile Include="Helpers\ViewSwitcher.cs" />
+    <Compile Include="Helpers\WindowControls.cs" />
     <Compile Include="Models\ChatLog.cs" />
     <Compile Include="Models\ChatMessageModel.cs" />
     <Compile Include="Models\ChatSessionModel.cs" />
@@ -195,13 +187,52 @@
     <Compile Include="Models\MessageBlock.cs" />
     <Compile Include="Models\OperationsLog.cs" />
     <Compile Include="Models\SpaceAdjustModel.cs" />
-    <Compile Include="ViewModels\DebugWindowModel.cs" />
-    <Compile Include="ViewModels\KnowledgeBaseViewModel.cs" />
-    <Compile Include="ViewModels\LoggingViewModel.cs" />
-    <Compile Include="ViewModels\MainWindowModel.cs" />
-    <Compile Include="ViewModels\LLMAdjustViewModel.cs" />
-    <Compile Include="ViewModels\SpaceAdjustViewModel.cs" />
-    <Compile Include="ViewModels\SpaceParametersViewModel.cs" />
+    <Compile Include="DAO\IAppSettingsRepository.cs" />
+    <Compile Include="DAO\ILogRepository.cs" />
+    <Compile Include="DAO\IRagIndexRepository.cs" />
+    <Compile Include="DAO\Impl\AppSettingsRepository.cs" />
+    <Compile Include="DAO\Impl\LogRepository.cs" />
+    <Compile Include="DAO\Impl\RagIndexRepository.cs" />
+    <Compile Include="Services\IChatService.cs" />
+    <Compile Include="Services\IDebugService.cs" />
+    <Compile Include="Services\IKnowledgeBaseSearchService.cs" />
+    <Compile Include="Services\IKnowledgeBaseService.cs" />
+    <Compile Include="Services\IKnowledgeBaseUIService.cs" />
+    <Compile Include="Services\ILLMAdjustService.cs" />
+    <Compile Include="Services\ILoggingService.cs" />
+    <Compile Include="Services\ILoggingDisplayService.cs" />
+    <Compile Include="Services\IMainWindowService.cs" />
+    <Compile Include="Services\IOllamaModelService.cs" />
+    <Compile Include="Services\IPromptTruncationService.cs" />
+    <Compile Include="Services\ISettingsChangeTracker.cs" />
+    <Compile Include="Services\ISpaceAdjustService.cs" />
+    <Compile Include="Services\Impl\ChatService.cs" />
+    <Compile Include="Services\Impl\DebugService.cs" />
+    <Compile Include="Services\Impl\KnowledgeBaseSearchService.cs" />
+    <Compile Include="Services\Impl\KnowledgeBaseService.cs" />
+    <Compile Include="Services\Impl\KnowledgeBaseUIService.cs" />
+    <Compile Include="Services\Impl\LLMAdjustService.cs" />
+    <Compile Include="Services\Impl\LoggingService.cs" />
+    <Compile Include="Services\Impl\LoggingDisplayService.cs" />
+    <Compile Include="Services\Impl\MainWindowService.cs" />
+    <Compile Include="Services\Impl\OllamaModelService.cs" />
+    <Compile Include="Services\Impl\PromptTruncationService.cs" />
+    <Compile Include="Services\Impl\SettingsChangeTracker.cs" />
+    <Compile Include="Services\Impl\SpaceAdjustService.cs" />
+    <Compile Include="ViewModels\IDebugWindowModel.cs" />
+    <Compile Include="ViewModels\IKnowledgeBaseViewModel.cs" />
+    <Compile Include="ViewModels\ILLMAdjustViewModel.cs" />
+    <Compile Include="ViewModels\ILoggingViewModel.cs" />
+    <Compile Include="ViewModels\IMainWindowModel.cs" />
+    <Compile Include="ViewModels\ISpaceAdjustViewModel.cs" />
+    <Compile Include="ViewModels\ISpaceParametersViewModel.cs" />
+    <Compile Include="ViewModels\Impl\DebugWindowModel.cs" />
+    <Compile Include="ViewModels\Impl\KnowledgeBaseViewModel.cs" />
+    <Compile Include="ViewModels\Impl\LLMAdjustViewModel.cs" />
+    <Compile Include="ViewModels\Impl\LoggingViewModel.cs" />
+    <Compile Include="ViewModels\Impl\MainWindowModel.cs" />
+    <Compile Include="ViewModels\Impl\SpaceAdjustViewModel.cs" />
+    <Compile Include="ViewModels\Impl\SpaceParametersViewModel.cs" />
     <Compile Include="Views\DebugWindow.xaml.cs">
       <DependentUpon>DebugWindow.xaml</DependentUpon>
     </Compile>
@@ -319,6 +350,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\IOC\IOC.csproj">
+      <Project>{8E37D9CB-85F1-4BDE-8604-00B1F507F797}</Project>
+      <Name>IOC</Name>
+    </ProjectReference>
     <ProjectReference Include="..\OllamaFramework\OllamaFramework.csproj">
       <Project>{a8c9b6de-f023-4aaa-8f87-7547d1094bbc}</Project>
       <Name>OllamaFramework</Name>

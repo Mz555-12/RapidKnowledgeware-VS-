@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,7 +50,9 @@ namespace IOC
         {
             // 获取该类除 IDisposable、IBase 之外的第一个接口作为服务类型
             var serviceType = implementationType.GetInterfaces()
-                .FirstOrDefault(i => i != typeof(IDisposable) && !i.Name.StartsWith("IBase"));
+                .FirstOrDefault(i => i != typeof(IDisposable)
+                    && !i.Name.StartsWith("IBase")
+                    && (i.Namespace == null || !i.Namespace.StartsWith("System")));
 
             if (serviceType != null)
             {

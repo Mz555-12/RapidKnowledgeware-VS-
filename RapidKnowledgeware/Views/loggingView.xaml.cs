@@ -1,32 +1,17 @@
-﻿using RapidKnowledgeware.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using IOC;
+using RapidKnowledgeware.ViewModels;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace RapidKnowledgeware.Views
 {
-    /// <summary>
-    /// LoggingView.xaml 的交互逻辑
-    /// </summary>
     public partial class LoggingView : UserControl
     {
-        public LoggingViewModel ViewModel { get; private set; }
+        public ILoggingViewModel ViewModel { get; private set; }
 
         public LoggingView()
         {
             InitializeComponent();
-            ViewModel = new LoggingViewModel();
+            ViewModel = BeanFactory.GetBean<ILoggingViewModel>();
             this.DataContext = ViewModel;
         }
     }
