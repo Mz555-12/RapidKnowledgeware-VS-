@@ -368,8 +368,6 @@ git clone https://github.com/你的用户名/OllamaRapid.git
 
 ## 📸 界面展示
 
-> **如何添加截图**：在项目根目录创建 `docs/screenshots/` 文件夹，将截图放入其中，然后替换下方路径即可。GitHub 会自动渲染相对路径引用的图片。
-
 ### 主界面 — 多会话对话
 
 
@@ -432,5 +430,4 @@ git clone https://github.com/你的用户名/OllamaRapid.git
 
 <div align="center">
 **Author: Mr.Zhong**
-
 </div>
